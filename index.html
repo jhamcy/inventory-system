@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Inventory Management</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+        :root {
+            --primary: #0081ff;
+            --secondary: rgba(15, 23, 42, 0.8);
+            --success: #10b981;
+            --glass: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.2);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        /* FULL PAGE BACKGROUND */
+        #auth-page {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.7)), 
+                        url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* GLASSMORPHISM CARD */
+        #auth-container {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            padding: 40px;
+            border-radius: 28px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+            color: white;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 { font-weight: 600; font-size: 1.8rem; margin: 15px 0 5px 0; }
+        p { opacity: 0.7; font-size: 0.9rem; margin-bottom: 30px; }
+
+        /* FORM INPUTS */
+        .input-group { margin-bottom: 20px; }
+        
+        input {
+            width: 100%;
+            padding: 14px;
+            margin: 8px 0;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.95);
+            box-sizing: border-box;
+            font-size: 14px;
+            color: #1e293b;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(0, 129, 255, 0.3);
+        }
+
+        /* BUTTONS */
+        .btn-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .row-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            cursor: pointer;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            color: white;
+        }
+
+        .primary-btn { background: var(--primary); width: 100%; }
+        .secondary-btn { background: var(--secondary); flex: 1; }
+        .demo-btn { background: var(--success); width: 100%; margin-top: 5px; }
+
+        button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        button:active { transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+    <div id="auth-page">
+        <div id="auth-container">
+            <div style="font-size: 3rem;">📦</div>
+            <h2>Inventory Management</h2>
+            <p>Sign in to manage team stock</p>
+            
+            <div class="input-group">
+                <input type="email" id="email" placeholder="Email Address">
+                <input type="password" id="password" placeholder="Password">
+            </div>
+
+            <div class="btn-stack">
+                <button class="primary-btn" onclick="signIn()">Sign In</button>
+                
+                <div class="row-btns">
+                    <button class="secondary-btn" onclick="signUp()">Sign Up</button>
+                </div>
+
+                <button class="demo-btn" onclick="demoLogin()">Demo Access</button>
+            </div>
+            
+            <p style="margin-top: 20px; font-size: 0.7rem; opacity: 0.5;">
+                Note: Demo requires a user created in Supabase Auth.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Your Verified Supabase Config
+        const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co'; 
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
+        
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Standard Sign In
+        async function signIn() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if(!email || !password) return alert("Please fill in all fields");
+
+            const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+            if (error) alert("Login failed: " + error.message);
+            else window.location.href = 'dashboard.html';
+        }
+
+        // Standard Sign Up
+        async function signUp() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if(!email || !password) return alert("Please fill in all fields");
+
+            const { error } = await _supabase.auth.signUp({ email, password });
+            if (error) alert(error.message);
+            else alert("Registration check! Please verify your email if required.");
+        }
+
+        // Demo Login Function
+        async function demoLogin() {
+            const email = 'demo@example.com';
+            const password = 'demo1234';
+            
+            const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+            
+            if (error) {
+                alert("Demo user not found in your database. Please create 'demo@example.com' with password 'demo1234' in your Supabase Auth dashboard.");
+            } else {
+                window.location.href = 'dashboard.html';
+            }
+        }
+
+        // Automatic redirect if session exists
+        async function checkExistingSession() {
+            const { data } = await _supabase.auth.getSession();
+            if (data.session) {
+                window.location.href = 'dashboard.html';
+            }
+        }
+        checkExistingSession();
+    </script>
+</body>
+</html>

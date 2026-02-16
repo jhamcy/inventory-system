@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management - Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+        :root {
+            --primary: #0081ff;
+            --danger: #ef4444;
+            --glass: rgba(255, 255, 255, 0.85);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            /* USING YOUR UPLOADED IMAGE */
+            background: url('images.jpeg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        .overlay {
+            min-height: 100vh;
+            background: rgba(15, 23, 42, 0.2); /* Subtle dark overlay to make text pop */
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* HEADER & SEARCH */
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: var(--glass);
+            margin-bottom: 20px;
+            font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        /* ADD ITEM PANEL */
+        .add-panel {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .add-panel input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            flex: 1;
+        }
+
+        /* DATA TABLE */
+        .table-container {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 18px 25px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        th {
+            background: rgba(0,0,0,0.02);
+            color: #64748b;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .qty-pill {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        /* ACTION BUTTONS */
+        .btn {
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .btn-add { background: var(--primary); color: white; padding: 0 25px; }
+        .btn-log { background: #1e293b; color: white; padding: 10px 20px; }
+        .btn-action { padding: 8px 15px; background: #f1f5f9; color: #475569; font-size: 1.1rem; }
+        .btn-action:hover { background: #e2e8f0; }
+        .btn-del { color: var(--danger); background: none; margin-left: 10px; }
+
+        @media (max-width: 600px) {
+            .add-panel { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="overlay">
+    <div class="container">
+        <div class="header-section">
+            <h1>📦 Inventory Dashboard</h1>
+            <button class="btn btn-log" onclick="signOut()">Logout</button>
+        </div>
+
+        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Search items by name..." onkeyup="filterItems()">
+
+        <div class="add-panel">
+            <input type="text" id="itemName" placeholder="New Item Name">
+            <input type="number" id="itemQty" placeholder="Quantity">
+            <button class="btn btn-add" onclick="addItem()">Add to Stock</button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Stock Level</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="inventory-body">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let allInventory = [];
+
+    // 1. PROTECTION & INITIAL LOAD
+    async function checkAuth() {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (!session) {
+            window.location.href = 'index.html';
+        } else {
+            fetchInventory();
+            subscribeToChanges();
+        }
+    }
+
+    // 2. FETCH DATA
+    async function fetchInventory() {
+        const { data, error } = await _supabase
+            .from('inventory')
+            .select('*')
+            .order('item_name');
+
+        if (error) return console.error(error);
+        allInventory = data;
+        renderTable(allInventory);
+    }
+
+    // 3. RENDER TABLE
+    function renderTable(items) {
+        const tbody = document.getElementById('inventory-body');
+        tbody.innerHTML = items.map(item => `
+            <tr>
+                <td><strong>${item.item_name}</strong></td>
+                <td><span class="qty-pill">${item.quantity}</span></td>
+                <td>
+                    <button class="btn btn-action" onclick="updateQty('${item.id}', ${item.quantity + 1})">+</button>
+                    <button class="btn btn-action" onclick="updateQty('${item.id}', ${item.quantity - 1})">-</button>
+                    <button class="btn btn-del" onclick="deleteItem('${item.id}')">🗑</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // 4. CRUD OPERATIONS
+    async function addItem() {
+        const name = document.getElementById('itemName').value;
+        const qty = document.getElementById('itemQty').value;
+        if(!name || !qty) return alert("Fill in details!");
+
+        await _supabase.from('inventory').insert([{ item_name: name, quantity: parseInt(qty) }]);
+        document.getElementById('itemName').value = '';
+        document.getElementById('itemQty').value = '';
+        fetchInventory();
+    }
+
+    async function updateQty(id, newQty) {
+        if (newQty < 0) return;
+        await _supabase.from('inventory').update({ quantity: newQty }).eq('id', id);
+        fetchInventory();
+    }
+
+    async function deleteItem(id) {
+        if(confirm("Are you sure you want to remove this item?")) {
+            await _supabase.from('inventory').delete().eq('id', id);
+            fetchInventory();
+        }
+    }
+
+    // 5. SEARCH/FILTER
+    function filterItems() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = allInventory.filter(item => 
+            item.item_name.toLowerCase().includes(query)
+        );
+        renderTable(filtered);
+    }
+
+    // 6. REALTIME (Syncs for all users automatically)
+    function subscribeToChanges() {
+        _supabase.channel('inventory-sync')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, () => {
+                fetchInventory();
+            }).subscribe();
+    }
+
+    async function signOut() {
+        await _supabase.auth.signOut();
+        window.location.href = 'index.html';
+    }
+
+    checkAuth();
+</script>
+
+</body>
+</html>
