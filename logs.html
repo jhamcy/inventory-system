@@ -10,7 +10,7 @@
         
         :root {
             --primary: #0f172a;
-            --accent: #0081ff;
+            --accent: #4f46e5;
             --border-main: #94a3b8;
         }
 
@@ -29,83 +29,67 @@
         .navbar { 
             height: 64px; background: var(--primary); color: white;
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 24px; position: sticky; top: 0; z-index: 1000;
+            padding: 0 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: sticky; top: 0; z-index: 1000;
         }
 
+        /* BACK BUTTON UPDATED TO INVENTORY */
         .back-btn { 
             background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.3); 
             color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer;
-            font-size: 0.85rem; font-weight: 600;
+            font-size: 0.85rem; font-weight: 600; text-decoration: none;
         }
 
-        .container { padding: 40px 24px; max-width: 1100px; margin: 0 auto; }
+        .container { padding: 30px 20px; max-width: 1100px; margin: 0 auto; }
 
-        /* SEARCH & FILTER BAR */
-        .filter-section {
-            background: white; padding: 20px; border-radius: 12px;
-            border: 2px solid var(--primary); margin-bottom: 30px;
-            display: flex; gap: 15px; flex-wrap: wrap;
-        }
+        .header-section { margin-bottom: 25px; }
+        .header-section h2 { margin: 0; color: var(--primary); font-weight: 800; }
 
-        .filter-section input, .filter-section select {
-            padding: 10px; border: 1.5px solid var(--border-main);
-            border-radius: 6px; font-weight: 500;
-        }
-
-        /* LOG TABLE */
-        .log-card {
+        .table-card {
             background: white; border-radius: 12px; overflow: hidden;
-            border: 2px solid var(--primary); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            border: 2px solid var(--primary); box-shadow: 0 10px 15px rgba(0,0,0,0.05);
         }
 
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { background: #f8fafc; padding: 15px; font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
-        td { padding: 15px; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; color: var(--primary); font-weight: 500; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; padding: 15px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: #64748b; border-bottom: 2px solid var(--primary); }
+        td { padding: 14px 15px; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; color: #1e293b; }
 
-        /* ACTION BADGES */
         .badge {
-            padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
+            padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
         }
-        .type-order { background: #fee2e2; color: #e11d48; }
-        .type-receiving { background: #dcfce7; color: #10b981; }
-        .type-transfer { background: #fef3c7; color: #d97706; }
+        .bg-order { background: #fee2e2; color: #991b1b; }
+        .bg-receiving { background: #dcfce7; color: #166534; }
+        .bg-transfer { background: #fef3c7; color: #92400e; }
 
-        @media (max-width: 768px) {
-            .hide-mobile { display: none; }
-        }
+        .timestamp { color: #64748b; font-size: 0.8rem; font-family: monospace; }
     </style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <button class="back-btn" onclick="location.href='dashboard.html'">← BACK TO DASHBOARD</button>
-        <div style="font-weight: 800;">TRANSACTION LOGS</div>
-    </nav>
+    <header class="navbar">
+        <a href="inventory.html" class="back-btn">← BACK TO INVENTORY</a>
+        <div style="font-weight: 800; letter-spacing: 1px;">TRANSACTION HISTORY</div>
+        <div style="width: 100px;"></div> </header>
 
     <main class="container">
-        <div class="filter-section">
-            <input type="text" id="search-log" placeholder="Search Reference ID or Item..." style="flex: 2;" oninput="filterLogs()">
-            <select id="type-filter" onchange="filterLogs()" style="flex: 1;">
-                <option value="ALL">All Movements</option>
-                <option value="ORDER">Orders</option>
-                <option value="RECEIVING">Receiving</option>
-                <option value="TRANSFER">Transfers</option>
-            </select>
+        <div class="header-section">
+            <h2>Activity Logs</h2>
+            <p style="color: #64748b; font-weight: 500;">Recent stock movements and order fulfillment records.</p>
         </div>
 
-        <div class="log-card">
+        <div class="table-card">
             <table>
                 <thead>
                     <tr>
-                        <th>Date</th>
+                        <th>Date & Time</th>
                         <th>Type</th>
                         <th>Reference ID</th>
                         <th>Item Description</th>
-                        <th class="hide-mobile">Qty</th>
+                        <th>Qty</th>
                         <th>Details</th>
                     </tr>
                 </thead>
-                <tbody id="log-table-body">
+                <tbody id="logs-body">
                     </tbody>
             </table>
         </div>
@@ -116,52 +100,31 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let allLogs = [];
-
         async function loadLogs() {
-            // Note: This assumes you have an 'activity_logs' table in Supabase.
-            // If you haven't created it yet, I can provide the SQL for it.
             const { data, error } = await _supabase
-                .from('activity_logs') 
+                .from('activity_logs')
                 .select('*')
-                .order('created_at', { ascending: false });
+                .order('created_at', { ascending: false })
+                .limit(100);
 
             if (data) {
-                allLogs = data;
-                renderLogs(allLogs);
+                const body = document.getElementById('logs-body');
+                body.innerHTML = data.map(log => {
+                    const date = new Date(log.created_at).toLocaleString();
+                    const typeClass = `bg-${log.type.toLowerCase()}`;
+                    
+                    return `
+                        <tr>
+                            <td class="timestamp">${date}</td>
+                            <td><span class="badge ${typeClass}">${log.type}</span></td>
+                            <td style="font-weight:700;">${log.reference_id}</td>
+                            <td style="font-weight:600;">${log.item_name}</td>
+                            <td style="font-weight:800;">${log.quantity}</td>
+                            <td style="color:#64748b; font-style:italic;">${log.details || '-'}</td>
+                        </tr>
+                    `;
+                }).join('');
             }
-        }
-
-        function renderLogs(logs) {
-            const body = document.getElementById('log-table-body');
-            body.innerHTML = logs.map(log => {
-                const badgeClass = `type-${log.type.toLowerCase()}`;
-                const date = new Date(log.created_at).toLocaleDateString();
-                
-                return `
-                    <tr>
-                        <td>${date}</td>
-                        <td><span class="badge ${badgeClass}">${log.type}</span></td>
-                        <td style="font-family: monospace; font-weight: 700;">${log.reference_id}</td>
-                        <td>${log.item_name}</td>
-                        <td class="hide-mobile">${log.quantity}</td>
-                        <td style="font-size: 0.8rem; color: #64748b;">${log.details || '-'}</td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        function filterLogs() {
-            const searchTerm = document.getElementById('search-log').value.toLowerCase();
-            const typeFilter = document.getElementById('type-filter').value;
-
-            const filtered = allLogs.filter(log => {
-                const matchesSearch = log.reference_id.toLowerCase().includes(searchTerm) || 
-                                     log.item_name.toLowerCase().includes(searchTerm);
-                const matchesType = typeFilter === "ALL" || log.type === typeFilter;
-                return matchesSearch && matchesType;
-            });
-            renderLogs(filtered);
         }
 
         loadLogs();
