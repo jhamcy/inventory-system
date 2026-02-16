@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Inventory | High-Visibility Grid</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary: #0f172a;
+            --accent: #0081ff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --info: #6366f1;
+            /* DARKENED BORDER FOR HIGH VISIBILITY */
+            --border-color: #94a3b8; 
+            --row-height: 48px;
+        }
+
+        body {
+            margin: 0; font-family: 'Inter', sans-serif;
+            background: url('images.jpeg') no-repeat center center fixed;
+            background-size: cover; 
+            height: 100vh; display: flex; flex-direction: column; 
+            overflow: hidden;
+        }
+
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(241, 245, 249, 0.85); z-index: -1;
+        }
+
+        .navbar { 
+            height: 64px; background: var(--primary); 
+            display: flex; align-items: center; justify-content: center; 
+            flex-shrink: 0; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .nav-title { color: white; font-weight: 700; font-size: 1rem; letter-spacing: 1.5px; text-transform: uppercase; }
+
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; padding: 15px; }
+
+        .action-bar-container {
+            z-index: 8000; background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px); padding: 12px;
+            border-radius: 12px; border: 2px solid var(--primary); /* Stronger border here */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 15px; flex-shrink: 0;
+            display: flex; justify-content: center;
+        }
+        .action-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; width: 100%; max-width: 900px; }
+
+        .table-scroll-area { flex-grow: 1; overflow: auto; border-radius: 12px; border: 2px solid var(--primary); }
+
+        .table-card { 
+            background: white;
+            display: inline-block; min-width: 1000px;
+        }
+
+        /* HIGH-VISIBILITY TABLE GRID */
+        table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+        
+        thead th { 
+            position: sticky; top: 0; z-index: 2000; 
+            background-color: #cbd5e1 !important; /* Darker header background */
+            height: 50px; padding: 0 10px; text-align: center; 
+            font-size: 0.75rem; font-weight: 800; text-transform: uppercase; 
+            /* THICKER BORDERS */
+            border-bottom: 2px solid var(--primary); 
+            border-right: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        tbody td { 
+            height: var(--row-height); padding: 0 12px;
+            /* HIGH VISIBILITY LINES */
+            border-bottom: 1.5px solid var(--border-color); 
+            border-right: 1.5px solid var(--border-color);
+            font-size: 0.85rem; text-align: center; white-space: nowrap;
+            color: #1e293b;
+        }
+
+        .row-num { font-weight: 800; color: white; width: 55px; background: #64748b !important; }
+
+        .btn { 
+            padding: 10px 20px; border-radius: 8px; border: 2px solid transparent; font-weight: 700; 
+            cursor: pointer; color: white; font-size: 0.85rem;
+            display: flex; align-items: center; gap: 8px; justify-content: center;
+            transition: 0.2s; flex: 1 1 140px; max-width: 180px;
+        }
+        .btn:hover { transform: scale(1.05); }
+        .btn-receive { background: var(--success); }
+        .btn-order { background: var(--info); }
+        .btn-transfer { background: var(--warning); }
+        .btn-home { background: #334155; display: none; }
+
+        .pagination-footer { 
+            background: #f1f5f9; padding: 12px 24px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            border-top: 3px solid var(--primary); position: sticky; bottom: 0;
+        }
+        
+        .w-num { width: 55px; } .w-loc { width: 130px; } .w-item { width: 240px; }
+
+        .qty-badge {
+            padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.85rem;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .qty-low { color: #ffffff; background: #dc2626; } /* Stronger Red */
+        .qty-normal { color: #ffffff; background: #059669; } /* Stronger Green */
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="nav-title">Inventory Master Control</div>
+    </div>
+
+    <div class="main-content">
+        <div class="action-bar-container">
+            <div class="action-bar">
+                <button id="admin-home-btn" class="btn btn-home" onclick="location.href='dashboard.html'">🏠 Home</button>
+                <button class="btn btn-receive" onclick="location.href='receiving.html'">🚚 Receive</button>
+                <button class="btn btn-order" onclick="location.href='orders.html'">📝 Order</button>
+                <button class="btn btn-transfer" onclick="location.href='transfer.html'">🔄 Transfer</button>
+            </div>
+        </div>
+
+        <div class="table-scroll-area">
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="w-num">#</th>
+                            <th class="w-loc">Location</th>
+                            <th class="w-item">Item Name</th>
+                            <th>Type</th>
+                            <th>Material</th>
+                            <th>Brand</th>
+                            <th class="w-qty">Qty</th>
+                            <th class="w-uom">Uom</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-body"></tbody>
+                </table>
+                <div class="pagination-footer">
+                    <div id="page-info" style="font-size: 0.9rem; color: var(--primary); font-weight: 700;">Connecting...</div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn" style="background:var(--primary)" id="prevBtn" onclick="changePage(currentPage - 1)">Prev</button>
+                        <button class="btn" style="background:var(--primary)" id="nextBtn" onclick="changePage(currentPage + 1)">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let currentPage = 1;
+        const ROWS_PER_PAGE = 25; 
+
+        async function applyPermissions() {
+            const { data: { user } } = await _supabase.auth.getUser();
+            if (!user) return;
+            const { data: profile } = await _supabase.from('profiles').select('role').eq('id', user.id).single();
+            if (profile && profile.role === 'admin') {
+                document.getElementById('admin-home-btn').style.display = 'flex';
+            }
+        }
+
+        async function fetchInventory() {
+            const { count } = await _supabase.from('inventory').select('*', { count: 'exact', head: true });
+            const from = (currentPage - 1) * ROWS_PER_PAGE;
+            const to = from + ROWS_PER_PAGE - 1;
+
+            const { data } = await _supabase.from('inventory').select('*').order('location').range(from, to);
+            renderTable(data || [], count || 0);
+        }
+
+        function renderTable(data, total) {
+            const tbody = document.getElementById('inventory-body');
+            let html = '';
+            const startNum = ((currentPage - 1) * ROWS_PER_PAGE) + 1;
+
+            data.forEach((item, index) => {
+                const isLow = (item.quantity || 0) < 5;
+                const qtyClass = isLow ? 'qty-low' : 'qty-normal';
+                
+                html += `<tr>
+                    <td class="row-num">${startNum + index}</td>
+                    <td style="color:var(--accent); font-weight:800;">${item.location || '-'}</td>
+                    <td style="font-weight:600;">${item.item_name || '-'}</td>
+                    <td>${item.type || '-'}</td>
+                    <td>${item.material || '-'}</td>
+                    <td>${item.brand || '-'}</td>
+                    <td><span class="qty-badge ${qtyClass}">${item.quantity || 0}</span></td>
+                    <td style="font-weight:700;">${item.uom || '-'}</td>
+                </tr>`;
+            });
+
+            const remainingRows = ROWS_PER_PAGE - data.length;
+            for (let i = 0; i < remainingRows; i++) {
+                html += `<tr><td class="row-num"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+            }
+
+            tbody.innerHTML = html;
+            const totalPages = Math.ceil(total / ROWS_PER_PAGE) || 1;
+            document.getElementById('page-info').innerText = `Page ${currentPage} / ${totalPages} • Total: ${total}`;
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = currentPage === totalPages;
+        }
+
+        function changePage(p) { 
+            if (p < 1) return;
+            currentPage = p; 
+            fetchInventory(); 
+            document.querySelector('.table-scroll-area').scrollTop = 0; 
+        }
+        
+        fetchInventory();
+        applyPermissions();
+    </script>
+</body>
+</html>

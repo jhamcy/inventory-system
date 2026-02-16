@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internal Transfer | Inventory Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #0f172a;
+            --accent: #0081ff;
+            --warning: #f59e0b;
+            --border-main: #94a3b8;
+        }
+
+        body {
+            margin: 0; font-family: 'Inter', sans-serif;
+            background: url('images.jpeg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh; display: flex; flex-direction: column;
+        }
+
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(241, 245, 249, 0.88); z-index: -1;
+        }
+
+        .navbar { 
+            height: 64px; background: var(--primary); color: white;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            position: sticky; top: 0; z-index: 1000;
+        }
+
+        .back-btn { 
+            background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.3); 
+            color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer;
+            font-size: 0.85rem; font-weight: 600;
+        }
+
+        .container { padding: 40px 20px; max-width: 600px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+
+        .form-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+            border: 2px solid var(--primary); overflow: hidden;
+        }
+
+        .card-header { padding: 30px; background: rgba(255, 251, 235, 0.8); border-bottom: 2px solid var(--primary); }
+        .card-header h2 { margin: 0; font-size: 1.5rem; color: var(--primary); }
+
+        .card-body { padding: 30px; }
+
+        .form-group { margin-bottom: 24px; }
+        label { display: block; margin-bottom: 8px; font-weight: 800; color: var(--primary); font-size: 0.85rem; text-transform: uppercase; }
+
+        input {
+            width: 100%; padding: 14px 16px; border: 2px solid var(--border-main);
+            border-radius: 8px; font-size: 1rem; box-sizing: border-box;
+            font-weight: 500; background: white;
+        }
+        input:focus { border-color: var(--accent); outline: none; }
+        input:read-only { background: #f1f5f9; color: #64748b; cursor: default; }
+
+        .details-panel {
+            background: rgba(15, 23, 42, 0.05); border: 2px solid var(--primary);
+            border-radius: 8px; padding: 20px; margin-bottom: 24px;
+            display: none;
+        }
+
+        .loc-display {
+            background: white; padding: 15px; border-radius: 8px;
+            border: 1.5px solid var(--border-main); margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .loc-label { font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 5px; }
+        .loc-val { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
+
+        .submit-btn {
+            width: 100%; background: var(--warning); color: var(--primary); padding: 16px;
+            border: none; border-radius: 8px; font-weight: 800; font-size: 1rem;
+            cursor: pointer; transition: 0.2s; text-transform: uppercase;
+        }
+        .submit-btn:hover { background: #d97706; color: white; }
+        .submit-btn:disabled { background: #cbd5e1; cursor: not-allowed; color: #94a3b8; }
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <button class="back-btn" onclick="location.href='inventory.html'">← BACK TO LIST</button>
+        <div style="font-weight: 800;">INTERNAL STOCK TRANSFER</div>
+    </header>
+
+    <main class="container">
+        <div class="form-card">
+            <div class="card-header">
+                <h2>Transfer Stocks</h2>
+                <p style="margin: 5px 0 0; color: #64748b; font-weight: 500;">Move items vertically between warehouse zones.</p>
+            </div>
+            
+            <div class="card-body">
+                <div class="form-group">
+                    <label>Transfer Reference #</label>
+                    <input type="text" id="ref-no" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Transfer Date</label>
+                    <input type="date" id="transfer-date" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Item to Move</label>
+                    <input list="items-list" id="item-search" placeholder="Search item..." onchange="handleSelection()">
+                    <datalist id="items-list"></datalist>
+                </div>
+
+                <div id="details-box" class="details-panel">
+                    <div class="loc-display">
+                        <div class="loc-label">Current Source Location</div>
+                        <div class="loc-val" id="view-loc-from">-</div>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 10px 0; font-size: 1.5rem;">⬇</div>
+
+                    <div class="form-group" style="margin-bottom: 10px;">
+                        <label>New Destination Location</label>
+                        <input type="text" id="new-location" placeholder="e.g. Shelf B-12" oninput="validateTransfer()">
+                    </div>
+
+                    <div style="text-align: center; font-weight: 700; color: var(--accent); margin-top: 15px;">
+                        Available: <span id="view-qty">0</span> <span id="view-uom"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Quantity to Transfer</label>
+                    <input type="number" id="transfer-qty" placeholder="0" min="1" disabled oninput="validateTransfer()">
+                </div>
+            </div>
+
+            <div class="action-area" style="padding: 0 30px 30px;">
+                <button id="save-btn" class="submit-btn" onclick="processTransfer()" disabled>
+                    Confirm Transfer
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let masterInventory = [];
+        let selectedItem = null;
+
+        function initForm() {
+            const now = new Date();
+            document.getElementById('transfer-date').valueAsDate = now;
+            const dateStr = now.toISOString().slice(0,10).replace(/-/g, "");
+            const rand = Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('ref-no').value = `TR-${dateStr}-${rand}`;
+        }
+
+        async function loadInventory() {
+            const { data } = await _supabase.from('inventory').select('*').order('item_name');
+            masterInventory = data || [];
+            const list = document.getElementById('items-list');
+            masterInventory.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = `${item.item_name} — [${item.location}]`;
+                list.appendChild(opt);
+            });
+        }
+
+        function handleSelection() {
+            const searchVal = document.getElementById('item-search').value;
+            selectedItem = masterInventory.find(i => `${i.item_name} — [${i.location}]` === searchVal);
+            
+            if (selectedItem) {
+                document.getElementById('view-loc-from').textContent = selectedItem.location;
+                document.getElementById('view-qty').textContent = selectedItem.quantity || 0;
+                document.getElementById('view-uom').textContent = selectedItem.uom || '';
+                document.getElementById('details-box').style.display = 'block';
+                document.getElementById('transfer-qty').disabled = false;
+            } else {
+                document.getElementById('details-box').style.display = 'none';
+                document.getElementById('transfer-qty').disabled = true;
+            }
+            validateTransfer();
+        }
+
+        function validateTransfer() {
+            const qty = parseInt(document.getElementById('transfer-qty').value) || 0;
+            const newLoc = document.getElementById('new-location').value.trim();
+            const currentQty = selectedItem ? selectedItem.quantity : 0;
+            const saveBtn = document.getElementById('save-btn');
+
+            if (selectedItem && qty > 0 && qty <= currentQty && newLoc !== "") {
+                saveBtn.disabled = false;
+            } else {
+                saveBtn.disabled = true;
+            }
+        }
+
+        async function processTransfer() {
+            const qty = parseInt(document.getElementById('transfer-qty').value);
+            const newLoc = document.getElementById('new-location').value;
+            const saveBtn = document.getElementById('save-btn');
+            
+            saveBtn.disabled = true;
+            saveBtn.textContent = "Moving Stock...";
+
+            try {
+                const { error } = await _supabase
+                    .from('inventory')
+                    .update({ location: newLoc }) 
+                    .eq('id', selectedItem.id);
+
+                if (error) throw error;
+                alert("Location updated successfully.");
+                location.reload();
+            } catch (err) {
+                alert("Error: " + err.message);
+                saveBtn.disabled = false;
+            }
+        }
+
+        initForm();
+        loadInventory();
+    </script>
+</body>
+</html>
