@@ -16,7 +16,7 @@
             --success: #10b981;
             --warning: #f59e0b;
             --info: #6366f1;
-            /* DARKENED BORDER FOR HIGH VISIBILITY */
+            --history: #4f46e5;
             --border-color: #94a3b8; 
             --row-height: 48px;
         }
@@ -34,41 +34,44 @@
             background: rgba(241, 245, 249, 0.85); z-index: -1;
         }
 
+        /* UPDATED NAVBAR FOR CLICKABLE LOGIC & LOGOUT */
         .navbar { 
             height: 64px; background: var(--primary); 
-            display: flex; align-items: center; justify-content: center; 
-            flex-shrink: 0; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 0 20px; flex-shrink: 0; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-        .nav-title { color: white; font-weight: 700; font-size: 1rem; letter-spacing: 1.5px; text-transform: uppercase; }
+        .nav-title { 
+            color: white; font-weight: 700; font-size: 1rem; letter-spacing: 1.5px; 
+            text-transform: uppercase; transition: 0.2s;
+        }
+        .logout-icon {
+            background: none; border: none; color: #ef4444; font-size: 1.5rem; 
+            cursor: pointer; display: flex; align-items: center;
+        }
 
         .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; padding: 15px; }
 
         .action-bar-container {
             z-index: 8000; background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px); padding: 12px;
-            border-radius: 12px; border: 2px solid var(--primary); /* Stronger border here */
+            border-radius: 12px; border: 2px solid var(--primary); 
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             margin-bottom: 15px; flex-shrink: 0;
             display: flex; justify-content: center;
         }
-        .action-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; width: 100%; max-width: 900px; }
+        .action-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; width: 100%; max-width: 1000px; }
 
         .table-scroll-area { flex-grow: 1; overflow: auto; border-radius: 12px; border: 2px solid var(--primary); }
 
-        .table-card { 
-            background: white;
-            display: inline-block; min-width: 1000px;
-        }
+        .table-card { background: white; display: inline-block; min-width: 1000px; }
 
-        /* HIGH-VISIBILITY TABLE GRID */
         table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
         
         thead th { 
             position: sticky; top: 0; z-index: 2000; 
-            background-color: #cbd5e1 !important; /* Darker header background */
+            background-color: #cbd5e1 !important; 
             height: 50px; padding: 0 10px; text-align: center; 
             font-size: 0.75rem; font-weight: 800; text-transform: uppercase; 
-            /* THICKER BORDERS */
             border-bottom: 2px solid var(--primary); 
             border-right: 2px solid var(--primary);
             color: var(--primary);
@@ -76,7 +79,6 @@
 
         tbody td { 
             height: var(--row-height); padding: 0 12px;
-            /* HIGH VISIBILITY LINES */
             border-bottom: 1.5px solid var(--border-color); 
             border-right: 1.5px solid var(--border-color);
             font-size: 0.85rem; text-align: center; white-space: nowrap;
@@ -95,6 +97,7 @@
         .btn-receive { background: var(--success); }
         .btn-order { background: var(--info); }
         .btn-transfer { background: var(--warning); }
+        .btn-history { background: var(--history); }
         .btn-home { background: #334155; display: none; }
 
         .pagination-footer { 
@@ -109,14 +112,18 @@
             padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.85rem;
             border: 1px solid rgba(0,0,0,0.1);
         }
-        .qty-low { color: #ffffff; background: #dc2626; } /* Stronger Red */
-        .qty-normal { color: #ffffff; background: #059669; } /* Stronger Green */
+        .qty-low { color: #ffffff; background: #dc2626; } 
+        .qty-normal { color: #ffffff; background: #059669; }
     </style>
 </head>
 <body>
 
     <div class="navbar">
-        <div class="nav-title">Inventory Master Control</div>
+        <div style="flex: 1;"></div>
+        <div id="nav-title-link" class="nav-title">Inventory Master Control</div>
+        <div style="flex: 1; display: flex; justify-content: flex-end;">
+            <button class="logout-icon" onclick="handleLogout()" title="Logout">⏻</button>
+        </div>
     </div>
 
     <div class="main-content">
@@ -126,6 +133,7 @@
                 <button class="btn btn-receive" onclick="location.href='receiving.html'">🚚 Receive</button>
                 <button class="btn btn-order" onclick="location.href='orders.html'">📝 Order</button>
                 <button class="btn btn-transfer" onclick="location.href='transfer.html'">🔄 Transfer</button>
+                <button class="btn btn-history" onclick="location.href='logs.html'">📜 History</button>
             </div>
         </div>
 
@@ -166,12 +174,35 @@
         const ROWS_PER_PAGE = 25; 
 
         async function applyPermissions() {
-            const { data: { user } } = await _supabase.auth.getUser();
-            if (!user) return;
-            const { data: profile } = await _supabase.from('profiles').select('role').eq('id', user.id).single();
-            if (profile && profile.role === 'admin') {
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (!session) return;
+
+            const userEmail = session.user.email;
+            const isDirectDemo = sessionStorage.getItem('loginSource') === 'directDemo';
+            const navTitle = document.getElementById('nav-title-link');
+
+            const { data: profile } = await _supabase.from('profiles').select('role').eq('id', session.user.id).single();
+            const isAdmin = profile && profile.role === 'admin';
+            const isManualDemo = (userEmail === 'demo@example.com' && !isDirectDemo);
+
+            // ENABLE CLICKABLE NAVBAR IF ADMIN OR MANUAL DEMO
+            if (isAdmin || isManualDemo) {
+                navTitle.style.cursor = 'pointer';
+                navTitle.style.borderBottom = "2px solid rgba(255,255,255,0.3)";
+                navTitle.onclick = () => location.href = 'dashboard.html';
+                navTitle.onmouseover = () => navTitle.style.color = "#60a5fa";
+                navTitle.onmouseout = () => navTitle.style.color = "white";
+            }
+
+            if (isAdmin) {
                 document.getElementById('admin-home-btn').style.display = 'flex';
             }
+        }
+
+        async function handleLogout() {
+            await _supabase.auth.signOut();
+            sessionStorage.removeItem('loginSource');
+            location.href = 'index.html';
         }
 
         async function fetchInventory() {

@@ -157,7 +157,6 @@
             document.getElementById('receive-date').valueAsDate = now;
             const dateStr = now.toISOString().slice(0,10).replace(/-/g, "");
             const rand = Math.floor(1000 + Math.random() * 9000);
-            // Prefix updated to DEL for Delivery
             document.getElementById('delivery-ref').value = `DEL-${dateStr}-${rand}`;
         }
 
@@ -201,20 +200,31 @@
             const saveBtn = document.getElementById('save-btn');
             
             saveBtn.disabled = true;
-            saveBtn.textContent = "Updating...";
+            saveBtn.textContent = "Processing...";
 
             try {
+                // 1. UPDATE INVENTORY TABLE
                 const { data: latest } = await _supabase.from('inventory').select('quantity').eq('id', selectedItem.id).single();
                 const newTotal = (latest.quantity || 0) + addVal;
+                const { error: invError } = await _supabase.from('inventory').update({ quantity: newTotal }).eq('id', selectedItem.id);
+                if (invError) throw invError;
 
-                const { error } = await _supabase.from('inventory').update({ quantity: newTotal }).eq('id', selectedItem.id);
-                if (error) throw error;
+                // 2. INSERT INTO ACTIVITY_LOGS TABLE
+                const { error: logError } = await _supabase.from('activity_logs').insert([{
+                    type: 'RECEIVING',
+                    reference_id: ref,
+                    item_name: selectedItem.item_name,
+                    quantity: addVal,
+                    details: `Stock Replenishment at ${selectedItem.location}`
+                }]);
+                if (logError) throw logError;
 
-                alert(`Stock replenished.\nRef: ${ref}\nNew Balance: ${newTotal}`);
+                alert(`Stock replenished.\nRef: ${ref}`);
                 location.reload();
             } catch (err) {
                 alert("Error: " + err.message);
                 saveBtn.disabled = false;
+                saveBtn.textContent = "Update Inventory";
             }
         }
 

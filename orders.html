@@ -98,7 +98,7 @@
         <div class="form-card">
             <div class="card-header">
                 <h2>Release Stock</h2>
-                <p style="margin: 5px 0 0; color: #64748b; font-weight: 500;">Deduct inventory with automatic order tracking.</p>
+                <p style="margin: 5px 0 0; color: #64748b; font-weight: 500;">Deduct inventory with automatic history tracking.</p>
             </div>
             
             <div class="card-body">
@@ -161,8 +161,6 @@
         function initForm() {
             const now = new Date();
             document.getElementById('order-date').valueAsDate = now;
-            
-            // Generate ORD-YYYYMMDD-RAND
             const dateStr = now.toISOString().slice(0,10).replace(/-/g, "");
             const rand = Math.floor(1000 + Math.random() * 9000);
             document.getElementById('order-id').value = `ORD-${dateStr}-${rand}`;
@@ -215,23 +213,35 @@
         async function processDeduction() {
             const deductVal = parseInt(document.getElementById('deduct-qty').value);
             const orderId = document.getElementById('order-id').value;
+            const customer = document.getElementById('customer-name').value;
             const saveBtn = document.getElementById('save-btn');
             
             saveBtn.disabled = true;
-            saveBtn.textContent = "Recording Order...";
+            saveBtn.textContent = "Processing...";
 
             try {
+                // 1. UPDATE INVENTORY TABLE
                 const { data: latest } = await _supabase.from('inventory').select('quantity').eq('id', selectedItem.id).single();
                 const newQty = (latest.quantity || 0) - deductVal;
+                const { error: invError } = await _supabase.from('inventory').update({ quantity: newQty }).eq('id', selectedItem.id);
+                if (invError) throw invError;
 
-                const { error } = await _supabase.from('inventory').update({ quantity: newQty }).eq('id', selectedItem.id);
-                if (error) throw error;
+                // 2. INSERT INTO ACTIVITY_LOGS TABLE
+                const { error: logError } = await _supabase.from('activity_logs').insert([{
+                    type: 'ORDER',
+                    reference_id: orderId,
+                    item_name: selectedItem.item_name,
+                    quantity: deductVal,
+                    details: `Customer: ${customer}`
+                }]);
+                if (logError) throw logError;
 
-                alert(`Order ${orderId} finalized. Stock updated.`);
+                alert(`Order ${orderId} finalized and logged.`);
                 location.reload();
             } catch (err) {
                 alert("Error: " + err.message);
                 saveBtn.disabled = false;
+                saveBtn.textContent = "Finalize Order";
             }
         }
 

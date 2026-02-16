@@ -213,23 +213,36 @@
         async function processTransfer() {
             const qty = parseInt(document.getElementById('transfer-qty').value);
             const newLoc = document.getElementById('new-location').value;
+            const ref = document.getElementById('ref-no').value;
             const saveBtn = document.getElementById('save-btn');
             
             saveBtn.disabled = true;
-            saveBtn.textContent = "Moving Stock...";
+            saveBtn.textContent = "Processing...";
 
             try {
-                const { error } = await _supabase
+                // 1. Update Inventory Table (Location only)
+                const { error: invError } = await _supabase
                     .from('inventory')
                     .update({ location: newLoc }) 
                     .eq('id', selectedItem.id);
+                if (invError) throw invError;
 
-                if (error) throw error;
-                alert("Location updated successfully.");
+                // 2. Insert into Activity Logs
+                const { error: logError } = await _supabase.from('activity_logs').insert([{
+                    type: 'TRANSFER',
+                    reference_id: ref,
+                    item_name: selectedItem.item_name,
+                    quantity: qty,
+                    details: `Moved from ${selectedItem.location} to ${newLoc}`
+                }]);
+                if (logError) throw logError;
+
+                alert("Transfer completed and logged successfully.");
                 location.reload();
             } catch (err) {
                 alert("Error: " + err.message);
                 saveBtn.disabled = false;
+                saveBtn.textContent = "Confirm Transfer";
             }
         }
 
