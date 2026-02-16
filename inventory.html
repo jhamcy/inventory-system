@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Inventory | High-Visibility Grid</title>
+    <title>Inventory | High-Visibility Master</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
@@ -18,7 +18,7 @@
             --info: #6366f1;
             --history: #4f46e5;
             --border-color: #94a3b8; 
-            --row-height: 48px;
+            --row-height: 40px; 
         }
 
         body {
@@ -34,84 +34,86 @@
             background: rgba(241, 245, 249, 0.85); z-index: -1;
         }
 
-        /* UPDATED NAVBAR FOR CLICKABLE LOGIC & LOGOUT */
         .navbar { 
-            height: 64px; background: var(--primary); 
+            height: 56px; background: var(--primary); 
             display: flex; align-items: center; justify-content: space-between; 
-            padding: 0 20px; flex-shrink: 0; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            padding: 0 15px; flex-shrink: 0; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-        .nav-title { 
-            color: white; font-weight: 700; font-size: 1rem; letter-spacing: 1.5px; 
-            text-transform: uppercase; transition: 0.2s;
-        }
-        .logout-icon {
-            background: none; border: none; color: #ef4444; font-size: 1.5rem; 
-            cursor: pointer; display: flex; align-items: center;
-        }
+        .nav-title { color: white; font-weight: 700; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; transition: 0.2s; }
+        .logout-icon { background: none; border: none; color: #ef4444; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; }
 
-        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; padding: 15px; }
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; padding: 10px; }
 
         .action-bar-container {
             z-index: 8000; background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px); padding: 12px;
-            border-radius: 12px; border: 2px solid var(--primary); 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-bottom: 15px; flex-shrink: 0;
+            backdrop-filter: blur(10px); padding: 8px;
+            border-radius: 10px; border: 2px solid var(--primary); 
+            margin-bottom: 8px; flex-shrink: 0;
             display: flex; justify-content: center;
         }
-        .action-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; width: 100%; max-width: 1000px; }
+        .action-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; max-width: 1000px; }
 
-        .table-scroll-area { flex-grow: 1; overflow: auto; border-radius: 12px; border: 2px solid var(--primary); }
+        /* THE SCROLL AREA (Restricted to Table only) */
+        .table-scroll-area { 
+            flex-grow: 1; 
+            overflow: auto; 
+            border: 2px solid var(--primary);
+            border-radius: 12px 12px 0 0;
+            background: white;
+        }
 
-        .table-card { background: white; display: inline-block; min-width: 1000px; }
+        .table-card { display: inline-block; min-width: 1000px; }
 
         table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
         
         thead th { 
             position: sticky; top: 0; z-index: 2000; 
             background-color: #cbd5e1 !important; 
-            height: 50px; padding: 0 10px; text-align: center; 
-            font-size: 0.75rem; font-weight: 800; text-transform: uppercase; 
-            border-bottom: 2px solid var(--primary); 
-            border-right: 2px solid var(--primary);
+            height: 40px; padding: 0 10px; text-align: center; 
+            font-size: 0.7rem; font-weight: 800; text-transform: uppercase; 
+            border-bottom: 2px solid var(--primary); border-right: 1.5px solid var(--border-color);
             color: var(--primary);
         }
 
+        /* STICKY FIRST COLUMN FOR MOBILE SIDER-SCROLLING */
+        .sticky-col { 
+            position: sticky; left: 0; z-index: 2005; 
+            background: #64748b !important; color: white !important;
+            border-right: 2px solid var(--primary) !important;
+            width: 50px;
+        }
+
         tbody td { 
-            height: var(--row-height); padding: 0 12px;
+            height: var(--row-height); padding: 0 10px;
             border-bottom: 1.5px solid var(--border-color); 
             border-right: 1.5px solid var(--border-color);
-            font-size: 0.85rem; text-align: center; white-space: nowrap;
+            font-size: 0.8rem; text-align: center; white-space: nowrap;
             color: #1e293b;
         }
 
-        .row-num { font-weight: 800; color: white; width: 55px; background: #64748b !important; }
-
         .btn { 
-            padding: 10px 20px; border-radius: 8px; border: 2px solid transparent; font-weight: 700; 
-            cursor: pointer; color: white; font-size: 0.85rem;
-            display: flex; align-items: center; gap: 8px; justify-content: center;
-            transition: 0.2s; flex: 1 1 140px; max-width: 180px;
+            padding: 8px 12px; border-radius: 6px; border: 2px solid transparent; font-weight: 700; 
+            cursor: pointer; color: white; font-size: 0.75rem;
+            display: flex; align-items: center; gap: 6px; justify-content: center;
+            transition: 0.2s; flex: 1 1 100px; max-width: 150px;
         }
-        .btn:hover { transform: scale(1.05); }
         .btn-receive { background: var(--success); }
         .btn-order { background: var(--info); }
         .btn-transfer { background: var(--warning); }
         .btn-history { background: var(--history); }
         .btn-home { background: #334155; display: none; }
 
+        /* FIXED FOOTER (Stays outside scroll area) */
         .pagination-footer { 
-            background: #f1f5f9; padding: 12px 24px; 
+            background: #f8fafc; padding: 8px 15px; 
             display: flex; justify-content: space-between; align-items: center; 
-            border-top: 3px solid var(--primary); position: sticky; bottom: 0;
+            border: 2px solid var(--primary); border-top: none;
+            border-radius: 0 0 12px 12px; flex-shrink: 0;
+            z-index: 9000;
         }
         
-        .w-num { width: 55px; } .w-loc { width: 130px; } .w-item { width: 240px; }
-
-        .qty-badge {
-            padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.85rem;
-            border: 1px solid rgba(0,0,0,0.1);
-        }
+        .w-num { width: 50px; } .w-loc { width: 120px; } .w-item { width: 220px; }
+        .qty-badge { padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 0.8rem; border: 1px solid rgba(0,0,0,0.1); }
         .qty-low { color: #ffffff; background: #dc2626; } 
         .qty-normal { color: #ffffff; background: #059669; }
     </style>
@@ -142,7 +144,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th class="w-num">#</th>
+                            <th class="sticky-col">#</th>
                             <th class="w-loc">Location</th>
                             <th class="w-item">Item Name</th>
                             <th>Type</th>
@@ -154,13 +156,14 @@
                     </thead>
                     <tbody id="inventory-body"></tbody>
                 </table>
-                <div class="pagination-footer">
-                    <div id="page-info" style="font-size: 0.9rem; color: var(--primary); font-weight: 700;">Connecting...</div>
-                    <div style="display:flex; gap:10px;">
-                        <button class="btn" style="background:var(--primary)" id="prevBtn" onclick="changePage(currentPage - 1)">Prev</button>
-                        <button class="btn" style="background:var(--primary)" id="nextBtn" onclick="changePage(currentPage + 1)">Next</button>
-                    </div>
-                </div>
+            </div>
+        </div>
+
+        <div class="pagination-footer">
+            <div id="page-info" style="font-size: 0.75rem; color: var(--primary); font-weight: 700;">Loading...</div>
+            <div style="display:flex; gap:8px;">
+                <button class="btn" style="background:var(--primary); width:70px; padding: 5px;" id="prevBtn" onclick="changePage(currentPage - 1)">Prev</button>
+                <button class="btn" style="background:var(--primary); width:70px; padding: 5px;" id="nextBtn" onclick="changePage(currentPage + 1)">Next</button>
             </div>
         </div>
     </div>
@@ -176,27 +179,20 @@
         async function applyPermissions() {
             const { data: { session } } = await _supabase.auth.getSession();
             if (!session) return;
-
             const userEmail = session.user.email;
             const isDirectDemo = sessionStorage.getItem('loginSource') === 'directDemo';
             const navTitle = document.getElementById('nav-title-link');
-
             const { data: profile } = await _supabase.from('profiles').select('role').eq('id', session.user.id).single();
             const isAdmin = profile && profile.role === 'admin';
             const isManualDemo = (userEmail === 'demo@example.com' && !isDirectDemo);
-
-            // ENABLE CLICKABLE NAVBAR IF ADMIN OR MANUAL DEMO
             if (isAdmin || isManualDemo) {
                 navTitle.style.cursor = 'pointer';
-                navTitle.style.borderBottom = "2px solid rgba(255,255,255,0.3)";
+                navTitle.style.borderBottom = "1px solid rgba(255,255,255,0.5)";
                 navTitle.onclick = () => location.href = 'dashboard.html';
                 navTitle.onmouseover = () => navTitle.style.color = "#60a5fa";
                 navTitle.onmouseout = () => navTitle.style.color = "white";
             }
-
-            if (isAdmin) {
-                document.getElementById('admin-home-btn').style.display = 'flex';
-            }
+            if (isAdmin) document.getElementById('admin-home-btn').style.display = 'flex';
         }
 
         async function handleLogout() {
@@ -209,7 +205,6 @@
             const { count } = await _supabase.from('inventory').select('*', { count: 'exact', head: true });
             const from = (currentPage - 1) * ROWS_PER_PAGE;
             const to = from + ROWS_PER_PAGE - 1;
-
             const { data } = await _supabase.from('inventory').select('*').order('location').range(from, to);
             renderTable(data || [], count || 0);
         }
@@ -218,13 +213,10 @@
             const tbody = document.getElementById('inventory-body');
             let html = '';
             const startNum = ((currentPage - 1) * ROWS_PER_PAGE) + 1;
-
             data.forEach((item, index) => {
-                const isLow = (item.quantity || 0) < 5;
-                const qtyClass = isLow ? 'qty-low' : 'qty-normal';
-                
+                const qtyClass = (item.quantity || 0) < 5 ? 'qty-low' : 'qty-normal';
                 html += `<tr>
-                    <td class="row-num">${startNum + index}</td>
+                    <td class="sticky-col">${startNum + index}</td>
                     <td style="color:var(--accent); font-weight:800;">${item.location || '-'}</td>
                     <td style="font-weight:600;">${item.item_name || '-'}</td>
                     <td>${item.type || '-'}</td>
@@ -234,15 +226,12 @@
                     <td style="font-weight:700;">${item.uom || '-'}</td>
                 </tr>`;
             });
-
-            const remainingRows = ROWS_PER_PAGE - data.length;
-            for (let i = 0; i < remainingRows; i++) {
-                html += `<tr><td class="row-num"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+            for (let i = 0; i < (ROWS_PER_PAGE - data.length); i++) {
+                html += `<tr><td class="sticky-col"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
             }
-
             tbody.innerHTML = html;
             const totalPages = Math.ceil(total / ROWS_PER_PAGE) || 1;
-            document.getElementById('page-info').innerText = `Page ${currentPage} / ${totalPages} • Total: ${total}`;
+            document.getElementById('page-info').innerText = `P. ${currentPage}/${totalPages} • T: ${total}`;
             document.getElementById('prevBtn').disabled = currentPage === 1;
             document.getElementById('nextBtn').disabled = currentPage === totalPages;
         }
