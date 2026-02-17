@@ -3,131 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activity Logs | Inventory Portal</title>
+    <title>Transaction History | EasiStock</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
+        :root { --primary: #0f172a; --accent: #0081ff; --success: #10b981; --warning: #f59e0b; }
         
-        :root {
-            --primary: #0f172a;
-            --accent: #4f46e5;
-            --border-main: #94a3b8;
+        body { margin: 0; font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; color: white; flex-shrink: 0; }
+        
+        .toggle-container { padding: 10px; display: flex; justify-content: center; flex-shrink: 0; }
+        .toggle-group { display: flex; width: 100%; max-width: 900px; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); }
+        .btn-toggle { flex: 1; padding: 12px; border: none; cursor: pointer; color: rgba(255,255,255,0.7); background: var(--primary); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        .btn-toggle.active { background: var(--accent) !important; color: white !important; }
+
+        .main-content { flex: 1; padding: 10px; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
+        
+        /* SEARCH BOX ABOVE TABLE */
+        .table-container { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 10px; flex: 1; overflow: hidden; }
+        
+        .search-wrapper { position: relative; width: 100%; }
+        .search-input { 
+            width: 100%; padding: 12px 15px 12px 40px; border-radius: 10px; 
+            border: 2px solid var(--primary); font-size: 0.9rem; font-weight: 600; 
+            box-sizing: border-box; outline: none; 
         }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--primary); }
 
-        body {
-            margin: 0; font-family: 'Inter', sans-serif;
-            background: url('images.jpeg') no-repeat center center fixed;
-            background-size: cover;
-            min-height: 100vh;
-        }
+        .table-area { background: white; border: 2px solid var(--primary); border-radius: 12px; overflow: auto; flex: 1; }
+        
+        table { border-collapse: collapse; width: 100%; text-align: left; }
+        thead th { position: sticky; top: 0; background: #f1f5f9; padding: 15px; font-size: 0.75rem; text-transform: uppercase; border-bottom: 2px solid var(--primary); color: var(--primary); z-index: 10; }
+        tbody td { padding: 15px; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; }
 
-        body::before {
-            content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(241, 245, 249, 0.92); z-index: -1;
-        }
+        .ref-link { color: var(--accent); font-weight: 800; cursor: pointer; text-decoration: underline; font-family: monospace; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 0.7rem; color: white; }
 
-        .navbar { 
-            height: 64px; background: var(--primary); color: white;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            position: sticky; top: 0; z-index: 1000;
-        }
-
-        /* BACK BUTTON UPDATED TO INVENTORY */
-        .back-btn { 
-            background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.3); 
-            color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer;
-            font-size: 0.85rem; font-weight: 600; text-decoration: none;
-        }
-
-        .container { padding: 30px 20px; max-width: 1100px; margin: 0 auto; }
-
-        .header-section { margin-bottom: 25px; }
-        .header-section h2 { margin: 0; color: var(--primary); font-weight: 800; }
-
-        .table-card {
-            background: white; border-radius: 12px; overflow: hidden;
-            border: 2px solid var(--primary); box-shadow: 0 10px 15px rgba(0,0,0,0.05);
-        }
-
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #f8fafc; padding: 15px; text-align: left; font-size: 0.75rem; text-transform: uppercase; color: #64748b; border-bottom: 2px solid var(--primary); }
-        td { padding: 14px 15px; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; color: #1e293b; }
-
-        .badge {
-            padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
-        }
-        .bg-order { background: #fee2e2; color: #991b1b; }
-        .bg-receiving { background: #dcfce7; color: #166534; }
-        .bg-transfer { background: #fef3c7; color: #92400e; }
-
-        .timestamp { color: #64748b; font-size: 0.8rem; font-family: monospace; }
+        /* MODAL STYLES */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        .modal-content { background: white; width: 95%; max-width: 600px; border-radius: 15px; border: 3px solid var(--primary); overflow: hidden; animation: slideIn 0.2s; }
+        @keyframes slideIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .modal-header { padding: 15px; background: var(--primary); color: white; display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 20px; max-height: 450px; overflow-y: auto; }
+        .line-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
     </style>
 </head>
 <body>
 
     <header class="navbar">
-        <a href="inventory.html" class="back-btn">← BACK TO INVENTORY</a>
-        <div style="font-weight: 800; letter-spacing: 1px;">TRANSACTION HISTORY</div>
-        <div style="width: 100px;"></div> </header>
+        <div style="font-weight: 800;">EASISTOCK LOGS</div>
+        <button onclick="location.href='index.html'" style="background:none; border:none; color:#ff4d4d; font-weight:800; cursor:pointer;">LOGOUT</button>
+    </header>
 
-    <main class="container">
-        <div class="header-section">
-            <h2>Activity Logs</h2>
-            <p style="color: #64748b; font-weight: 500;">Recent stock movements and order fulfillment records.</p>
+    <div class="toggle-container">
+        <div class="toggle-group">
+            <button class="btn-toggle" onclick="location.href='inventory.html'">Inv</button>
+            <button class="btn-toggle" onclick="location.href='receiving.html'">Receive</button>
+            <button class="btn-toggle" onclick="location.href='orders.html'">Order</button>
+            <button class="btn-toggle" onclick="location.href='transfer.html'">Trans</button>
+            <button class="btn-toggle active">Logs</button>
         </div>
+    </div>
 
-        <div class="table-card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date & Time</th>
-                        <th>Type</th>
-                        <th>Reference ID</th>
-                        <th>Item Description</th>
-                        <th>Qty</th>
-                        <th>Details</th>
-                    </tr>
-                </thead>
-                <tbody id="logs-body">
-                    </tbody>
-            </table>
+    <main class="main-content">
+        <div class="table-container">
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="logSearch" class="search-input" placeholder="Search Reference ID or Type..." onkeyup="filterTable()">
+            </div>
+
+            <div class="table-area">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Reference ID</th>
+                            <th style="text-align: right;">Total Qty</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logs-summary-body">
+                        </tbody>
+                </table>
+            </div>
         </div>
     </main>
+
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="modal-title" style="font-weight:800;">BATCH DETAILS</span>
+                <button onclick="closeModal()" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-items-list"></div>
+        </div>
+    </div>
 
     <script>
         const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function loadLogs() {
-            const { data, error } = await _supabase
-                .from('activity_logs')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(100);
+        let cachedSummary = [];
 
+        async function fetchLogs() {
+            const { data, error } = await _supabase.from('activity_logs').select('*').order('created_at', { ascending: false });
+            if (error) return console.error(error);
+
+            const grouped = data.reduce((acc, log) => {
+                const ref = log.reference_id || 'MANUAL-ADJ';
+                if (!acc[ref]) {
+                    acc[ref] = {
+                        date: new Date(log.created_at).toLocaleDateString(),
+                        type: log.type,
+                        ref: ref,
+                        totalQty: 0
+                    };
+                }
+                acc[ref].totalQty += (log.quantity || 0);
+                return acc;
+            }, {});
+
+            cachedSummary = Object.values(grouped);
+            renderSummary(cachedSummary);
+        }
+
+        function renderSummary(dataList) {
+            const body = document.getElementById('logs-summary-body');
+            body.innerHTML = dataList.map(row => `
+                <tr>
+                    <td style="font-size:0.8rem; color:#64748b;">${row.date}</td>
+                    <td><span class="badge" style="background:${getTypeColor(row.type)}">${row.type}</span></td>
+                    <td><span class="ref-link" onclick="viewDetails('${row.ref}')">${row.ref}</span></td>
+                    <td style="text-align: right; font-weight: 800;">${row.totalQty}</td>
+                </tr>
+            `).join('');
+        }
+
+        function filterTable() {
+            const val = document.getElementById('logSearch').value.toLowerCase();
+            const filtered = cachedSummary.filter(item => 
+                item.ref.toLowerCase().includes(val) || 
+                item.type.toLowerCase().includes(val)
+            );
+            renderSummary(filtered);
+        }
+
+        function getTypeColor(type) {
+            if (type === 'RECEIVING') return '#10b981';
+            if (type === 'ORDER') return '#f59e0b';
+            if (type === 'TRANSFER') return '#0081ff';
+            return '#64748b';
+        }
+
+        async function viewDetails(refId) {
+            const listDiv = document.getElementById('modal-items-list');
+            document.getElementById('modal-title').innerText = `DOC LIST: ${refId}`;
+            listDiv.innerHTML = "Fetching itemized list...";
+            document.getElementById('detailsModal').style.display = 'flex';
+
+            const { data } = await _supabase.from('activity_logs').select('*').eq('reference_id', refId);
             if (data) {
-                const body = document.getElementById('logs-body');
-                body.innerHTML = data.map(log => {
-                    const date = new Date(log.created_at).toLocaleString();
-                    const typeClass = `bg-${log.type.toLowerCase()}`;
-                    
-                    return `
-                        <tr>
-                            <td class="timestamp">${date}</td>
-                            <td><span class="badge ${typeClass}">${log.type}</span></td>
-                            <td style="font-weight:700;">${log.reference_id}</td>
-                            <td style="font-weight:600;">${log.item_name}</td>
-                            <td style="font-weight:800;">${log.quantity}</td>
-                            <td style="color:#64748b; font-style:italic;">${log.details || '-'}</td>
-                        </tr>
-                    `;
-                }).join('');
+                listDiv.innerHTML = data.map(item => `
+                    <div class="line-item">
+                        <div>
+                            <strong style="display:block; color:var(--primary);">${item.item_name}</strong>
+                            <small style="color:#64748b;">${item.details || 'No notes'}</small>
+                        </div>
+                        <div style="font-weight:800; color:var(--accent);">QTY: ${item.quantity}</div>
+                    </div>
+                `).join('');
             }
         }
 
-        loadLogs();
+        function closeModal() { document.getElementById('detailsModal').style.display = 'none'; }
+        window.onclick = (e) => { if(e.target == document.getElementById('detailsModal')) closeModal(); }
+
+        fetchLogs();
     </script>
 </body>
 </html>
