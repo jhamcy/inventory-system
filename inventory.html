@@ -11,7 +11,9 @@
         :root {
             --primary: #0f172a; 
             --accent: #0081ff;  
-            --grid-border: #64748b; 
+            --success: #10b981;
+            --excel-border: #cbd5e1;
+            --primary-border: #0f172a;
         }
 
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
@@ -22,72 +24,98 @@
             display: flex; flex-direction: column; 
         }
 
+        /* NAVBAR & USER INFO */
         .navbar { 
             height: 60px; background: var(--primary); 
             display: flex; align-items: center; justify-content: space-between; 
             padding: 0 20px; flex-shrink: 0; z-index: 1000;
         }
-        
         .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
+        
+        .user-info { display: flex; flex-direction: column; align-items: flex-end; margin-right: 15px; }
+        .user-label { font-size: 0.55rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: -2px; }
+        .user-name { font-size: 0.75rem; color: white; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
+        .online-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
 
         .main-content { 
             flex: 1; display: flex; flex-direction: column; 
             padding: 10px; overflow: hidden; height: calc(100vh - 60px); 
         }
 
-        /* TOGGLE BUTTONS AT THE TOP */
-        .action-bar-container { margin-bottom: 12px; flex-shrink: 0; }
-
+        /* TOGGLE BUTTONS */
+        .action-bar-container { padding: 5px 0 15px 0; display: flex; justify-content: center; flex-shrink: 0; }
         .toggle-group {
-            display: flex; width: 100%; max-width: 900px; margin: 0 auto;
+            display: flex; width: 100%; max-width: 500px;
             border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); 
-            background: var(--primary); 
+            background: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-
         .btn-toggle {
-            flex: 1; padding: 12px 2px; border: none; border-right: 1px solid rgba(255,255,255,0.15);
-            cursor: pointer; color: rgba(255,255,255,0.8); background: var(--primary); 
-            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
-            display: flex; flex-direction: column; align-items: center;
+            flex: 1; padding: 10px 0; border: none; border-right: 1px solid rgba(255,255,255,0.15);
+            cursor: pointer; color: rgba(255,255,255,0.6); background: var(--primary); 
+            font-size: 0.65rem; font-weight: 800; text-transform: uppercase;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
         }
-        .btn-toggle:hover { background: #1e293b; }
+        .btn-toggle span:first-child { font-size: 1.2rem; }
+        .btn-toggle.active { background: var(--accent) !important; color: white !important; }
 
-        /* SEARCH BOX MOVED NEAR TABLE */
+        /* SEARCH BOX */
         .search-container {
             margin-bottom: 8px; width: 100%; max-width: 900px; margin-left: auto; margin-right: auto;
             position: relative; flex-shrink: 0;
         }
         .search-input {
             width: 100%; padding: 10px 40px; border-radius: 10px; border: 2px solid var(--primary);
-            font-size: 0.9rem; font-weight: 600; box-sizing: border-box; outline: none;
+            font-size: 0.9rem; font-weight: 700; box-sizing: border-box; outline: none; text-transform: uppercase;
         }
         .search-icon { position: absolute; left: 15px; top: 10px; color: var(--primary); font-size: 1rem; }
 
+        /* EXCEL STYLE TABLE */
         .table-scroll-area { 
             flex: 1; overflow: auto; background: white; 
             border: 2px solid var(--primary); border-radius: 12px 12px 0 0;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
         table { border-collapse: collapse; width: 100%; min-width: 1000px; table-layout: fixed; }
         
         thead th { 
             position: sticky; top: 0; z-index: 20; 
-            background: #cbd5e1; height: 45px; 
-            font-size: 0.7rem; font-weight: 800; border: 1px solid var(--grid-border);
+            background: #f1f5f9; height: 45px; 
+            font-size: 0.7rem; font-weight: 800; 
+            border-bottom: 2px solid var(--primary);
+            border-right: 1px solid var(--excel-border);
+            color: var(--primary);
         }
 
         .sticky-col { 
             position: sticky; left: 0; z-index: 30; 
             background: #f1f5f9 !important; width: 45px !important;
             border-right: 2px solid var(--primary) !important;
+            transition: background 0.1s;
         }
+
+        tbody tr { cursor: pointer; transition: background 0.1s; }
+        tbody tr:hover { background-color: #f0f9ff; }
+
+        /* SELECTED BLUE ROW STYLING */
+        tbody tr.selected-row { background-color: var(--accent) !important; }
+        tbody tr.selected-row td { 
+            color: white !important; 
+            border-right-color: rgba(255,255,255,0.2) !important; 
+        }
+        tbody tr.selected-row .sticky-col { background: #0066cc !important; color: white !important; }
+        tbody tr.selected-row .sku-text { color: #e0f2fe !important; }
+        tbody tr.selected-row .qty-badge { background: white !important; color: var(--accent) !important; }
 
         tbody td { 
-            height: 48px; padding: 0 8px; border: 1px solid var(--grid-border);
-            font-size: 0.85rem; text-align: center; white-space: nowrap; overflow: hidden;
+            height: 48px; padding: 0 8px; 
+            border-bottom: 1px solid var(--excel-border);
+            border-right: 1px solid var(--excel-border);
+            font-size: 0.8rem; text-align: center; white-space: nowrap; overflow: hidden;
+            font-weight: 600; color: #334155;
         }
 
-        .sku-text { font-family: monospace; font-weight: 700; color: #475569; font-size: 0.75rem; }
+        .sku-text { font-family: monospace; font-weight: 800; color: #475569; font-size: 0.75rem; }
 
         .pagination-footer { 
             height: 60px; background: white; padding: 0 15px; 
@@ -98,40 +126,42 @@
 
         .nav-btns { 
             width: 80px; height: 38px; background: var(--primary); color: white; 
-            border: none; border-radius: 8px; font-weight: 700; cursor: pointer;
+            border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.7rem;
         }
         .nav-btns:disabled { background: #94a3b8; cursor: not-allowed; }
 
-        .qty-badge { padding: 4px 8px; border-radius: 6px; font-weight: 800; background: #10b981; color: white; }
+        .qty-badge { padding: 4px 8px; border-radius: 6px; font-weight: 800; background: var(--success); color: white; }
         .qty-low { background: #ef4444; }
 
-        @media (max-width: 600px) {
-            .btn-toggle span:last-child { font-size: 0.55rem; }
-            .btn-toggle { padding: 8px 1px; }
-        }
     </style>
 </head>
 <body>
 
     <div class="navbar">
         <div class="nav-logo-text">EasiStock</div>
-        <button style="background:none; border:none; color:#ef4444; font-weight:800; cursor:pointer;" onclick="handleLogout()">LOGOUT ⏻</button>
+        <div style="display:flex; align-items:center;">
+            <div class="user-info">
+                <span class="user-label">Inventory Admin</span>
+                <span class="user-name"><div class="online-dot"></div><span id="active-user">ADMIN_MASTER</span></span>
+            </div>
+            <button style="background:none; border:none; color:#ef4444; font-weight:800; cursor:pointer; font-size: 0.75rem;" onclick="handleLogout()">LOGOUT ⏻</button>
+        </div>
     </div>
 
     <div class="main-content">
         <div class="action-bar-container">
             <div class="toggle-group">
-                <button id="admin-home-btn" class="btn-toggle" style="display:none;" onclick="location.href='dashboard.html'"><span>🏠</span><span>Dash</span></button>
-                <button class="btn-toggle" onclick="location.href='receiving.html'"><span>🚚</span><span>Receiving</span></button>
-                <button class="btn-toggle" onclick="location.href='orders.html'"><span>📝</span><span>Ordering</span></button>
-                <button class="btn-toggle" onclick="location.href='transfer.html'"><span>🔄</span><span>Transfer</span></button>
-                <button class="btn-toggle" onclick="location.href='logs.html'"><span>📜</span><span>History</span></button>
+                <button class="btn-toggle active" onclick="location.href='inventory.html'"><span>📋</span><span>Inv</span></button>
+                <button class="btn-toggle" onclick="location.href='receiving.html'"><span>🚚</span><span>Recv</span></button>
+                <button class="btn-toggle" onclick="location.href='orders.html'"><span>📝</span><span>Order</span></button>
+                <button class="btn-toggle" onclick="location.href='transfer.html'"><span>🔄</span><span>Trans</span></button>
+                <button class="btn-toggle" onclick="location.href='logs.html'"><span>📜</span><span>Logs</span></button>
             </div>
         </div>
 
         <div class="search-container">
             <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" class="search-input" placeholder="Quick Search (Code, Item, Location...)" oninput="handleSearch()">
+            <input type="text" id="searchInput" class="search-input" placeholder="SEARCH (SKU, DESCRIPTION, LOCATION...)" oninput="handleSearch()">
         </div>
 
         <div class="table-scroll-area">
@@ -153,7 +183,7 @@
         </div>
 
         <div class="pagination-footer">
-            <div id="page-info" style="font-size: 0.8rem; font-weight: 800; color: var(--primary);">Loading...</div>
+            <div id="page-info" style="font-size: 0.75rem; font-weight: 800; color: var(--primary);">Loading SKUs...</div>
             <div style="display:flex; gap:10px;">
                 <button class="nav-btns" id="prevBtn" onclick="changePage(currentPage - 1)">PREV</button>
                 <button class="nav-btns" id="nextBtn" onclick="changePage(currentPage + 1)">NEXT</button>
@@ -170,33 +200,26 @@
         const ROWS_PER_PAGE = 25; 
         let currentSearchQuery = "";
 
-        async function applyPermissions() {
-            const { data: { session } } = await _supabase.auth.getSession();
-            if (!session) return;
-            const { data: profile } = await _supabase.from('profiles').select('role').eq('id', session.user.id).single();
-            if (profile?.role === 'admin') document.getElementById('admin-home-btn').style.display = 'flex';
+        function initSession() {
+            const savedUser = localStorage.getItem('activeAdmin');
+            if (savedUser) document.getElementById('active-user').innerText = savedUser.toUpperCase();
         }
 
         async function handleLogout() {
+            localStorage.removeItem('activeAdmin');
             await _supabase.auth.signOut();
             location.href = 'index.html';
         }
 
         async function fetchInventory() {
             let query = _supabase.from('inventory').select('*', { count: 'exact' });
-
             if (currentSearchQuery) {
                 query = query.or(`item_name.ilike.%${currentSearchQuery}%,sku.ilike.%${currentSearchQuery}%,location.ilike.%${currentSearchQuery}%,brand.ilike.%${currentSearchQuery}%`);
             }
-
             const from = (currentPage - 1) * ROWS_PER_PAGE;
             const to = from + ROWS_PER_PAGE - 1;
-            
             const { data, count, error } = await query.order('location').range(from, to);
-            
-            if (!error) {
-                renderTable(data || [], count || 0);
-            }
+            if (!error) renderTable(data || [], count || 0);
         }
 
         function handleSearch() {
@@ -211,15 +234,15 @@
             const startNum = ((currentPage - 1) * ROWS_PER_PAGE) + 1;
             
             if (data.length === 0) {
-                html = `<tr><td colspan="8" style="padding:20px; color:#64748b;">No items found.</td></tr>`;
+                html = `<tr><td colspan="8" style="padding:20px; color:#64748b; border:none;">No items found.</td></tr>`;
             } else {
                 data.forEach((item, index) => {
                     const qtyClass = (item.quantity || 0) < 5 ? 'qty-low' : '';
-                    html += `<tr>
+                    html += `<tr onclick="selectRow(this)">
                         <td class="sticky-col">${startNum + index}</td>
                         <td style="color:var(--accent); font-weight:800;">${item.location || '-'}</td>
                         <td class="sku-text">${item.sku || 'PENDING'}</td>
-                        <td style="text-align:left; font-weight:600;">${item.item_name || '-'}</td>
+                        <td style="text-align:left; font-weight:700;">${item.item_name || '-'}</td>
                         <td>${item.category || '-'}</td>
                         <td>${item.brand || '-'}</td>
                         <td><span class="qty-badge ${qtyClass}">${item.quantity || 0}</span></td>
@@ -234,6 +257,11 @@
             document.getElementById('nextBtn').disabled = currentPage === totalPages || data.length === 0;
         }
 
+        function selectRow(rowElement) {
+            document.querySelectorAll('#inventory-body tr').forEach(row => row.classList.remove('selected-row'));
+            rowElement.classList.add('selected-row');
+        }
+
         function changePage(p) { 
             if (p < 1) return;
             currentPage = p; 
@@ -241,8 +269,8 @@
             document.querySelector('.table-scroll-area').scrollTop = 0; 
         }
         
+        initSession();
         fetchInventory();
-        applyPermissions();
     </script>
 </body>
 </html>

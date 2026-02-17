@@ -3,117 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Adjustment | Admin</title>
+    <title>Stock Adjustment | Admin Console</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
-        :root { --primary: #0f172a; --accent: #0081ff; --warning: #f59e0b; }
+        :root {
+            --primary: #0f172a;
+            --accent: #0081ff;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --border: #e2e8f0;
+        }
 
         body {
             margin: 0; font-family: 'Inter', sans-serif;
             background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
-            height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden;
+            min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
         }
 
-        .admin-card {
-            background: white; width: 95%; max-width: 480px;
-            padding: 30px; border-radius: 16px; border: 2px solid var(--primary);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        .main-card {
+            background: white; width: 100%; max-width: 550px;
+            border-radius: 20px; border: 2px solid var(--primary);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
         }
 
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { margin: 0; font-size: 1.3rem; color: var(--primary); text-transform: uppercase; font-weight: 800; }
-
-        /* ITEM PREVIEW BAR */
-        .item-info-bar {
-            background: #f1f5f9; padding: 15px; border-radius: 12px;
-            margin-bottom: 20px; border: 1px solid #cbd5e1;
+        .card-header {
+            background: var(--primary); color: white; padding: 20px 25px;
+            display: flex; justify-content: space-between; align-items: center;
         }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .label-small { font-size: 0.6rem; font-weight: 800; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 2px; }
-        .val-small { font-size: 0.9rem; font-weight: 800; color: var(--primary); display: block; text-transform: uppercase; font-family: monospace; }
+        .header-title h1 { margin: 0; font-size: 1rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+        .user-tag { font-size: 0.65rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-top: 2px; }
 
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 6px; }
-        
-        input, select, textarea {
-            width: 100%; padding: 12px; border: 2px solid #cbd5e1; border-radius: 8px;
-            font-size: 0.9rem; font-weight: 600; box-sizing: border-box; outline: none;
-            text-transform: uppercase; 
+        .badge-live { background: var(--success); color: white; font-size: 0.6rem; padding: 4px 8px; border-radius: 4px; font-weight: 800; }
+
+        .content-body { padding: 30px; }
+
+        /* SEARCH SECTION */
+        .search-container { margin-bottom: 25px; }
+        .input-group { position: relative; }
+        .search-input {
+            width: 100%; padding: 14px 15px; border: 2px solid var(--border);
+            border-radius: 10px; font-weight: 600; transition: 0.2s; outline: none; box-sizing: border-box;
+            text-transform: uppercase;
         }
-        input:focus, select:focus, textarea:focus { border-color: var(--accent); background: #f8fafc; }
+        .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0, 129, 255, 0.1); }
 
-        .btn-adj {
-            width: 100%; background: var(--primary); color: white; padding: 15px;
-            border: none; border-radius: 10px; font-weight: 800; cursor: pointer;
-            transition: 0.2s; text-transform: uppercase; font-size: 0.9rem;
+        .results-dropdown {
+            position: absolute; width: 100%; background: white; border: 1px solid var(--border);
+            border-radius: 10px; z-index: 100; margin-top: 5px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); display: none;
+        }
+        .result-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: 0.2s; font-size: 0.85rem; font-weight: 600; }
+        .result-item:hover { background: #f8fafc; color: var(--accent); }
+
+        /* PREVIEW BOX */
+        .item-preview {
+            background: #f8fafc; border-radius: 12px; padding: 20px;
+            margin-bottom: 25px; border-left: 5px solid var(--accent); display: none;
+        }
+        .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .stat-label { font-size: 0.65rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
+        .stat-value { font-size: 0.9rem; font-weight: 800; display: block; margin-top: 2px; text-transform: uppercase; }
+
+        /* FORM STYLING */
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 0.7rem; font-weight: 800; margin-bottom: 6px; color: var(--primary); text-transform: uppercase; }
+        .form-control {
+            width: 100%; padding: 12px; border: 1.5px solid var(--border);
+            border-radius: 8px; font-weight: 600; box-sizing: border-box; text-transform: uppercase;
+        }
+        .form-control:focus { border-color: var(--accent); outline: none; }
+
+        .btn-submit {
+            width: 100%; background: var(--primary); color: white; padding: 16px;
+            border: none; border-radius: 12px; font-weight: 800; font-size: 0.9rem;
+            text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-top: 10px;
             box-shadow: 0 4px 0 #000;
         }
-        .btn-adj:hover { background: var(--warning); color: var(--primary); transform: translateY(-2px); }
-        .btn-adj:active { transform: translateY(0); box-shadow: none; }
+        .btn-submit:hover { background: #1e293b; transform: translateY(-2px); }
+        .btn-submit:active { transform: translateY(0); box-shadow: none; }
+        .btn-submit:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        .btn-back { 
-            display: block; text-align: center; margin-top: 15px; 
-            color: var(--primary); text-decoration: none; font-size: 0.75rem; 
-            font-weight: 800; text-transform: uppercase;
+        .btn-cancel {
+            display: block; text-align: center; margin-top: 20px; color: var(--primary);
+            text-decoration: none; font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
         }
     </style>
 </head>
 <body>
 
-<div class="admin-card">
-    <div class="header">
-        <h1>Inventory Adjustment</h1>
+<div class="main-card">
+    <div class="card-header">
+        <div class="header-title">
+            <h1>Stock Adjustment</h1>
+            <div class="user-tag">Session: <span id="current-user">ADMIN MASTER</span></div>
+        </div>
+        <span class="badge-live">CONNECTED</span>
     </div>
 
-    <div class="item-info-bar">
-        <div class="info-grid">
-            <div>
-                <span class="label-small">SKU / Code</span>
-                <span id="display-sku" class="val-small">---</span>
+    <div class="content-body">
+        <div class="search-container">
+            <div class="input-group">
+                <input type="text" id="search-bar" class="search-input" placeholder="SEARCH SKU OR DESCRIPTION..." oninput="searchItems(this.value)">
+                <div id="results" class="results-dropdown"></div>
             </div>
-            <div>
-                <span class="label-small">Current Stock</span>
-                <span id="display-qty" class="val-small" style="color:var(--accent); font-size: 1.1rem;">0</span>
+        </div>
+
+        <div id="preview" class="item-preview">
+            <div class="preview-grid">
+                <div>
+                    <span class="stat-label">Item SKU</span>
+                    <span id="p-sku" class="stat-value">---</span>
+                </div>
+                <div>
+                    <span class="stat-label">Current Stock</span>
+                    <span id="p-qty" class="stat-value" style="color: var(--accent); font-size: 1.2rem;">0</span>
+                </div>
+                <div style="grid-column: span 2;">
+                    <span class="stat-label">Item Description</span>
+                    <span id="p-name" class="stat-value">---</span>
+                </div>
+                <div style="grid-column: span 2; border-top: 1px solid #e2e8f0; padding-top: 10px;">
+                    <span class="stat-label">Last Change Recorded</span>
+                    <span id="p-last" class="stat-value" style="color: #94a3b8; font-size: 0.75rem;">NO HISTORY FOUND</span>
+                </div>
             </div>
         </div>
-        <div style="margin-top:10px; border-top: 1px dashed #cbd5e1; padding-top: 8px;">
-            <span class="label-small">Item Description</span>
-            <span id="display-name" class="val-small" style="font-family: 'Inter';">---</span>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Date of Action</label>
+                <input type="date" id="adj-date" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>New Total Qty</label>
+                <input type="number" id="adj-qty" class="form-control" placeholder="0">
+            </div>
         </div>
-    </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <div class="form-group">
-            <label>Adj. Date</label>
-            <input type="date" id="adj-date">
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label>Adjustment Protocol</label>
+            <select id="adj-reason" class="form-control">
+                <option value="">-- SELECT REASON --</option>
+                <option value="BEGINNING BALANCE">BEGINNING BALANCE</option>
+                <option value="PHYSICAL COUNT">PHYSICAL COUNT VERIFICATION</option>
+                <option value="LOSS">DAMAGED / WASTE / LOSS</option>
+                <option value="ERROR">SYSTEM ENTRY CORRECTION</option>
+            </select>
         </div>
-        <div class="form-group">
-            <label>Set Total Qty</label>
-            <input type="number" id="adj-qty" placeholder="0">
+
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label>Administrative Notes</label>
+            <textarea id="adj-notes" class="form-control" rows="2" placeholder="PROVIDE ADDITIONAL CONTEXT..." oninput="this.value = this.value.toUpperCase()"></textarea>
         </div>
-    </div>
 
-    <div class="form-group">
-        <label>Reason for Change</label>
-        <select id="adj-reason">
-            <option value="">-- SELECT REASON --</option>
-            <option value="BEGINNING BALANCE">BEGINNING BALANCE</option>
-            <option value="PHYSICAL COUNT">PHYSICAL COUNT CORRECTION</option>
-            <option value="DAMAGED">DAMAGED / EXPIRED</option>
-            <option value="ENTRY ERROR">DATA ENTRY ERROR</option>
-            <option value="OTHER">OTHER (SEE NOTES)</option>
-        </select>
+        <button id="btn-save" class="btn-submit" onclick="submitAdj()" disabled>Confirm Stock Change</button>
+        <a href="dashboard.html" class="btn-cancel">Cancel & Back to Dashboard</a>
     </div>
-
-    <div class="form-group">
-        <label>Administrative Notes</label>
-        <textarea id="adj-notes" rows="2" placeholder="ADDITIONAL CONTEXT..." oninput="this.value = this.value.toUpperCase()"></textarea>
-    </div>
-
-    <button class="btn-adj" onclick="processAdjustment()">Apply Final Adjustment</button>
-    <a href="dashboard.html" class="btn-back">Cancel & Return</a>
 </div>
 
 <script>
@@ -121,70 +168,66 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const itemId = urlParams.get('id');
-
-    // Default to today
+    let activeId = null;
     document.getElementById('adj-date').valueAsDate = new Date();
 
-    async function loadItem() {
-        if (!itemId) return window.location.href = 'dashboard.html';
-        const { data, error } = await _supabase.from('inventory').select('*').eq('id', itemId).single();
-        if (data) {
-            document.getElementById('display-sku').innerText = data.sku.toUpperCase();
-            document.getElementById('display-name').innerText = data.item_name.toUpperCase();
-            document.getElementById('display-qty').innerText = data.quantity;
-            document.getElementById('adj-qty').value = data.quantity;
+    async function searchItems(q) {
+        const drop = document.getElementById('results');
+        if (q.length < 2) { drop.style.display = 'none'; return; }
+
+        const { data } = await _supabase.from('inventory').select('id, sku, item_name, quantity').or(`sku.ilike.%${q}%,item_name.ilike.%${q}%`).limit(5);
+
+        if (data && data.length > 0) {
+            drop.innerHTML = data.map(i => `<div class="result-item" onclick="selectItem('${i.id}')">${i.sku} | ${i.item_name}</div>`).join('');
+            drop.style.display = 'block';
+        } else { drop.style.display = 'none'; }
+    }
+
+    async function selectItem(id) {
+        activeId = id;
+        document.getElementById('results').style.display = 'none';
+        
+        const { data: item } = await _supabase.from('inventory').select('*').eq('id', id).single();
+        const { data: lastLog } = await _supabase.from('activity_logs').select('created_at').eq('item_name', item.item_name).order('created_at', {ascending: false}).limit(1);
+
+        if (item) {
+            document.getElementById('p-sku').innerText = item.sku;
+            document.getElementById('p-name').innerText = item.item_name;
+            document.getElementById('p-qty').innerText = item.quantity;
+            document.getElementById('adj-qty').value = item.quantity;
+            document.getElementById('p-last').innerText = lastLog.length ? new Date(lastLog[0].created_at).toLocaleString() : 'NO HISTORY RECORDED';
+            
+            document.getElementById('preview').style.display = 'block';
+            document.getElementById('btn-save').disabled = false;
+            document.getElementById('search-bar').value = item.sku;
         }
     }
 
-    async function processAdjustment() {
+    async function submitAdj() {
         const newQty = parseInt(document.getElementById('adj-qty').value);
         const reason = document.getElementById('adj-reason').value;
-        const notes = document.getElementById('adj-notes').value.trim();
-        const adjDate = document.getElementById('adj-date').value;
-        const oldQty = parseInt(document.getElementById('display-qty').innerText);
-        const itemName = document.getElementById('display-name').innerText;
-        const sku = document.getElementById('display-sku').innerText;
+        const notes = document.getElementById('adj-notes').value;
+        const oldQty = parseInt(document.getElementById('p-qty').innerText);
+        const adminUser = document.getElementById('current-user').innerText;
 
-        if (isNaN(newQty) || !reason) return alert("MISSING DATA: PROVIDE QUANTITY AND REASON.");
+        if (!reason) return alert("SELECT AN ADJUSTMENT PROTOCOL");
 
-        const btn = document.querySelector('.btn-adj');
-        btn.disabled = true;
-        btn.innerText = "UPDATING...";
-
-        try {
-            // Update the master stock
-            const { error: updateErr } = await _supabase.from('inventory')
-                .update({ quantity: newQty })
-                .eq('id', itemId);
-            if (updateErr) throw updateErr;
-
-            // Log the "Difference" so the audit math works
-            const diff = newQty - oldQty;
-            const logEntry = {
+        const { error } = await _supabase.from('inventory').update({ quantity: newQty }).eq('id', activeId);
+        
+        if (!error) {
+            await _supabase.from('activity_logs').insert([{
                 type: 'SYSTEM',
-                reference_id: 'ADJ-' + new Date().getTime().toString().slice(-6),
-                item_name: itemName,
-                quantity: diff, 
-                details: `ADJ: ${reason} | SKU: ${sku} | DATE: ${adjDate} | ${notes}`.toUpperCase()
-            };
-
-            const { error: logErr } = await _supabase.from('activity_logs').insert([logEntry]);
-            if (logErr) throw logErr;
-
-            alert("STOCK ADJUSTED AND LOGGED.");
+                item_name: document.getElementById('p-name').innerText,
+                quantity: newQty - oldQty,
+                details: `[${adminUser}] ADJ: ${reason} | ${notes}`.toUpperCase()
+            }]);
+            alert("SUCCESS: INVENTORY HAS BEEN UPDATED.");
             window.location.href = 'dashboard.html';
-
-        } catch (err) {
-            alert(err.message.toUpperCase());
-            btn.disabled = false;
-            btn.innerText = "APPLY FINAL ADJUSTMENT";
         }
     }
 
-    loadItem();
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('id')) selectItem(params.get('id'));
 </script>
-
 </body>
 </html>

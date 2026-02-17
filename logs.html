@@ -2,66 +2,121 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transaction History | EasiStock</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Activity Logs | EasiStock</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
-        :root { --primary: #0f172a; --accent: #0081ff; --success: #10b981; --warning: #f59e0b; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --primary: #0f172a;
+            --accent: #0081ff;
+            --success: #10b981;
+            --danger: #ef4444;
+            --border-main: #94a3b8;
+            --excel-border: #cbd5e1; /* Subtle gray for internal lines */
+        }
+
+        body {
+            margin: 0; font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        /* NAVBAR & USER INFO */
+        .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 1000; }
+        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
         
-        body { margin: 0; font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; color: white; flex-shrink: 0; }
-        
-        .toggle-container { padding: 10px; display: flex; justify-content: center; flex-shrink: 0; }
-        .toggle-group { display: flex; width: 100%; max-width: 900px; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); }
-        .btn-toggle { flex: 1; padding: 12px; border: none; cursor: pointer; color: rgba(255,255,255,0.7); background: var(--primary); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        .user-info { display: flex; flex-direction: column; align-items: flex-end; }
+        .user-label { font-size: 0.55rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: -2px; }
+        .user-name { font-size: 0.75rem; color: white; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
+        .online-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
+
+        /* TOGGLE GROUP */
+        .toggle-container { padding: 15px; display: flex; justify-content: center; flex-shrink: 0; }
+        .toggle-group { 
+            display: flex; width: 100%; max-width: 500px; 
+            border-radius: 12px; overflow: hidden; 
+            border: 2px solid var(--primary); background: var(--primary); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .btn-toggle { 
+            flex: 1; padding: 10px 0; border: none; 
+            border-right: 1px solid rgba(255,255,255,0.1); cursor: pointer; 
+            color: rgba(255,255,255,0.6); background: var(--primary); 
+            font-size: 0.65rem; font-weight: 800; text-transform: uppercase; 
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+        }
+        .btn-toggle span:first-child { font-size: 1.2rem; }
         .btn-toggle.active { background: var(--accent) !important; color: white !important; }
 
+        /* MAIN CONTENT AREA */
         .main-content { flex: 1; padding: 10px; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
-        
-        /* SEARCH BOX ABOVE TABLE */
-        .table-container { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 10px; flex: 1; overflow: hidden; }
+        .table-container { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 10px; flex: 1; overflow: hidden; }
         
         .search-wrapper { position: relative; width: 100%; }
         .search-input { 
             width: 100%; padding: 12px 15px 12px 40px; border-radius: 10px; 
-            border: 2px solid var(--primary); font-size: 0.9rem; font-weight: 600; 
-            box-sizing: border-box; outline: none; 
+            border: 2px solid var(--primary); font-size: 0.8rem; font-weight: 700; 
+            box-sizing: border-box; outline: none; text-transform: uppercase;
         }
         .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--primary); }
 
-        .table-area { background: white; border: 2px solid var(--primary); border-radius: 12px; overflow: auto; flex: 1; }
+        /* EXCEL STYLE TABLE AREA */
+        .table-area { background: white; border: 2px solid var(--primary); border-radius: 12px; overflow: auto; flex: 1; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         
         table { border-collapse: collapse; width: 100%; text-align: left; }
-        thead th { position: sticky; top: 0; background: #f1f5f9; padding: 15px; font-size: 0.75rem; text-transform: uppercase; border-bottom: 2px solid var(--primary); color: var(--primary); z-index: 10; }
-        tbody td { padding: 15px; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; }
+        
+        /* Vertical and Horizontal lines */
+        thead th { 
+            position: sticky; top: 0; background: #f1f5f9; padding: 12px; 
+            font-size: 0.65rem; text-transform: uppercase; 
+            border-bottom: 2px solid var(--primary); 
+            border-right: 1px solid var(--excel-border); /* Vertical line */
+            color: var(--primary); z-index: 10; font-weight: 800; 
+        }
+        
+        tbody td { 
+            padding: 12px; 
+            border-bottom: 1px solid var(--excel-border); /* Horizontal line */
+            border-right: 1px solid var(--excel-border);  /* Vertical line */
+            font-size: 0.75rem; font-weight: 600; 
+        }
 
-        .ref-link { color: var(--accent); font-weight: 800; cursor: pointer; text-decoration: underline; font-family: monospace; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 0.7rem; color: white; }
+        /* Remove right border on the last column */
+        thead th:last-child, tbody td:last-child { border-right: none; }
 
-        /* MODAL STYLES */
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
-        .modal-content { background: white; width: 95%; max-width: 600px; border-radius: 15px; border: 3px solid var(--primary); overflow: hidden; animation: slideIn 0.2s; }
-        @keyframes slideIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        .modal-header { padding: 15px; background: var(--primary); color: white; display: flex; justify-content: space-between; align-items: center; }
-        .modal-body { padding: 20px; max-height: 450px; overflow-y: auto; }
-        .line-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
+        /* Row hover effect for readability */
+        tbody tr:hover { background-color: #f8fafc; }
+
+        .ref-link { color: var(--accent); font-weight: 800; cursor: pointer; text-decoration: none; font-family: monospace; }
+        .badge { padding: 3px 6px; border-radius: 4px; font-weight: 800; font-size: 0.6rem; color: white; display: inline-block; }
+
+        /* MODAL */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); align-items: center; justify-content: center; padding: 10px; }
+        .modal-content { background: white; width: 100%; max-width: 500px; border-radius: 12px; border: 2px solid var(--primary); overflow: hidden; }
+        .modal-header { padding: 15px; background: #f8fafc; border-bottom: 2px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 15px; max-height: 400px; overflow-y: auto; }
+        .line-item { padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; }
     </style>
 </head>
 <body>
 
     <header class="navbar">
-        <div style="font-weight: 800;">EASISTOCK LOGS</div>
-        <button onclick="location.href='index.html'" style="background:none; border:none; color:#ff4d4d; font-weight:800; cursor:pointer;">LOGOUT</button>
+        <div class="nav-logo-text">EasiStock</div>
+        <div class="user-info">
+            <span class="user-label">Systems Admin</span>
+            <span class="user-name"><div class="online-dot"></div><span id="active-user">ADMIN_MASTER</span></span>
+        </div>
     </header>
 
     <div class="toggle-container">
         <div class="toggle-group">
-            <button class="btn-toggle" onclick="location.href='inventory.html'">Inv</button>
-            <button class="btn-toggle" onclick="location.href='receiving.html'">Receive</button>
-            <button class="btn-toggle" onclick="location.href='orders.html'">Order</button>
-            <button class="btn-toggle" onclick="location.href='transfer.html'">Trans</button>
-            <button class="btn-toggle active">Logs</button>
+            <button class="btn-toggle" onclick="location.href='inventory.html'"><span>📋</span><span>Inv</span></button>
+            <button class="btn-toggle" onclick="location.href='receiving.html'"><span>🚚</span><span>Recv</span></button>
+            <button class="btn-toggle" onclick="location.href='orders.html'"><span>📝</span><span>Order</span></button>
+            <button class="btn-toggle" onclick="location.href='transfer.html'"><span>🔄</span><span>Trans</span></button>
+            <button class="btn-toggle active" onclick="location.href='logs.html'"><span>📜</span><span>Logs</span></button>
         </div>
     </div>
 
@@ -69,7 +124,7 @@
         <div class="table-container">
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="logSearch" class="search-input" placeholder="Search Reference ID or Type..." onkeyup="filterTable()">
+                <input type="text" id="logSearch" class="search-input" placeholder="SEARCH LOGS..." onkeyup="filterTable()">
             </div>
 
             <div class="table-area">
@@ -78,12 +133,11 @@
                         <tr>
                             <th>Date</th>
                             <th>Type</th>
-                            <th>Reference ID</th>
-                            <th style="text-align: right;">Total Qty</th>
+                            <th>Ref ID</th>
+                            <th style="text-align: right;">Qty</th>
                         </tr>
                     </thead>
-                    <tbody id="logs-summary-body">
-                        </tbody>
+                    <tbody id="logs-summary-body"></tbody>
                 </table>
             </div>
         </div>
@@ -92,8 +146,8 @@
     <div id="detailsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <span id="modal-title" style="font-weight:800;">BATCH DETAILS</span>
-                <button onclick="closeModal()" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
+                <span id="modal-title" style="font-weight:800; font-size: 0.8rem; color: var(--primary);">BATCH DETAILS</span>
+                <button onclick="closeModal()" style="background:var(--danger); border:none; color:white; border-radius: 4px; padding: 2px 8px; cursor:pointer; font-weight: 800;">✕</button>
             </div>
             <div class="modal-body" id="modal-items-list"></div>
         </div>
@@ -106,12 +160,18 @@
 
         let cachedSummary = [];
 
+        function initLogs() {
+            const savedUser = localStorage.getItem('activeAdmin');
+            if (savedUser) document.getElementById('active-user').innerText = savedUser.toUpperCase();
+            fetchLogs();
+        }
+
         async function fetchLogs() {
             const { data, error } = await _supabase.from('activity_logs').select('*').order('created_at', { ascending: false });
             if (error) return console.error(error);
 
             const grouped = data.reduce((acc, log) => {
-                const ref = log.reference_id || 'MANUAL-ADJ';
+                const ref = log.reference_id || 'ADJ';
                 if (!acc[ref]) {
                     acc[ref] = {
                         date: new Date(log.created_at).toLocaleDateString(),
@@ -132,10 +192,10 @@
             const body = document.getElementById('logs-summary-body');
             body.innerHTML = dataList.map(row => `
                 <tr>
-                    <td style="font-size:0.8rem; color:#64748b;">${row.date}</td>
-                    <td><span class="badge" style="background:${getTypeColor(row.type)}">${row.type}</span></td>
+                    <td style="color:#64748b; font-size: 0.65rem;">${row.date}</td>
+                    <td><span class="badge" style="background:${getTypeColor(row.type)}">${row.type.substring(0,4)}</span></td>
                     <td><span class="ref-link" onclick="viewDetails('${row.ref}')">${row.ref}</span></td>
-                    <td style="text-align: right; font-weight: 800;">${row.totalQty}</td>
+                    <td style="text-align: right; font-weight: 800; color: ${row.totalQty < 0 ? 'var(--danger)' : 'var(--success)'}">${row.totalQty > 0 ? '+' : ''}${row.totalQty}</td>
                 </tr>
             `).join('');
         }
@@ -151,26 +211,28 @@
 
         function getTypeColor(type) {
             if (type === 'RECEIVING') return '#10b981';
-            if (type === 'ORDER') return '#f59e0b';
+            if (type === 'ORDER') return '#ef4444';
             if (type === 'TRANSFER') return '#0081ff';
             return '#64748b';
         }
 
         async function viewDetails(refId) {
             const listDiv = document.getElementById('modal-items-list');
-            document.getElementById('modal-title').innerText = `DOC LIST: ${refId}`;
-            listDiv.innerHTML = "Fetching itemized list...";
+            document.getElementById('modal-title').innerText = `REFERENCE: ${refId}`;
+            listDiv.innerHTML = "<p style='text-align:center; font-size:0.7rem;'>Loading...</p>";
             document.getElementById('detailsModal').style.display = 'flex';
 
             const { data } = await _supabase.from('activity_logs').select('*').eq('reference_id', refId);
             if (data) {
                 listDiv.innerHTML = data.map(item => `
                     <div class="line-item">
-                        <div>
-                            <strong style="display:block; color:var(--primary);">${item.item_name}</strong>
-                            <small style="color:#64748b;">${item.details || 'No notes'}</small>
+                        <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:5px;">
+                            <span style="font-weight:800; font-size:0.75rem; color:var(--primary);">${item.item_name}</span>
+                            <span style="font-weight:800; color:var(--accent); font-size:0.75rem;">QTY: ${item.quantity}</span>
                         </div>
-                        <div style="font-weight:800; color:var(--accent);">QTY: ${item.quantity}</div>
+                        <div style="font-size:0.6rem; color:#64748b; text-transform:uppercase; font-weight:700;">
+                            ${item.details || 'No additional details'}
+                        </div>
                     </div>
                 `).join('');
             }
@@ -179,7 +241,7 @@
         function closeModal() { document.getElementById('detailsModal').style.display = 'none'; }
         window.onclick = (e) => { if(e.target == document.getElementById('detailsModal')) closeModal(); }
 
-        fetchLogs();
+        initLogs();
     </script>
 </body>
 </html>
