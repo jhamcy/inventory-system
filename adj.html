@@ -19,53 +19,59 @@
         body {
             margin: 0; font-family: 'Inter', sans-serif;
             background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
-            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            /* Fix for mobile cut-off */
+            height: 100dvh; 
+            display: flex; flex-direction: column; overflow: hidden;
         }
 
         .navbar { 
-            height: 60px; background: var(--primary); 
+            height: 56px; background: var(--primary); 
             display: flex; align-items: center; justify-content: space-between; 
-            padding: 0 20px; flex-shrink: 0;
+            padding: 0 15px; flex-shrink: 0;
         }
-        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
+        .nav-logo-text { color: white; font-weight: 800; font-size: 1rem; text-transform: uppercase; }
 
-        .main-content { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow: hidden; }
+        .main-content { flex: 1; padding: 10px; display: flex; flex-direction: column; overflow: hidden; }
 
         .adj-container {
             background: white; border: 2px solid var(--primary); border-radius: 12px;
             display: flex; flex-direction: column; height: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            overflow: hidden;
         }
 
         .adj-header {
-            padding: 15px; border-bottom: 2px solid var(--primary);
+            padding: 12px; border-bottom: 2px solid var(--primary);
             display: flex; justify-content: space-between; align-items: center; background: #fffbeb;
-            gap: 15px; flex-wrap: wrap;
+            gap: 10px; flex-shrink: 0;
         }
-        .adj-header h2 { margin: 0; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: var(--warning); }
+        .adj-header h2 { margin: 0; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--warning); }
 
-        .search-bar { display: flex; gap: 10px; flex: 1; max-width: 400px; }
-        .search-bar input { padding: 8px; border-radius: 6px; border: 1px solid var(--border-gray); width: 100%; font-weight: 700; font-size: 0.75rem; }
+        .search-bar { display: flex; gap: 10px; flex: 1; max-width: 300px; }
+        .search-bar input { 
+            padding: 10px; border-radius: 8px; border: 1px solid var(--border-gray); 
+            width: 100%; font-weight: 700; font-size: 0.75rem; outline: none;
+        }
 
-        .grid-area { flex: 1; overflow: auto; }
-        table { border-collapse: collapse; width: 100%; min-width: 1000px; }
+        .grid-area { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; }
+        table { border-collapse: collapse; width: 100%; min-width: 900px; }
         
         thead th { 
             position: sticky; top: 0; background: #f8fafc; 
             padding: 12px; font-size: 0.65rem; font-weight: 800; 
             border-bottom: 2px solid var(--primary); border-right: 1px solid #e2e8f0;
-            text-transform: uppercase; color: #475569; text-align: left;
+            text-transform: uppercase; color: #475569; text-align: left; z-index: 10;
         }
 
         tbody td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.8rem; font-weight: 600; color: var(--primary); }
 
         .adj-input {
-            width: 80px; padding: 8px; border: 2px solid var(--border-gray); border-radius: 6px;
-            text-align: center; font-weight: 800; color: var(--accent); outline: none;
+            width: 80px; padding: 10px; border: 2px solid var(--border-gray); border-radius: 6px;
+            text-align: center; font-weight: 800; color: var(--accent); outline: none; font-size: 0.85rem;
         }
         .adj-input:focus { border-color: var(--accent); background: #eff6ff; }
         
         .reason-select {
-            width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 6px;
+            width: 100%; padding: 10px; border: 1px solid var(--border-gray); border-radius: 6px;
             font-size: 0.7rem; font-weight: 700; outline: none; text-transform: uppercase;
             background: #fdfdfd; cursor: pointer;
         }
@@ -74,31 +80,33 @@
         .sku-code { font-family: monospace; color: var(--accent); font-weight: 800; }
 
         .bulk-footer {
-            padding: 15px; border-top: 2px solid var(--primary);
-            display: flex; justify-content: space-between; gap: 10px; align-items: center;
+            padding: 12px; border-top: 2px solid var(--primary);
+            display: flex; justify-content: space-between; gap: 8px; align-items: center;
+            background: white; flex-shrink: 0;
         }
 
         .btn {
-            padding: 12px 20px; border-radius: 8px; font-weight: 800; 
-            text-transform: uppercase; font-size: 0.7rem; cursor: pointer; border: none;
+            height: 44px; padding: 0 20px; border-radius: 8px; font-weight: 800; 
+            text-transform: uppercase; font-size: 0.75rem; cursor: pointer; border: none;
+            display: flex; align-items: center; justify-content: center;
         }
         .btn-update { background: var(--primary); color: white; flex: 1; }
-        .btn-back { background: #64748b; color: white; text-decoration: none; display: flex; align-items: center; padding: 0 20px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; }
+        .btn-back { background: #64748b; color: white; text-decoration: none; }
     </style>
 </head>
 <body>
 
 <header class="navbar">
-    <div class="nav-logo-text">EasiStock Stock Adjust</div>
-    <div style="color: var(--warning); font-size: 0.7rem; font-weight: 800;">⚖️ INVENTORY RECONCILIATION</div>
+    <div class="nav-logo-text">EasiStock Adjust</div>
+    <div style="color: var(--warning); font-size: 0.65rem; font-weight: 800;">⚖️ RECONCILIATION</div>
 </header>
 
 <main class="main-content">
     <div class="adj-container">
         <div class="adj-header">
-            <h2>Stock Correction</h2>
+            <h2>Correction</h2>
             <div class="search-bar">
-                <input type="text" id="search-box" placeholder="SEARCH SKU, NAME, OR BRAND..." onkeyup="filterRows()">
+                <input type="text" id="search-box" placeholder="SEARCH ITEMS..." onkeyup="filterRows()">
             </div>
         </div>
 
@@ -108,10 +116,10 @@
                     <tr>
                         <th style="width: 140px;">SKU</th>
                         <th>Item Description</th>
-                        <th style="width: 150px;">Brand</th>
+                        <th style="width: 130px;">Brand</th>
                         <th style="width: 100px;">Current</th>
-                        <th style="width: 120px;">New Count</th>
-                        <th style="width: 220px;">Adjustment Reason</th>
+                        <th style="width: 110px;">New Count</th>
+                        <th style="width: 200px;">Reason</th>
                     </tr>
                 </thead>
                 <tbody id="adj-body">
@@ -121,7 +129,7 @@
         </div>
 
         <div class="bulk-footer">
-            <a href="dashboard.html" class="btn-back">CANCEL</a>
+            <a href="dashboard.html" class="btn btn-back">CANCEL</a>
             <button class="btn btn-update" id="save-btn" onclick="applyAdjustments()">Post Adjustments</button>
         </div>
     </div>
@@ -132,7 +140,6 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Added "BEGINNING BALANCE" to the array
     const reasons = [
         "BEGINNING BALANCE",
         "PHYSICAL COUNT DISCREPANCY",
@@ -205,7 +212,6 @@
                         quantity: parseInt(newQtyInput)
                     });
                     
-                    // Logic to label log based on the Beginning Balance selection
                     const logType = (reason === "BEGINNING BALANCE") ? "INITIALIZATION" : "ADJUSTMENT";
                     
                     logs.push({
@@ -222,7 +228,7 @@
         if (logs.length !== updates.length) return alert("SELECT A REASON FOR ALL CHANGES.");
 
         const btn = document.getElementById('save-btn');
-        btn.disabled = true; btn.innerText = "UPDATING...";
+        btn.disabled = true; btn.innerText = "POSTING...";
 
         try {
             for (const item of updates) {
@@ -230,7 +236,7 @@
             }
             await _supabase.from('activity_logs').insert(logs);
 
-            alert("BEGINNING BALANCE / ADJUSTMENTS POSTED.");
+            alert("ADJUSTMENTS POSTED.");
             window.location.href = 'inventory.html';
         } catch (err) {
             alert("ERROR: " + err.message);
