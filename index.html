@@ -6,7 +6,6 @@
     <title>Login | Inventory System</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Restoring your exact original styles */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
         
         body {
@@ -16,12 +15,19 @@
             height: 100vh; display: flex; align-items: center; justify-content: center;
         }
 
-        /* Ensuring the overlay/card matches your original design */
         .login-container {
             background: rgba(255, 255, 255, 0.9);
-            padding: 40px; border-radius: 12px;
+            padding: 30px 40px 40px 40px; /* Adjusted padding for logo */
+            border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             width: 100%; max-width: 350px; text-align: center;
+        }
+
+        /* Logo Styling */
+        .logo-container img {
+            width: 120px; /* Adjust size as needed */
+            height: auto;
+            margin-bottom: 10px;
         }
 
         input {
@@ -45,11 +51,19 @@
 <body>
 
     <div class="login-container">
-        <h2 style="margin-bottom: 20px;">Inventory Login</h2>
+        <div class="logo-container">
+            <img src="logo.jpg" alt="EasiStock Logo">
+        </div>
+        
+        <h2 style="margin-bottom: 20px; color: #0f172a;">Inventory Login</h2>
+        
         <input type="email" id="email" placeholder="Email">
         <input type="password" id="password" placeholder="Password">
+        
         <button class="btn-login" onclick="signIn()">Login</button>
+        
         <div style="margin: 15px 0; font-size: 0.8rem; color: #666;">OR</div>
+        
         <button class="btn-demo" onclick="demoLogin()">Demo Access</button>
     </div>
 
@@ -59,26 +73,20 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function signIn() {
-            // CRITICAL: Manual login clears the source flag
             sessionStorage.removeItem('loginSource');
-            
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-
             const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
 
             if (error) {
                 alert(error.message);
             } else {
-                // Manual login goes to dashboard
                 window.location.href = 'dashboard.html';
             }
         }
 
         async function demoLogin() {
-            // CRITICAL: Set the flag to block dashboard access via navbar
             sessionStorage.setItem('loginSource', 'directDemo');
-            
             const { error } = await _supabase.auth.signInWithPassword({ 
                 email: 'demo@example.com', 
                 password: 'demo1234' 
@@ -87,7 +95,6 @@
             if (error) {
                 alert("Demo Access Error");
             } else {
-                // Demo button goes straight to inventory
                 window.location.href = 'inventory.html';
             }
         }
