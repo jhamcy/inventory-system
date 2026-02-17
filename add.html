@@ -19,38 +19,41 @@
         body {
             margin: 0; font-family: 'Inter', sans-serif;
             background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
-            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            /* Using dvh to fix mobile address bar issues */
+            height: 100dvh; 
+            display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* NAVBAR - Updated Text */
         .navbar { 
-            height: 60px; background: var(--primary); 
+            height: 56px; background: var(--primary); 
             display: flex; align-items: center; justify-content: space-between; 
-            padding: 0 20px; flex-shrink: 0;
+            padding: 0 15px; flex-shrink: 0;
         }
-        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
+        .nav-logo-text { color: white; font-weight: 800; font-size: 1rem; text-transform: uppercase; }
 
-        .main-content { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow: hidden; }
+        .main-content { flex: 1; padding: 10px; display: flex; flex-direction: column; overflow: hidden; }
 
         .bulk-container {
             background: white; border: 2px solid var(--primary); border-radius: 12px;
             display: flex; flex-direction: column; height: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            overflow: hidden;
         }
 
         .bulk-header {
-            padding: 15px; border-bottom: 2px solid var(--primary);
+            padding: 12px; border-bottom: 2px solid var(--primary);
             display: flex; justify-content: space-between; align-items: center; background: #f8fafc;
+            flex-shrink: 0;
         }
-        .bulk-header h2 { margin: 0; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: var(--primary); }
+        .bulk-header h2 { margin: 0; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--primary); }
 
-        .grid-area { flex: 1; overflow: auto; }
-        table { border-collapse: collapse; width: 100%; min-width: 1000px; }
+        .grid-area { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; }
+        table { border-collapse: collapse; width: 100%; min-width: 900px; }
         
         thead th { 
             position: sticky; top: 0; background: #f1f5f9; 
             padding: 10px; font-size: 0.65rem; font-weight: 800; 
             border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border);
-            text-transform: uppercase; color: #475569;
+            text-transform: uppercase; color: #475569; z-index: 10;
         }
 
         tbody td { border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); }
@@ -60,40 +63,46 @@
             font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
             box-sizing: border-box; background: transparent;
         }
-        input:focus { background: #f0f9ff; box-shadow: inset 0 0 0 2px var(--accent); }
+        input:focus { background: #f0f9ff; }
 
         .sku-cell { font-family: monospace; color: var(--accent); background: #f8fafc; font-weight: 800; text-align: center; }
 
         .bulk-footer {
-            padding: 15px; border-top: 2px solid var(--primary);
-            display: flex; justify-content: space-between; gap: 10px;
+            padding: 12px; border-top: 2px solid var(--primary);
+            display: flex; justify-content: space-between; gap: 8px;
+            background: white; flex-shrink: 0;
         }
 
         .btn {
-            padding: 12px 20px; border-radius: 8px; font-weight: 800; 
+            padding: 0 15px; height: 44px; border-radius: 8px; font-weight: 800; 
             text-transform: uppercase; font-size: 0.7rem; cursor: pointer; border: none;
+            display: flex; align-items: center; justify-content: center;
         }
         .btn-import { background: var(--success); color: white; }
         .btn-add { background: #e2e8f0; color: var(--primary); }
         .btn-save { background: var(--primary); color: white; flex: 1; }
-        .btn-back { background: #ef4444; color: white; text-decoration: none; display: flex; align-items: center; padding: 0 15px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; }
+        .btn-back { background: #ef4444; color: white; text-decoration: none; }
         
         #excel-upload { display: none; }
+
+        @media (max-width: 600px) {
+            .btn-text { display: none; } /* Hides text on small screens to save space */
+        }
     </style>
 </head>
 <body>
 
 <header class="navbar">
     <div class="nav-logo-text">EasiStock Add items</div>
-    <div id="active-user" style="color: var(--success); font-size: 0.7rem; font-weight: 800;">ADMIN_MODE</div>
+    <div style="color: var(--success); font-size: 0.65rem; font-weight: 800;">ADMIN_MODE</div>
 </header>
 
 <main class="main-content">
     <div class="bulk-container">
         <div class="bulk-header">
-            <h2>Batch Record Entry</h2>
-            <div style="display:flex; gap:10px;">
-                <label for="excel-upload" class="btn btn-import">📁 Import Excel</label>
+            <h2>Batch Entry</h2>
+            <div>
+                <label for="excel-upload" class="btn btn-import">📁 <span class="btn-text">Import Excel</span></label>
                 <input type="file" id="excel-upload" accept=".xlsx, .xls, .csv" onchange="handleExcel(event)">
             </div>
         </div>
@@ -104,9 +113,9 @@
                     <tr>
                         <th style="width: 40px;">#</th>
                         <th>Description</th>
-                        <th style="width: 130px;">Brand</th>
-                        <th style="width: 180px;">Category</th>
-                        <th style="width: 180px;">Generated SKU</th>
+                        <th style="width: 120px;">Brand</th>
+                        <th style="width: 150px;">Category</th>
+                        <th style="width: 150px;">Generated SKU</th>
                         <th style="width: 70px;">UOM</th>
                         <th style="width: 90px;">Location</th>
                     </tr>
@@ -116,8 +125,8 @@
         </div>
 
         <div class="bulk-footer">
-            <a href="dashboard.html" class="btn-back">EXIT</a>
-            <button class="btn btn-add" onclick="addNewRow()">+ Add Row</button>
+            <a href="dashboard.html" class="btn btn-back">EXIT</a>
+            <button class="btn btn-add" onclick="addNewRow()">+ <span class="btn-text">Add Row</span></button>
             <button class="btn btn-save" id="save-btn" onclick="saveAllItems()">Register All Items</button>
         </div>
     </div>
@@ -133,7 +142,6 @@
     async function init() {
         const { data } = await _supabase.from('inventory_categories').select('*').order('name');
         categories = data || [];
-        // Default rows
         for(let i=0; i<5; i++) addNewRow();
     }
 
@@ -159,7 +167,6 @@
         `;
         tbody.appendChild(tr);
 
-        // If data was imported, trigger SKU generation for that row
         const select = tr.querySelector('.row-cat');
         if(select.value) generateRowSKU(select);
     }
@@ -219,14 +226,14 @@
             }
         });
 
-        if (itemsToInsert.length === 0) return alert("NO VALID DATA FOUND IN ROWS.");
+        if (itemsToInsert.length === 0) return alert("NO VALID DATA.");
         const btn = document.getElementById('save-btn');
-        btn.disabled = true; btn.innerText = "SENDING TO DATABASE...";
+        btn.disabled = true; btn.innerText = "SAVING...";
 
         try {
             const { error } = await _supabase.from('inventory').insert(itemsToInsert);
             if (error) throw error;
-            alert(`SUCCESS: ${itemsToInsert.length} NEW ITEMS REGISTERED.`);
+            alert(`SUCCESS: ${itemsToInsert.length} ITEMS ADDED.`);
             window.location.href = 'inventory.html';
         } catch (err) {
             alert("UPLOAD ERROR: " + err.message);
