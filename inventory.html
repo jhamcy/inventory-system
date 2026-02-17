@@ -16,7 +16,8 @@
             --primary-border: #0f172a;
         }
 
-        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+        /* Use dvh for better mobile address bar handling */
+        html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -24,15 +25,19 @@
             display: flex; flex-direction: column; 
         }
 
-        /* NAVBAR & USER INFO */
+        /* NAVBAR */
         .navbar { 
             height: 60px; background: var(--primary); 
             display: flex; align-items: center; justify-content: space-between; 
             padding: 0 20px; flex-shrink: 0; z-index: 1000;
         }
         
-        /* LOGO STYLING */
-        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; text-decoration: none; }
+        /* LOGO: Standard style */
+        .nav-logo-text { 
+            color: white; font-weight: 800; font-size: 1.1rem; 
+            text-transform: uppercase; text-decoration: none; 
+        }
+        /* LOGO: Active style when clickable */
         .logo-clickable { cursor: pointer; transition: opacity 0.2s; }
         .logo-clickable:hover { opacity: 0.8; }
 
@@ -43,10 +48,10 @@
 
         .main-content { 
             flex: 1; display: flex; flex-direction: column; 
-            padding: 10px; overflow: hidden; height: calc(100vh - 60px); 
+            padding: 10px; overflow: hidden;
         }
 
-        /* ACTION BAR */
+        /* TOGGLE BUTTONS */
         .action-bar-container { padding: 5px 0 15px 0; display: flex; justify-content: center; flex-shrink: 0; }
         .toggle-group {
             display: flex; width: 100%; max-width: 500px;
@@ -62,14 +67,15 @@
         .btn-toggle span:first-child { font-size: 1.2rem; }
         .btn-toggle.active { background: var(--accent) !important; color: white !important; }
 
-        /* SEARCH BOX */
+        /* SEARCH BOX (Forced Uppercase) */
         .search-container {
             margin-bottom: 8px; width: 100%; max-width: 900px; margin-left: auto; margin-right: auto;
             position: relative; flex-shrink: 0;
         }
         .search-input {
             width: 100%; padding: 10px 40px; border-radius: 10px; border: 2px solid var(--primary);
-            font-size: 0.9rem; font-weight: 700; box-sizing: border-box; outline: none; text-transform: uppercase;
+            font-size: 0.9rem; font-weight: 700; box-sizing: border-box; outline: none; 
+            text-transform: uppercase;
         }
         .search-icon { position: absolute; left: 15px; top: 10px; color: var(--primary); font-size: 1rem; }
 
@@ -78,6 +84,7 @@
             flex: 1; overflow: auto; background: white; 
             border: 2px solid var(--primary); border-radius: 12px 12px 0 0;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            -webkit-overflow-scrolling: touch;
         }
 
         table { border-collapse: collapse; width: 100%; min-width: 1000px; table-layout: fixed; }
@@ -103,16 +110,19 @@
 
         /* SELECTED ROW */
         tbody tr.selected-row { background-color: var(--accent) !important; }
-        tbody tr.selected-row td { color: white !important; }
+        tbody tr.selected-row td { color: white !important; border-right-color: rgba(255,255,255,0.2) !important; }
+        tbody tr.selected-row .sticky-col { background: #0066cc !important; }
+        tbody tr.selected-row .sku-text { color: #e0f2fe !important; }
+        tbody tr.selected-row .qty-badge { background: white !important; color: var(--accent) !important; }
 
-        /* TABLE DATA UPPERCASE FIX */
+        /* TABLE DATA: Forced Uppercase */
         tbody td { 
             height: 48px; padding: 0 8px; 
             border-bottom: 1px solid var(--excel-border);
             border-right: 1px solid var(--excel-border);
             font-size: 0.8rem; text-align: center; white-space: nowrap; overflow: hidden;
             font-weight: 600; color: #334155;
-            text-transform: uppercase; /* FORCES UPPERCASE */
+            text-transform: uppercase;
         }
 
         .sku-text { font-family: monospace; font-weight: 800; color: #475569; font-size: 0.75rem; }
@@ -139,7 +149,6 @@
 
     <div class="navbar">
         <a id="nav-logo" class="nav-logo-text">EasiStock</a>
-        
         <div style="display:flex; align-items:center;">
             <div class="user-info">
                 <span class="user-label">Inventory Admin</span>
@@ -201,15 +210,15 @@
         const ROWS_PER_PAGE = 25; 
         let currentSearchQuery = "";
 
-        // NEW: Function to check if logo should be clickable
+        // Nav logic: Clickable only if logged in via standard method
         function setupNavigation() {
             const loginType = localStorage.getItem('loginType'); 
             const logo = document.getElementById('nav-logo');
 
-            // Only make clickable if they didn't just use the "Direct Demo" button
             if (loginType === 'standard_login') {
                 logo.href = 'dashboard.html';
                 logo.classList.add('logo-clickable');
+                logo.title = "Back to Dashboard";
             } else {
                 logo.removeAttribute('href');
                 logo.classList.remove('logo-clickable');

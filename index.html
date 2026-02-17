@@ -11,7 +11,6 @@
         body {
             margin: 0; 
             font-family: 'Inter', sans-serif;
-            /* MATCHING THE BLUE GRADIENT FROM THE IMAGE */
             background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
             height: 100vh; 
             display: flex; 
@@ -21,7 +20,6 @@
         }
 
         .login-container {
-            /* Glassmorphism Effect */
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             padding: 40px; 
@@ -37,7 +35,7 @@
         .logo-container img {
             width: 240px; 
             height: auto;
-            margin-bottom: -15px; /* Pulls text closer */
+            margin-bottom: -15px;
             display: block;
             margin-left: auto;
             margin-right: auto;
@@ -55,7 +53,6 @@
             animation: textSlideUp 1.2s ease-out;
         }
 
-        /* KEYFRAMES */
         @keyframes fadeInCard {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
@@ -161,20 +158,27 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function signIn() {
-            sessionStorage.removeItem('loginSource');
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                alert("Please enter both email and password.");
+                return;
+            }
+
             const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
 
             if (error) {
-                alert(error.message);
+                alert("Login Failed: " + error.message);
             } else {
+                // SET PERMISSIONS: Dashboard link will be ACTIVE
+                localStorage.setItem('loginType', 'standard_login');
+                localStorage.setItem('activeAdmin', email.split('@')[0].toUpperCase());
                 window.location.href = 'dashboard.html';
             }
         }
 
         async function demoLogin() {
-            sessionStorage.setItem('loginSource', 'directDemo');
             const { error } = await _supabase.auth.signInWithPassword({ 
                 email: 'demo@example.com', 
                 password: 'demo1234' 
@@ -183,6 +187,9 @@
             if (error) {
                 alert("Demo Access Error");
             } else {
+                // SET PERMISSIONS: Dashboard link will be DISABLED
+                localStorage.setItem('loginType', 'direct_demo');
+                localStorage.setItem('activeAdmin', 'DEMO_USER');
                 window.location.href = 'inventory.html';
             }
         }
