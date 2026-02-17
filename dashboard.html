@@ -42,11 +42,10 @@
         /* DASHBOARD GRID - Mobile Optimized */
         .dash-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* Default 2-column for mobile */
+            grid-template-columns: repeat(2, 1fr); 
             gap: 15px; margin-bottom: 30px;
         }
 
-        /* Desktop Grid - Switches to 4 columns */
         @media (min-width: 768px) {
             .dash-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
             .welcome-section h1 { font-size: 2rem; }
@@ -70,11 +69,10 @@
         }
         .section-title::after { content: ""; flex: 1; height: 1px; background: #cbd5e1; }
 
-        /* STATUS FOOTER - Mobile Friendly */
         .status-bar {
             background: white; padding: 15px; border-radius: 12px;
             border: 2px solid var(--primary); display: flex; 
-            flex-wrap: wrap; /* Allows wrapping on small screens */
+            flex-wrap: wrap; 
             gap: 20px; justify-content: space-around;
         }
         .stat-item { display: flex; flex-direction: column; align-items: center; text-align: center; }
@@ -88,7 +86,10 @@
 
     <div class="navbar">
         <div style="font-weight: 800; letter-spacing: 0.5px; font-size: 0.9rem;">ADMIN PANEL</div>
-        <a href="inventory.html" class="btn-inventory">MASTER LIST</a>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="inventory.html" class="btn-inventory">MASTER LIST</a>
+            <button onclick="localStorage.removeItem('activeAdmin'); location.href='index.html'" style="background:none; border:none; color:#ef4444; font-weight:800; cursor:pointer; font-size:0.7rem;">LOGOUT</button>
+        </div>
     </div>
 
     <div class="container">
@@ -99,7 +100,7 @@
 
         <div class="section-title">Inventory Operations</div>
         <div class="dash-grid">
-            <div class="dash-card" onclick="location.href='add_item.html'" style="border-bottom: 5px solid var(--success);">
+            <div class="dash-card" onclick="location.href='add.html'" style="border-bottom: 5px solid var(--success);">
                 <span>📦</span>
                 <h3>Add Item</h3>
                 <p>Register new SKU</p>
@@ -111,13 +112,13 @@
                 <p>Correct balances</p>
             </div>
 
-            <div class="dash-card" onclick="location.href='edit_item.html'" style="border-bottom: 5px solid var(--accent);">
+            <div class="dash-card" onclick="location.href='edit.html'" style="border-bottom: 5px solid var(--accent);">
                 <span>📝</span>
                 <h3>Edit</h3>
                 <p>Update item info</p>
             </div>
 
-            <div class="dash-card" onclick="location.href='delete_item.html'" style="border-bottom: 5px solid var(--danger);">
+            <div class="dash-card" onclick="location.href='delete.html'" style="border-bottom: 5px solid var(--danger);">
                 <span>🗑️</span>
                 <h3>Delete</h3>
                 <p>Remove records</p>
@@ -132,10 +133,10 @@
                 <p>Prefix Management</p>
             </div>
             
-            <div class="dash-card" onclick="location.href='reports.html'" style="border-bottom: 5px solid var(--report);">
-                <span>📊</span>
-                <h3>Reports</h3>
-                <p>Stock Analysis</p>
+            <div class="dash-card" onclick="location.href='logs.html'" style="border-bottom: 5px solid var(--report);">
+                <span>📜</span>
+                <h3>History</h3>
+                <p>Activity Logs</p>
             </div>
         </div>
 
@@ -149,7 +150,7 @@
                 <span id="low-stock" class="stat-value" style="color: var(--danger);">--</span>
             </div>
             <div class="stat-item">
-                <span class="stat-label">System</span>
+                <span class="stat-label">System Status</span>
                 <span class="stat-value" style="color: var(--success); font-size: 0.9rem;">ONLINE</span>
             </div>
         </div>
