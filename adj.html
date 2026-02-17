@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Adjustment | Admin Console</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Adjust Stock | EasiStock</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -13,221 +13,232 @@
             --accent: #0081ff;
             --warning: #f59e0b;
             --success: #10b981;
-            --border: #e2e8f0;
+            --border-gray: #cbd5e1;
         }
 
         body {
             margin: 0; font-family: 'Inter', sans-serif;
             background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
-            min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        .main-card {
-            background: white; width: 100%; max-width: 550px;
-            border-radius: 20px; border: 2px solid var(--primary);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            overflow: hidden;
+        .navbar { 
+            height: 60px; background: var(--primary); 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 0 20px; flex-shrink: 0;
+        }
+        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
+
+        .main-content { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow: hidden; }
+
+        .adj-container {
+            background: white; border: 2px solid var(--primary); border-radius: 12px;
+            display: flex; flex-direction: column; height: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
 
-        .card-header {
-            background: var(--primary); color: white; padding: 20px 25px;
-            display: flex; justify-content: space-between; align-items: center;
+        .adj-header {
+            padding: 15px; border-bottom: 2px solid var(--primary);
+            display: flex; justify-content: space-between; align-items: center; background: #fffbeb;
+            gap: 15px; flex-wrap: wrap;
         }
-        .header-title h1 { margin: 0; font-size: 1rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
-        .user-tag { font-size: 0.65rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-top: 2px; }
+        .adj-header h2 { margin: 0; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: var(--warning); }
 
-        .badge-live { background: var(--success); color: white; font-size: 0.6rem; padding: 4px 8px; border-radius: 4px; font-weight: 800; }
+        .search-bar { display: flex; gap: 10px; flex: 1; max-width: 400px; }
+        .search-bar input { padding: 8px; border-radius: 6px; border: 1px solid var(--border-gray); width: 100%; font-weight: 700; font-size: 0.75rem; }
 
-        .content-body { padding: 30px; }
-
-        /* SEARCH SECTION */
-        .search-container { margin-bottom: 25px; }
-        .input-group { position: relative; }
-        .search-input {
-            width: 100%; padding: 14px 15px; border: 2px solid var(--border);
-            border-radius: 10px; font-weight: 600; transition: 0.2s; outline: none; box-sizing: border-box;
-            text-transform: uppercase;
+        .grid-area { flex: 1; overflow: auto; }
+        table { border-collapse: collapse; width: 100%; min-width: 1000px; }
+        
+        thead th { 
+            position: sticky; top: 0; background: #f8fafc; 
+            padding: 12px; font-size: 0.65rem; font-weight: 800; 
+            border-bottom: 2px solid var(--primary); border-right: 1px solid #e2e8f0;
+            text-transform: uppercase; color: #475569; text-align: left;
         }
-        .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0, 129, 255, 0.1); }
 
-        .results-dropdown {
-            position: absolute; width: 100%; background: white; border: 1px solid var(--border);
-            border-radius: 10px; z-index: 100; margin-top: 5px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); display: none;
-        }
-        .result-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: 0.2s; font-size: 0.85rem; font-weight: 600; }
-        .result-item:hover { background: #f8fafc; color: var(--accent); }
+        tbody td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.8rem; font-weight: 600; color: var(--primary); }
 
-        /* PREVIEW BOX */
-        .item-preview {
-            background: #f8fafc; border-radius: 12px; padding: 20px;
-            margin-bottom: 25px; border-left: 5px solid var(--accent); display: none;
+        .adj-input {
+            width: 80px; padding: 8px; border: 2px solid var(--border-gray); border-radius: 6px;
+            text-align: center; font-weight: 800; color: var(--accent); outline: none;
         }
-        .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .stat-label { font-size: 0.65rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
-        .stat-value { font-size: 0.9rem; font-weight: 800; display: block; margin-top: 2px; text-transform: uppercase; }
+        .adj-input:focus { border-color: var(--accent); background: #eff6ff; }
+        
+        .reason-select {
+            width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 6px;
+            font-size: 0.7rem; font-weight: 700; outline: none; text-transform: uppercase;
+            background: #fdfdfd; cursor: pointer;
+        }
 
-        /* FORM STYLING */
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 0.7rem; font-weight: 800; margin-bottom: 6px; color: var(--primary); text-transform: uppercase; }
-        .form-control {
-            width: 100%; padding: 12px; border: 1.5px solid var(--border);
-            border-radius: 8px; font-weight: 600; box-sizing: border-box; text-transform: uppercase;
-        }
-        .form-control:focus { border-color: var(--accent); outline: none; }
+        .brand-tag { font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 700; }
+        .sku-code { font-family: monospace; color: var(--accent); font-weight: 800; }
 
-        .btn-submit {
-            width: 100%; background: var(--primary); color: white; padding: 16px;
-            border: none; border-radius: 12px; font-weight: 800; font-size: 0.9rem;
-            text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-top: 10px;
-            box-shadow: 0 4px 0 #000;
+        .bulk-footer {
+            padding: 15px; border-top: 2px solid var(--primary);
+            display: flex; justify-content: space-between; gap: 10px; align-items: center;
         }
-        .btn-submit:hover { background: #1e293b; transform: translateY(-2px); }
-        .btn-submit:active { transform: translateY(0); box-shadow: none; }
-        .btn-submit:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        .btn-cancel {
-            display: block; text-align: center; margin-top: 20px; color: var(--primary);
-            text-decoration: none; font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
+        .btn {
+            padding: 12px 20px; border-radius: 8px; font-weight: 800; 
+            text-transform: uppercase; font-size: 0.7rem; cursor: pointer; border: none;
         }
+        .btn-update { background: var(--primary); color: white; flex: 1; }
+        .btn-back { background: #64748b; color: white; text-decoration: none; display: flex; align-items: center; padding: 0 20px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; }
     </style>
 </head>
 <body>
 
-<div class="main-card">
-    <div class="card-header">
-        <div class="header-title">
-            <h1>Stock Adjustment</h1>
-            <div class="user-tag">Session: <span id="current-user">ADMIN MASTER</span></div>
+<header class="navbar">
+    <div class="nav-logo-text">EasiStock Stock Adjust</div>
+    <div style="color: var(--warning); font-size: 0.7rem; font-weight: 800;">⚖️ INVENTORY RECONCILIATION</div>
+</header>
+
+<main class="main-content">
+    <div class="adj-container">
+        <div class="adj-header">
+            <h2>Stock Correction</h2>
+            <div class="search-bar">
+                <input type="text" id="search-box" placeholder="SEARCH SKU, NAME, OR BRAND..." onkeyup="filterRows()">
+            </div>
         </div>
-        <span class="badge-live">CONNECTED</span>
+
+        <div class="grid-area">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 140px;">SKU</th>
+                        <th>Item Description</th>
+                        <th style="width: 150px;">Brand</th>
+                        <th style="width: 100px;">Current</th>
+                        <th style="width: 120px;">New Count</th>
+                        <th style="width: 220px;">Adjustment Reason</th>
+                    </tr>
+                </thead>
+                <tbody id="adj-body">
+                    <tr><td colspan="6" style="text-align:center; padding:40px;">Loading inventory...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="bulk-footer">
+            <a href="dashboard.html" class="btn-back">CANCEL</a>
+            <button class="btn btn-update" id="save-btn" onclick="applyAdjustments()">Post Adjustments</button>
+        </div>
     </div>
-
-    <div class="content-body">
-        <div class="search-container">
-            <div class="input-group">
-                <input type="text" id="search-bar" class="search-input" placeholder="SEARCH SKU OR DESCRIPTION..." oninput="searchItems(this.value)">
-                <div id="results" class="results-dropdown"></div>
-            </div>
-        </div>
-
-        <div id="preview" class="item-preview">
-            <div class="preview-grid">
-                <div>
-                    <span class="stat-label">Item SKU</span>
-                    <span id="p-sku" class="stat-value">---</span>
-                </div>
-                <div>
-                    <span class="stat-label">Current Stock</span>
-                    <span id="p-qty" class="stat-value" style="color: var(--accent); font-size: 1.2rem;">0</span>
-                </div>
-                <div style="grid-column: span 2;">
-                    <span class="stat-label">Item Description</span>
-                    <span id="p-name" class="stat-value">---</span>
-                </div>
-                <div style="grid-column: span 2; border-top: 1px solid #e2e8f0; padding-top: 10px;">
-                    <span class="stat-label">Last Change Recorded</span>
-                    <span id="p-last" class="stat-value" style="color: #94a3b8; font-size: 0.75rem;">NO HISTORY FOUND</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group">
-                <label>Date of Action</label>
-                <input type="date" id="adj-date" class="form-control">
-            </div>
-            <div class="form-group">
-                <label>New Total Qty</label>
-                <input type="number" id="adj-qty" class="form-control" placeholder="0">
-            </div>
-        </div>
-
-        <div class="form-group" style="margin-bottom: 15px;">
-            <label>Adjustment Protocol</label>
-            <select id="adj-reason" class="form-control">
-                <option value="">-- SELECT REASON --</option>
-                <option value="BEGINNING BALANCE">BEGINNING BALANCE</option>
-                <option value="PHYSICAL COUNT">PHYSICAL COUNT VERIFICATION</option>
-                <option value="LOSS">DAMAGED / WASTE / LOSS</option>
-                <option value="ERROR">SYSTEM ENTRY CORRECTION</option>
-            </select>
-        </div>
-
-        <div class="form-group" style="margin-bottom: 20px;">
-            <label>Administrative Notes</label>
-            <textarea id="adj-notes" class="form-control" rows="2" placeholder="PROVIDE ADDITIONAL CONTEXT..." oninput="this.value = this.value.toUpperCase()"></textarea>
-        </div>
-
-        <button id="btn-save" class="btn-submit" onclick="submitAdj()" disabled>Confirm Stock Change</button>
-        <a href="dashboard.html" class="btn-cancel">Cancel & Back to Dashboard</a>
-    </div>
-</div>
+</main>
 
 <script>
     const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let activeId = null;
-    document.getElementById('adj-date').valueAsDate = new Date();
+    // Added "BEGINNING BALANCE" to the array
+    const reasons = [
+        "BEGINNING BALANCE",
+        "PHYSICAL COUNT DISCREPANCY",
+        "DAMAGED / EXPIRED STOCK",
+        "RETURN TO VENDOR",
+        "DATA ENTRY ERROR",
+        "SAMPLE / PROMO USE",
+        "LOST / STOLEN",
+        "OTHER (INTERNAL USE)"
+    ];
 
-    async function searchItems(q) {
-        const drop = document.getElementById('results');
-        if (q.length < 2) { drop.style.display = 'none'; return; }
+    async function loadInventory() {
+        const { data, error } = await _supabase.from('inventory').select('*').order('item_name');
+        const tbody = document.getElementById('adj-body');
+        
+        if(data) {
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.dataset.id = item.id;
+                tr.dataset.name = item.item_name;
+                tr.dataset.sku = item.sku;
+                tr.dataset.brand = item.brand || '';
+                tr.dataset.oldqty = item.quantity;
+                
+                let reasonOptions = reasons.map(r => `<option value="${r}">${r}</option>`).join('');
 
-        const { data } = await _supabase.from('inventory').select('id, sku, item_name, quantity').or(`sku.ilike.%${q}%,item_name.ilike.%${q}%`).limit(5);
-
-        if (data && data.length > 0) {
-            drop.innerHTML = data.map(i => `<div class="result-item" onclick="selectItem('${i.id}')">${i.sku} | ${i.item_name}</div>`).join('');
-            drop.style.display = 'block';
-        } else { drop.style.display = 'none'; }
+                tr.innerHTML = `
+                    <td class="sku-code">${item.sku}</td>
+                    <td>${item.item_name}</td>
+                    <td class="brand-tag">${item.brand || '---'}</td>
+                    <td style="font-weight: 800; color: #64748b;">${item.quantity} <small>${item.uom}</small></td>
+                    <td><input type="number" class="adj-input" placeholder="${item.quantity}"></td>
+                    <td>
+                        <select class="reason-select">
+                            <option value="">-- SELECT REASON --</option>
+                            ${reasonOptions}
+                        </select>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
     }
 
-    async function selectItem(id) {
-        activeId = id;
-        document.getElementById('results').style.display = 'none';
-        
-        const { data: item } = await _supabase.from('inventory').select('*').eq('id', id).single();
-        const { data: lastLog } = await _supabase.from('activity_logs').select('created_at').eq('item_name', item.item_name).order('created_at', {ascending: false}).limit(1);
+    function filterRows() {
+        const val = document.getElementById('search-box').value.toUpperCase();
+        const rows = document.querySelectorAll('#adj-body tr');
+        rows.forEach(row => {
+            const text = (row.dataset.name + row.dataset.sku + row.dataset.brand).toUpperCase();
+            row.style.display = text.includes(val) ? '' : 'none';
+        });
+    }
 
-        if (item) {
-            document.getElementById('p-sku').innerText = item.sku;
-            document.getElementById('p-name').innerText = item.item_name;
-            document.getElementById('p-qty').innerText = item.quantity;
-            document.getElementById('adj-qty').value = item.quantity;
-            document.getElementById('p-last').innerText = lastLog.length ? new Date(lastLog[0].created_at).toLocaleString() : 'NO HISTORY RECORDED';
+    async function applyAdjustments() {
+        const rows = document.querySelectorAll('#adj-body tr');
+        const updates = [];
+        const logs = [];
+
+        rows.forEach(row => {
+            const newQtyInput = row.querySelector('.adj-input').value;
+            const reason = row.querySelector('.reason-select').value;
             
-            document.getElementById('preview').style.display = 'block';
-            document.getElementById('btn-save').disabled = false;
-            document.getElementById('search-bar').value = item.sku;
+            if(newQtyInput !== "" && parseInt(newQtyInput) !== parseInt(row.dataset.oldqty)) {
+                if(!reason) {
+                    row.querySelector('.reason-select').style.borderColor = 'red';
+                } else {
+                    updates.push({
+                        id: row.dataset.id,
+                        quantity: parseInt(newQtyInput)
+                    });
+                    
+                    // Logic to label log based on the Beginning Balance selection
+                    const logType = (reason === "BEGINNING BALANCE") ? "INITIALIZATION" : "ADJUSTMENT";
+                    
+                    logs.push({
+                        type: logType,
+                        item_name: row.dataset.name,
+                        reference_id: row.dataset.sku,
+                        details: `${reason}: Set to ${newQtyInput} ${row.dataset.oldqty !== '0' ? '(Prev: ' + row.dataset.oldqty + ')' : ''}`
+                    });
+                }
+            }
+        });
+
+        if (updates.length === 0) return alert("NO CHANGES DETECTED.");
+        if (logs.length !== updates.length) return alert("SELECT A REASON FOR ALL CHANGES.");
+
+        const btn = document.getElementById('save-btn');
+        btn.disabled = true; btn.innerText = "UPDATING...";
+
+        try {
+            for (const item of updates) {
+                await _supabase.from('inventory').update({ quantity: item.quantity }).eq('id', item.id);
+            }
+            await _supabase.from('activity_logs').insert(logs);
+
+            alert("BEGINNING BALANCE / ADJUSTMENTS POSTED.");
+            window.location.href = 'inventory.html';
+        } catch (err) {
+            alert("ERROR: " + err.message);
+            btn.disabled = false; btn.innerText = "POST ADJUSTMENTS";
         }
     }
 
-    async function submitAdj() {
-        const newQty = parseInt(document.getElementById('adj-qty').value);
-        const reason = document.getElementById('adj-reason').value;
-        const notes = document.getElementById('adj-notes').value;
-        const oldQty = parseInt(document.getElementById('p-qty').innerText);
-        const adminUser = document.getElementById('current-user').innerText;
-
-        if (!reason) return alert("SELECT AN ADJUSTMENT PROTOCOL");
-
-        const { error } = await _supabase.from('inventory').update({ quantity: newQty }).eq('id', activeId);
-        
-        if (!error) {
-            await _supabase.from('activity_logs').insert([{
-                type: 'SYSTEM',
-                item_name: document.getElementById('p-name').innerText,
-                quantity: newQty - oldQty,
-                details: `[${adminUser}] ADJ: ${reason} | ${notes}`.toUpperCase()
-            }]);
-            alert("SUCCESS: INVENTORY HAS BEEN UPDATED.");
-            window.location.href = 'dashboard.html';
-        }
-    }
-
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('id')) selectItem(params.get('id'));
+    loadInventory();
 </script>
 </body>
 </html>

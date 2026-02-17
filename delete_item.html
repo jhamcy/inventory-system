@@ -2,145 +2,208 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete Item | Admin Control</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Delete Items | EasiStock</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
         :root {
             --primary: #0f172a;
+            --accent: #0081ff;
             --danger: #ef4444;
-            --danger-dark: #b91c1c;
+            --border-gray: #cbd5e1;
         }
 
         body {
             margin: 0; font-family: 'Inter', sans-serif;
-            /* Syncing with inventory.html background */
             background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
-            height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden;
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        .admin-card {
-            background: white; width: 90%; max-width: 420px;
-            padding: 30px; border-radius: 16px; border: 2px solid var(--primary);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            text-align: center;
+        .navbar { 
+            height: 60px; background: var(--primary); 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 0 20px; flex-shrink: 0;
+        }
+        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
+
+        .main-content { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow: hidden; }
+
+        .bulk-container {
+            background: white; border: 2px solid var(--primary); border-radius: 12px;
+            display: flex; flex-direction: column; height: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
 
-        .warning-icon { font-size: 3rem; margin-bottom: 10px; display: block; }
+        .bulk-header {
+            padding: 15px; border-bottom: 2px solid var(--primary);
+            display: flex; justify-content: space-between; align-items: center; background: #fef2f2;
+        }
+        .bulk-header h2 { margin: 0; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: var(--danger); }
+
+        .filter-box { display: flex; gap: 8px; }
+        .filter-box select { padding: 8px; border-radius: 6px; border: 1px solid var(--border-gray); font-weight: 700; font-size: 0.7rem; }
+
+        .grid-area { flex: 1; overflow: auto; }
+        table { border-collapse: collapse; width: 100%; min-width: 900px; }
         
-        .header h1 { margin: 0; font-size: 1.3rem; color: var(--danger); text-transform: uppercase; font-weight: 800; }
-        .header p { color: #64748b; font-size: 0.8rem; margin-top: 5px; font-weight: 700; text-transform: uppercase; }
-
-        .item-preview-box {
-            background: #f1f5f9; border: 2px solid var(--primary);
-            padding: 20px; border-radius: 12px; margin: 20px 0;
-            text-align: left;
+        thead th { 
+            position: sticky; top: 0; background: #f8fafc; 
+            padding: 12px; font-size: 0.65rem; font-weight: 800; 
+            border-bottom: 2px solid var(--primary); border-right: 1px solid #e2e8f0;
+            text-transform: uppercase; color: #475569; text-align: left;
         }
 
-        .item-label { font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 4px; }
-        .item-value { font-size: 1.1rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 12px; display: block; font-family: monospace; }
+        tbody td { padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.8rem; font-weight: 600; color: var(--primary); }
+        tr:hover { background: #fff1f2; }
 
-        .btn-delete {
-            width: 100%; background: var(--danger); color: white; padding: 15px;
-            border: none; border-radius: 10px; font-weight: 800; cursor: pointer;
-            transition: 0.2s; text-transform: uppercase; font-size: 0.9rem;
-            box-shadow: 0 4px 0 var(--danger-dark);
-        }
-        .btn-delete:hover { background: var(--danger-dark); transform: translateY(-2px); }
-        .btn-delete:active { transform: translateY(0); box-shadow: none; }
+        /* CHECKBOX STYLING */
+        input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--danger); }
 
-        .btn-back { 
-            display: block; text-align: center; margin-top: 15px; 
-            color: var(--primary); text-decoration: none; font-size: 0.75rem; 
-            font-weight: 800; text-transform: uppercase;
+        .sku-tag { font-family: monospace; font-weight: 800; color: var(--accent); }
+
+        .bulk-footer {
+            padding: 15px; border-top: 2px solid var(--primary);
+            display: flex; justify-content: space-between; gap: 10px; align-items: center;
         }
+
+        .btn {
+            padding: 12px 20px; border-radius: 8px; font-weight: 800; 
+            text-transform: uppercase; font-size: 0.7rem; cursor: pointer; border: none;
+        }
+        .btn-load { background: var(--primary); color: white; }
+        .btn-delete { background: var(--danger); color: white; flex: 1; }
+        .btn-back { background: #64748b; color: white; text-decoration: none; display: flex; align-items: center; padding: 0 20px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; }
+        
+        #selected-count { font-size: 0.75rem; font-weight: 800; color: var(--danger); }
     </style>
 </head>
 <body>
 
-<div class="admin-card">
-    <span class="warning-icon">⚠️</span>
-    <div class="header">
-        <h1>Confirm Deletion</h1>
-        <p>This record will be permanently removed</p>
+<header class="navbar">
+    <div class="nav-logo-text">EasiStock Delete items</div>
+    <div style="color: var(--danger); font-size: 0.7rem; font-weight: 800;">⚠️ DATA REMOVAL MODE</div>
+</header>
+
+<main class="main-content">
+    <div class="bulk-container">
+        <div class="bulk-header">
+            <h2>Inventory Cleanup</h2>
+            <div class="filter-box">
+                <select id="cat-filter">
+                    <option value="ALL">-- ALL CATEGORIES --</option>
+                </select>
+                <button class="btn btn-load" onclick="loadInventory()">🔍 View List</button>
+            </div>
+        </div>
+
+        <div class="grid-area">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center;"><input type="checkbox" id="master-check" onclick="toggleAll(this)"></th>
+                        <th style="width: 180px;">SKU</th>
+                        <th>Item Description</th>
+                        <th>Brand</th>
+                        <th style="width: 100px;">Stock</th>
+                        <th style="width: 120px;">Category</th>
+                    </tr>
+                </thead>
+                <tbody id="bulk-body">
+                    <tr><td colspan="6" style="text-align:center; padding:40px; color:#94a3b8; font-weight:700;">Select a category and click "View List" to manage records</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="bulk-footer">
+            <a href="dashboard.html" class="btn-back">CANCEL</a>
+            <div>
+                <span id="selected-count">0 ITEMS SELECTED</span>
+            </div>
+            <button class="btn btn-delete" id="delete-btn" onclick="deleteSelected()" disabled>Permanently Delete Selected</button>
+        </div>
     </div>
-
-    <div class="item-preview-box">
-        <span class="item-label">SKU / ID</span>
-        <span id="del-sku" class="item-value">LOADING...</span>
-
-        <span class="item-label">Description</span>
-        <span id="del-name" class="item-value" style="font-family: 'Inter';">LOADING...</span>
-
-        <span class="item-label" id="stock-warning" style="color: var(--danger); margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px;">STOCK LEVEL: 0</span>
-    </div>
-
-    <button class="btn-delete" id="confirm-btn" onclick="deleteItem()">Delete Master Record</button>
-    <a href="dashboard.html" class="btn-back">Cancel & Go Back</a>
-</div>
+</main>
 
 <script>
     const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const itemId = urlParams.get('id');
-
-    async function loadItem() {
-        if (!itemId) return window.location.href = 'dashboard.html';
-
-        const { data, error } = await _supabase.from('inventory').select('*').eq('id', itemId).single();
-        
-        if (error || !data) {
-            alert("ITEM NOT FOUND.");
-            window.location.href = 'dashboard.html';
-            return;
-        }
-
-        document.getElementById('del-sku').innerText = data.sku.toUpperCase();
-        document.getElementById('del-name').innerText = data.item_name.toUpperCase();
-        document.getElementById('stock-warning').innerText = `CURRENT STOCK: ${data.quantity}`;
-        
-        if (data.quantity > 0) {
-            document.getElementById('stock-warning').style.fontWeight = "900";
-            document.getElementById('stock-warning').innerText += " (WARNING: STOCK DETECTED)";
+    async function init() {
+        const { data } = await _supabase.from('inventory_categories').select('*').order('name');
+        const filter = document.getElementById('cat-filter');
+        if(data) {
+            data.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.name;
+                opt.textContent = c.name.toUpperCase();
+                filter.appendChild(opt);
+            });
         }
     }
 
-    async function deleteItem() {
-        const sku = document.getElementById('del-sku').innerText;
-        const name = document.getElementById('del-name').innerText;
-        
-        const btn = document.getElementById('confirm-btn');
-        btn.disabled = true;
-        btn.innerText = "REMOVING...";
+    async function loadInventory() {
+        const filterVal = document.getElementById('cat-filter').value;
+        const tbody = document.getElementById('bulk-body');
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px;">Loading Data...</td></tr>`;
+
+        let query = _supabase.from('inventory').select('*').order('item_name');
+        if(filterVal !== "ALL") query = query.eq('category', filterVal);
+
+        const { data, error } = await query;
+
+        if(data) {
+            tbody.innerHTML = '';
+            data.forEach((item) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="text-align:center;"><input type="checkbox" class="row-check" value="${item.id}" onchange="updateCount()"></td>
+                    <td class="sku-tag">${item.sku}</td>
+                    <td>${item.item_name}</td>
+                    <td>${item.brand || '---'}</td>
+                    <td>${item.quantity} ${item.uom}</td>
+                    <td style="font-size:0.65rem; color:#64748b;">${item.category}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            updateCount();
+        }
+    }
+
+    function toggleAll(master) {
+        document.querySelectorAll('.row-check').forEach(c => c.checked = master.checked);
+        updateCount();
+    }
+
+    function updateCount() {
+        const checked = document.querySelectorAll('.row-check:checked').length;
+        document.getElementById('selected-count').innerText = `${checked} ITEMS SELECTED`;
+        document.getElementById('delete-btn').disabled = (checked === 0);
+    }
+
+    async function deleteSelected() {
+        const checkedBoxes = document.querySelectorAll('.row-check:checked');
+        const idsToDelete = Array.from(checkedBoxes).map(cb => cb.value);
+
+        if (!confirm(`CRITICAL ACTION: Are you sure you want to PERMANENTLY delete ${idsToDelete.length} records? This cannot be undone.`)) return;
+
+        const btn = document.getElementById('delete-btn');
+        btn.disabled = true; btn.innerText = "DELETING FROM SYSTEM...";
 
         try {
-            const { error } = await _supabase.from('inventory').delete().eq('id', itemId);
+            const { error } = await _supabase.from('inventory').delete().in('id', idsToDelete);
             if (error) throw error;
 
-            await _supabase.from('activity_logs').insert([{
-                type: 'SYSTEM',
-                reference_id: 'DELETE',
-                item_name: name,
-                details: `PERMANENTLY REMOVED SKU: ${sku}`
-            }]);
-
-            alert("RECORD DELETED SUCCESSFULLY.");
-            window.location.href = 'dashboard.html';
-
+            alert("RECORDS REMOVED SUCCESSFULLY.");
+            loadInventory();
         } catch (err) {
-            alert(err.message.toUpperCase());
-            btn.disabled = false;
-            btn.innerText = "DELETE MASTER RECORD";
+            alert("DELETE ERROR: " + err.message);
+            btn.disabled = false; btn.innerText = "PERMANENTLY DELETE SELECTED";
         }
     }
 
-    loadItem();
+    init();
 </script>
-
 </body>
 </html>
