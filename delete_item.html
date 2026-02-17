@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Item | Admin Control</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        
+        :root {
+            --primary: #0f172a;
+            --danger: #ef4444;
+            --danger-dark: #b91c1c;
+        }
+
+        body {
+            margin: 0; font-family: 'Inter', sans-serif;
+            /* Syncing with inventory.html background */
+            background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
+            height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+
+        .admin-card {
+            background: white; width: 90%; max-width: 420px;
+            padding: 30px; border-radius: 16px; border: 2px solid var(--primary);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .warning-icon { font-size: 3rem; margin-bottom: 10px; display: block; }
+        
+        .header h1 { margin: 0; font-size: 1.3rem; color: var(--danger); text-transform: uppercase; font-weight: 800; }
+        .header p { color: #64748b; font-size: 0.8rem; margin-top: 5px; font-weight: 700; text-transform: uppercase; }
+
+        .item-preview-box {
+            background: #f1f5f9; border: 2px solid var(--primary);
+            padding: 20px; border-radius: 12px; margin: 20px 0;
+            text-align: left;
+        }
+
+        .item-label { font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 4px; }
+        .item-value { font-size: 1.1rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 12px; display: block; font-family: monospace; }
+
+        .btn-delete {
+            width: 100%; background: var(--danger); color: white; padding: 15px;
+            border: none; border-radius: 10px; font-weight: 800; cursor: pointer;
+            transition: 0.2s; text-transform: uppercase; font-size: 0.9rem;
+            box-shadow: 0 4px 0 var(--danger-dark);
+        }
+        .btn-delete:hover { background: var(--danger-dark); transform: translateY(-2px); }
+        .btn-delete:active { transform: translateY(0); box-shadow: none; }
+
+        .btn-back { 
+            display: block; text-align: center; margin-top: 15px; 
+            color: var(--primary); text-decoration: none; font-size: 0.75rem; 
+            font-weight: 800; text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<div class="admin-card">
+    <span class="warning-icon">⚠️</span>
+    <div class="header">
+        <h1>Confirm Deletion</h1>
+        <p>This record will be permanently removed</p>
+    </div>
+
+    <div class="item-preview-box">
+        <span class="item-label">SKU / ID</span>
+        <span id="del-sku" class="item-value">LOADING...</span>
+
+        <span class="item-label">Description</span>
+        <span id="del-name" class="item-value" style="font-family: 'Inter';">LOADING...</span>
+
+        <span class="item-label" id="stock-warning" style="color: var(--danger); margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px;">STOCK LEVEL: 0</span>
+    </div>
+
+    <button class="btn-delete" id="confirm-btn" onclick="deleteItem()">Delete Master Record</button>
+    <a href="dashboard.html" class="btn-back">Cancel & Go Back</a>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const itemId = urlParams.get('id');
+
+    async function loadItem() {
+        if (!itemId) return window.location.href = 'dashboard.html';
+
+        const { data, error } = await _supabase.from('inventory').select('*').eq('id', itemId).single();
+        
+        if (error || !data) {
+            alert("ITEM NOT FOUND.");
+            window.location.href = 'dashboard.html';
+            return;
+        }
+
+        document.getElementById('del-sku').innerText = data.sku.toUpperCase();
+        document.getElementById('del-name').innerText = data.item_name.toUpperCase();
+        document.getElementById('stock-warning').innerText = `CURRENT STOCK: ${data.quantity}`;
+        
+        if (data.quantity > 0) {
+            document.getElementById('stock-warning').style.fontWeight = "900";
+            document.getElementById('stock-warning').innerText += " (WARNING: STOCK DETECTED)";
+        }
+    }
+
+    async function deleteItem() {
+        const sku = document.getElementById('del-sku').innerText;
+        const name = document.getElementById('del-name').innerText;
+        
+        const btn = document.getElementById('confirm-btn');
+        btn.disabled = true;
+        btn.innerText = "REMOVING...";
+
+        try {
+            const { error } = await _supabase.from('inventory').delete().eq('id', itemId);
+            if (error) throw error;
+
+            await _supabase.from('activity_logs').insert([{
+                type: 'SYSTEM',
+                reference_id: 'DELETE',
+                item_name: name,
+                details: `PERMANENTLY REMOVED SKU: ${sku}`
+            }]);
+
+            alert("RECORD DELETED SUCCESSFULLY.");
+            window.location.href = 'dashboard.html';
+
+        } catch (err) {
+            alert(err.message.toUpperCase());
+            btn.disabled = false;
+            btn.innerText = "DELETE MASTER RECORD";
+        }
+    }
+
+    loadItem();
+</script>
+
+</body>
+</html>

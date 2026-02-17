@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New SKU | Admin Control</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        
+        :root {
+            --primary: #0f172a;
+            --accent: #0081ff;
+            --success: #10b981;
+        }
+
+        body {
+            margin: 0; font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
+            height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+
+        .admin-card {
+            background: white; width: 90%; max-width: 450px;
+            padding: 30px; border-radius: 16px; border: 2px solid var(--primary);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h1 { margin: 0; font-size: 1.3rem; color: var(--primary); text-transform: uppercase; font-weight: 800; }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 6px; }
+        
+        /* FORCING UPPERCASE IN UI */
+        input, select {
+            width: 100%; padding: 12px; border: 2px solid #cbd5e1; border-radius: 8px;
+            font-size: 0.9rem; font-weight: 600; box-sizing: border-box; outline: none;
+            transition: 0.2s;
+            text-transform: uppercase; 
+        }
+        input::placeholder { text-transform: none; } /* Keeps placeholders readable */
+        input:focus { border-color: var(--accent); background: #f8fafc; }
+
+        .sku-preview {
+            background: #f1f5f9; border: 2px dashed var(--primary);
+            padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 20px;
+        }
+        .sku-label { font-size: 0.6rem; font-weight: 800; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        .sku-code { font-size: 1.6rem; font-weight: 800; color: var(--accent); font-family: monospace; letter-spacing: 1px; }
+
+        .btn-save {
+            width: 100%; background: var(--primary); color: white; padding: 15px;
+            border: none; border-radius: 10px; font-weight: 800; cursor: pointer;
+            transition: 0.2s; text-transform: uppercase; font-size: 0.9rem;
+            box-shadow: 0 4px 0 #000;
+        }
+        .btn-save:hover { background: var(--accent); transform: translateY(-2px); }
+        .btn-save:active { transform: translateY(0); box-shadow: none; }
+
+        .btn-back { display: block; text-align: center; margin-top: 15px; color: #64748b; text-decoration: none; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+<div class="admin-card">
+    <div class="header">
+        <h1>Master SKU Creation</h1>
+    </div>
+
+    <div class="form-group">
+        <label>Item Description</label>
+        <input type="text" id="item-name" placeholder="TECHNICAL DESCRIPTION..." oninput="this.value = this.value.toUpperCase()">
+    </div>
+
+    <div class="form-group">
+        <label>Category Prefix</label>
+        <select id="item-category" onchange="updateSKUPreview()">
+            <option value="">-- SELECT CATEGORY --</option>
+        </select>
+    </div>
+
+    <div class="sku-preview">
+        <span class="sku-label">Auto-Generated SKU</span>
+        <span id="sku-display" class="sku-code">---</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+            <label>UOM</label>
+            <input type="text" id="item-uom" placeholder="PCS" oninput="this.value = this.value.toUpperCase()">
+        </div>
+        <div class="form-group">
+            <label>Default Bin</label>
+            <input type="text" id="item-loc" placeholder="A1-01" oninput="this.value = this.value.toUpperCase()">
+        </div>
+    </div>
+
+    <button class="btn-save" onclick="saveItem()">Register Record</button>
+    <a href="dashboard.html" class="btn-back">Cancel & Exit</a>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function loadCategories() {
+        const { data } = await _supabase.from('inventory_categories').select('*').order('name');
+        const select = document.getElementById('item-category');
+        if (data) {
+            data.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat.name.toUpperCase();
+                opt.dataset.code = cat.code.toUpperCase();
+                opt.textContent = `${cat.name.toUpperCase()} (${cat.code.toUpperCase()})`;
+                select.appendChild(opt);
+            });
+        }
+    }
+
+    function updateSKUPreview() {
+        const select = document.getElementById('item-category');
+        const opt = select.options[select.selectedIndex];
+        if (!opt.value) {
+            document.getElementById('sku-display').innerText = "---";
+            return;
+        }
+        const prefix = opt.dataset.code;
+        const year = new Date().getFullYear().toString().slice(-2);
+        const random = Math.floor(1000 + Math.random() * 9000);
+        document.getElementById('sku-display').innerText = `${prefix}-${year}-${random}`;
+    }
+
+    async function saveItem() {
+        const name = document.getElementById('item-name').value.trim();
+        const cat = document.getElementById('item-category').value;
+        const uom = document.getElementById('item-uom').value.trim();
+        const loc = document.getElementById('item-loc').value.trim();
+        const sku = document.getElementById('sku-display').innerText;
+
+        if (!name || !cat || sku === "---") return alert("FILL IN DESCRIPTION AND CATEGORY.");
+
+        const btn = document.querySelector('.btn-save');
+        btn.disabled = true;
+        btn.innerText = "SAVING...";
+
+        try {
+            const { error } = await _supabase.from('inventory').insert([{
+                item_name: name, category: cat, sku: sku, uom: uom, location: loc, quantity: 0
+            }]);
+            if (error) throw error;
+
+            await _supabase.from('activity_logs').insert([{
+                type: 'SYSTEM', reference_id: 'CREATE', item_name: name, details: `REGISTERED MASTER SKU: ${sku}`
+            }]);
+
+            alert("ITEM SUCCESSFULLY ADDED TO MASTER LIST.");
+            window.location.href = 'dashboard.html';
+        } catch (err) {
+            alert(err.message.toUpperCase());
+            btn.disabled = false;
+            btn.innerText = "REGISTER RECORD";
+        }
+    }
+
+    loadCategories();
+</script>
+
+</body>
+</html>
