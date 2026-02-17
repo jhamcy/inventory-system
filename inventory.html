@@ -12,88 +12,113 @@
             --primary: #0f172a; 
             --accent: #0081ff;  
             --grid-border: #64748b; 
-            --row-height: 48px; 
+        }
+
+        /* 1. FORCE THE BODY TO BE EXACTLY THE SCREEN HEIGHT */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent double scrollbars */
         }
 
         body {
-            margin: 0; font-family: 'Inter', sans-serif;
+            font-family: 'Inter', sans-serif;
             background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
-            height: 100vh; display: flex; flex-direction: column; 
-            overflow: hidden;
+            display: flex;
+            flex-direction: column; 
         }
 
         .navbar { 
             height: 60px; background: var(--primary); 
             display: flex; align-items: center; justify-content: space-between; 
-            padding: 0 20px; flex-shrink: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            padding: 0 20px; flex-shrink: 0; z-index: 1000;
         }
         
         .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
 
-        .main-content { flex: 1; display: flex; flex-direction: column; padding: 10px; overflow: hidden; }
+        /* 2. THE MAIN CONTENT AREA MUST BE FLEX AND CALCULATED */
+        .main-content { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 10px; 
+            overflow: hidden; /* Crucial: stops children from pushing footer out */
+            height: calc(100vh - 60px); 
+        }
 
-        /* --- TOGGLE BAR --- */
-        .action-bar-container { margin-bottom: 12px; display: flex; justify-content: center; width: 100%; }
+        .action-bar-container { margin-bottom: 12px; flex-shrink: 0; }
+
         .toggle-group {
-            display: flex; width: 100%; max-width: 900px; border-radius: 12px; overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2); border: 2px solid var(--primary); background: var(--primary); 
+            display: flex; width: 100%; max-width: 900px; margin: 0 auto;
+            border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); 
+            background: var(--primary); 
         }
-        .btn-toggle {
-            flex: 1; padding: 12px 2px; border: none; border-right: 1px solid rgba(255,255,255,0.15);
-            cursor: pointer; color: rgba(255,255,255,0.8); background: var(--primary); font-size: 0.7rem; 
-            font-weight: 700; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .btn-toggle:hover { background: #1e293b; color: white; }
-        .btn-toggle:last-child { border-right: none; }
 
-        /* --- FULL GRID TABLE --- */
+        .btn-toggle {
+            flex: 1; padding: 10px 2px; border: none; border-right: 1px solid rgba(255,255,255,0.15);
+            cursor: pointer; color: rgba(255,255,255,0.8); background: var(--primary); 
+            font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* 3. THE SCROLL AREA MUST BE FLEX-GROW */
         .table-scroll-area { 
-            flex: 1; overflow: auto; background: white; border-radius: 12px 12px 0 0;
-            position: relative; border: 2px solid var(--primary); 
+            flex: 1; /* This takes up all available space between bar and footer */
+            overflow: auto; 
+            background: white; 
+            border: 2px solid var(--primary);
+            border-radius: 12px 12px 0 0;
         }
 
         table { 
-            border-collapse: collapse; 
-            width: 100%; min-width: 900px; 
-            table-layout: fixed; /* FORCES COLUMNS TO RESPECT WIDTHS */
+            border-collapse: collapse; width: 100%; min-width: 900px; 
+            table-layout: fixed; 
         }
         
         thead th { 
             position: sticky; top: 0; z-index: 20; 
             background: #cbd5e1; height: 45px; 
-            font-size: 0.7rem; font-weight: 800; text-transform: uppercase; 
-            color: var(--primary); border: 1px solid var(--grid-border);
-            border-bottom: 2px solid var(--primary);
+            font-size: 0.7rem; font-weight: 800; border: 1px solid var(--grid-border);
         }
 
-        /* NARROW STICKY COLUMN FIX */
         .sticky-col { 
             position: sticky; left: 0; z-index: 30; 
-            background: #f1f5f9 !important; 
-            width: 45px !important; /* FIXED NARROW WIDTH */
-            min-width: 45px !important;
+            background: #f1f5f9 !important; width: 45px !important;
             border-right: 2px solid var(--primary) !important;
-            text-align: center;
         }
 
         tbody td { 
-            height: var(--row-height); padding: 0 10px;
-            border: 1px solid var(--grid-border);
-            font-size: 0.85rem; text-align: center;
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            height: 48px; padding: 0 8px; border: 1px solid var(--grid-border);
+            font-size: 0.85rem; text-align: center; white-space: nowrap; overflow: hidden;
         }
 
-        tbody tr:nth-child(even) { background-color: #f8fafc; }
-
+        /* 4. THE FOOTER MUST BE FLEX-SHRINK: 0 */
         .pagination-footer { 
-            background: white; padding: 12px 15px; display: flex; justify-content: space-between; 
-            align-items: center; border-radius: 0 0 12px 12px; flex-shrink: 0;
-            border: 2px solid var(--primary); border-top: none;
+            height: 60px; /* Fixed height ensures visibility */
+            background: white; 
+            padding: 0 15px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border: 2px solid var(--primary); 
+            border-top: none;
+            border-radius: 0 0 12px 12px; 
+            flex-shrink: 0; /* Prevents the footer from being "squashed" */
         }
 
-        .nav-btns { width: 80px; background: var(--primary); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        .nav-btns { 
+            width: 80px; height: 38px; background: var(--primary); color: white; 
+            border: none; border-radius: 8px; font-weight: 700; cursor: pointer;
+        }
+        .nav-btns:disabled { background: #94a3b8; cursor: not-allowed; }
+
         .qty-badge { padding: 4px 8px; border-radius: 6px; font-weight: 800; background: #10b981; color: white; }
         .qty-low { background: #ef4444; }
+
+        @media (max-width: 600px) {
+            .btn-toggle span:last-child { font-size: 0.55rem; }
+        }
     </style>
 </head>
 <body>
@@ -106,11 +131,11 @@
     <div class="main-content">
         <div class="action-bar-container">
             <div class="toggle-group">
-                <button id="admin-home-btn" class="btn-toggle" style="display:none;" onclick="location.href='dashboard.html'"><span>🏠</span><span>Dashboard</span></button>
+                <button id="admin-home-btn" class="btn-toggle" style="display:none;" onclick="location.href='dashboard.html'"><span>🏠</span><span>Dash</span></button>
                 <button class="btn-toggle" onclick="location.href='receiving.html'"><span>🚚</span><span>Receiving</span></button>
                 <button class="btn-toggle" onclick="location.href='orders.html'"><span>📝</span><span>Ordering</span></button>
                 <button class="btn-toggle" onclick="location.href='transfer.html'"><span>🔄</span><span>Transfer</span></button>
-                <button class="btn-toggle" onclick="location.href='logs.html'"><span>📜</span><span>History Log</span></button>
+                <button class="btn-toggle" onclick="location.href='logs.html'"><span>📜</span><span>History</span></button>
             </div>
         </div>
 
@@ -119,12 +144,12 @@
                 <thead>
                     <tr>
                         <th class="sticky-col">#</th>
-                        <th style="width:90px;">Loc</th>
+                        <th style="width:80px;">Loc</th>
                         <th style="width:250px;">Item Description</th>
                         <th style="width:120px;">Category</th>
                         <th style="width:120px;">Brand</th>
-                        <th style="width:80px;">Stock</th>
-                        <th style="width:80px;">Uom</th>
+                        <th style="width:70px;">Stock</th>
+                        <th style="width:70px;">Uom</th>
                     </tr>
                 </thead>
                 <tbody id="inventory-body"></tbody>
@@ -186,7 +211,7 @@
             });
             tbody.innerHTML = html;
             const totalPages = Math.ceil(total / ROWS_PER_PAGE) || 1;
-            document.getElementById('page-info').innerText = `Page ${currentPage} of ${totalPages} (${total} SKUs)`;
+            document.getElementById('page-info').innerText = `Page ${currentPage}/${totalPages} (${total} SKUs)`;
             document.getElementById('prevBtn').disabled = currentPage === 1;
             document.getElementById('nextBtn').disabled = currentPage === totalPages;
         }
