@@ -14,19 +14,12 @@
             --grid-border: #64748b; 
         }
 
-        /* 1. FORCE THE BODY TO BE EXACTLY THE SCREEN HEIGHT */
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden; /* Prevent double scrollbars */
-        }
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
 
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
-            display: flex;
-            flex-direction: column; 
+            display: flex; flex-direction: column; 
         }
 
         .navbar { 
@@ -37,16 +30,12 @@
         
         .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
 
-        /* 2. THE MAIN CONTENT AREA MUST BE FLEX AND CALCULATED */
         .main-content { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            padding: 10px; 
-            overflow: hidden; /* Crucial: stops children from pushing footer out */
-            height: calc(100vh - 60px); 
+            flex: 1; display: flex; flex-direction: column; 
+            padding: 10px; overflow: hidden; height: calc(100vh - 60px); 
         }
 
+        /* TOGGLE BUTTONS AT THE TOP */
         .action-bar-container { margin-bottom: 12px; flex-shrink: 0; }
 
         .toggle-group {
@@ -56,25 +45,30 @@
         }
 
         .btn-toggle {
-            flex: 1; padding: 10px 2px; border: none; border-right: 1px solid rgba(255,255,255,0.15);
+            flex: 1; padding: 12px 2px; border: none; border-right: 1px solid rgba(255,255,255,0.15);
             cursor: pointer; color: rgba(255,255,255,0.8); background: var(--primary); 
-            font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
             display: flex; flex-direction: column; align-items: center;
         }
+        .btn-toggle:hover { background: #1e293b; }
 
-        /* 3. THE SCROLL AREA MUST BE FLEX-GROW */
+        /* SEARCH BOX MOVED NEAR TABLE */
+        .search-container {
+            margin-bottom: 8px; width: 100%; max-width: 900px; margin-left: auto; margin-right: auto;
+            position: relative; flex-shrink: 0;
+        }
+        .search-input {
+            width: 100%; padding: 10px 40px; border-radius: 10px; border: 2px solid var(--primary);
+            font-size: 0.9rem; font-weight: 600; box-sizing: border-box; outline: none;
+        }
+        .search-icon { position: absolute; left: 15px; top: 10px; color: var(--primary); font-size: 1rem; }
+
         .table-scroll-area { 
-            flex: 1; /* This takes up all available space between bar and footer */
-            overflow: auto; 
-            background: white; 
-            border: 2px solid var(--primary);
-            border-radius: 12px 12px 0 0;
+            flex: 1; overflow: auto; background: white; 
+            border: 2px solid var(--primary); border-radius: 12px 12px 0 0;
         }
 
-        table { 
-            border-collapse: collapse; width: 100%; min-width: 900px; 
-            table-layout: fixed; 
-        }
+        table { border-collapse: collapse; width: 100%; min-width: 1000px; table-layout: fixed; }
         
         thead th { 
             position: sticky; top: 0; z-index: 20; 
@@ -93,18 +87,13 @@
             font-size: 0.85rem; text-align: center; white-space: nowrap; overflow: hidden;
         }
 
-        /* 4. THE FOOTER MUST BE FLEX-SHRINK: 0 */
+        .sku-text { font-family: monospace; font-weight: 700; color: #475569; font-size: 0.75rem; }
+
         .pagination-footer { 
-            height: 60px; /* Fixed height ensures visibility */
-            background: white; 
-            padding: 0 15px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            border: 2px solid var(--primary); 
-            border-top: none;
-            border-radius: 0 0 12px 12px; 
-            flex-shrink: 0; /* Prevents the footer from being "squashed" */
+            height: 60px; background: white; padding: 0 15px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            border: 2px solid var(--primary); border-top: none;
+            border-radius: 0 0 12px 12px; flex-shrink: 0; 
         }
 
         .nav-btns { 
@@ -118,6 +107,7 @@
 
         @media (max-width: 600px) {
             .btn-toggle span:last-child { font-size: 0.55rem; }
+            .btn-toggle { padding: 8px 1px; }
         }
     </style>
 </head>
@@ -139,12 +129,18 @@
             </div>
         </div>
 
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" class="search-input" placeholder="Quick Search (Code, Item, Location...)" oninput="handleSearch()">
+        </div>
+
         <div class="table-scroll-area">
             <table>
                 <thead>
                     <tr>
                         <th class="sticky-col">#</th>
                         <th style="width:80px;">Loc</th>
+                        <th style="width:140px;">Item Code</th>
                         <th style="width:250px;">Item Description</th>
                         <th style="width:120px;">Category</th>
                         <th style="width:120px;">Brand</th>
@@ -172,6 +168,7 @@
         
         let currentPage = 1;
         const ROWS_PER_PAGE = 25; 
+        let currentSearchQuery = "";
 
         async function applyPermissions() {
             const { data: { session } } = await _supabase.auth.getSession();
@@ -186,34 +183,55 @@
         }
 
         async function fetchInventory() {
-            const { count } = await _supabase.from('inventory').select('*', { count: 'exact', head: true });
+            let query = _supabase.from('inventory').select('*', { count: 'exact' });
+
+            if (currentSearchQuery) {
+                query = query.or(`item_name.ilike.%${currentSearchQuery}%,sku.ilike.%${currentSearchQuery}%,location.ilike.%${currentSearchQuery}%,brand.ilike.%${currentSearchQuery}%`);
+            }
+
             const from = (currentPage - 1) * ROWS_PER_PAGE;
             const to = from + ROWS_PER_PAGE - 1;
-            const { data } = await _supabase.from('inventory').select('*').order('location').range(from, to);
-            renderTable(data || [], count || 0);
+            
+            const { data, count, error } = await query.order('location').range(from, to);
+            
+            if (!error) {
+                renderTable(data || [], count || 0);
+            }
+        }
+
+        function handleSearch() {
+            currentSearchQuery = document.getElementById('searchInput').value.trim();
+            currentPage = 1; 
+            fetchInventory();
         }
 
         function renderTable(data, total) {
             const tbody = document.getElementById('inventory-body');
             let html = '';
             const startNum = ((currentPage - 1) * ROWS_PER_PAGE) + 1;
-            data.forEach((item, index) => {
-                const qtyClass = (item.quantity || 0) < 5 ? 'qty-low' : '';
-                html += `<tr>
-                    <td class="sticky-col">${startNum + index}</td>
-                    <td style="color:var(--accent); font-weight:800;">${item.location || '-'}</td>
-                    <td style="text-align:left; font-weight:600;">${item.item_name || '-'}</td>
-                    <td>${item.type || '-'}</td>
-                    <td>${item.brand || '-'}</td>
-                    <td><span class="qty-badge ${qtyClass}">${item.quantity || 0}</span></td>
-                    <td>${item.uom || '-'}</td>
-                </tr>`;
-            });
+            
+            if (data.length === 0) {
+                html = `<tr><td colspan="8" style="padding:20px; color:#64748b;">No items found.</td></tr>`;
+            } else {
+                data.forEach((item, index) => {
+                    const qtyClass = (item.quantity || 0) < 5 ? 'qty-low' : '';
+                    html += `<tr>
+                        <td class="sticky-col">${startNum + index}</td>
+                        <td style="color:var(--accent); font-weight:800;">${item.location || '-'}</td>
+                        <td class="sku-text">${item.sku || 'PENDING'}</td>
+                        <td style="text-align:left; font-weight:600;">${item.item_name || '-'}</td>
+                        <td>${item.category || '-'}</td>
+                        <td>${item.brand || '-'}</td>
+                        <td><span class="qty-badge ${qtyClass}">${item.quantity || 0}</span></td>
+                        <td>${item.uom || '-'}</td>
+                    </tr>`;
+                });
+            }
             tbody.innerHTML = html;
             const totalPages = Math.ceil(total / ROWS_PER_PAGE) || 1;
             document.getElementById('page-info').innerText = `Page ${currentPage}/${totalPages} (${total} SKUs)`;
             document.getElementById('prevBtn').disabled = currentPage === 1;
-            document.getElementById('nextBtn').disabled = currentPage === totalPages;
+            document.getElementById('nextBtn').disabled = currentPage === totalPages || data.length === 0;
         }
 
         function changePage(p) { 

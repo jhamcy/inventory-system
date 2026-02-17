@@ -2,144 +2,134 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Receiving | Inventory Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Batch Receiving | EasiStock</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
         :root {
             --primary: #0f172a;
-            --accent: #10b981;
+            --accent: #0081ff;
+            --success: #10b981;
+            --danger: #ef4444;
             --border-main: #94a3b8;
         }
 
         body {
             margin: 0; font-family: 'Inter', sans-serif;
-            background: url('images.jpeg') no-repeat center center fixed;
-            background-size: cover;
-            min-height: 100vh; display: flex; flex-direction: column;
+            background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        body::before {
-            content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(241, 245, 249, 0.88); z-index: -1;
-        }
-
-        .navbar { 
-            height: 64px; background: var(--primary); color: white;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            position: sticky; top: 0; z-index: 1000;
-        }
-
-        .back-btn { 
-            background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.3); 
-            color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer;
-            font-size: 0.85rem; font-weight: 600;
-        }
-
-        .container { padding: 40px 20px; max-width: 600px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-
-        .form-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
-            border: 2px solid var(--primary); overflow: hidden;
-        }
-
-        .card-header { padding: 30px; background: rgba(236, 253, 245, 0.8); border-bottom: 2px solid var(--primary); }
-        .card-header h2 { margin: 0; font-size: 1.5rem; color: var(--primary); }
-
-        .card-body { padding: 30px; }
-
-        .form-group { margin-bottom: 24px; }
-        label { display: block; margin-bottom: 8px; font-weight: 800; color: var(--primary); font-size: 0.85rem; text-transform: uppercase; }
-
-        input {
-            width: 100%; padding: 14px 16px; border: 2px solid var(--border-main);
-            border-radius: 8px; font-size: 1rem; box-sizing: border-box;
-            font-weight: 500; background: white;
-        }
-        input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
-        input:read-only { background: #f1f5f9; color: #64748b; cursor: default; }
-
-        .details-panel {
-            background: rgba(16, 185, 129, 0.05); border: 2px dashed var(--accent);
-            border-radius: 8px; padding: 20px; margin-bottom: 24px;
-            display: none;
-        }
-
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .info-label { font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; }
-        .info-val { font-size: 1rem; font-weight: 700; color: var(--primary); }
-
-        .action-area { padding: 0 30px 30px; }
+        .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 1000; }
+        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
         
-        .submit-btn {
-            width: 100%; background: var(--accent); color: white; padding: 16px;
-            border: none; border-radius: 8px; font-weight: 800; font-size: 1rem;
-            cursor: pointer; transition: 0.2s; text-transform: uppercase;
-        }
-        .submit-btn:hover { background: #059669; transform: translateY(-2px); }
-        .submit-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+        .toggle-container { padding: 10px; display: flex; justify-content: center; flex-shrink: 0; }
+        .toggle-group { display: flex; width: 100%; max-width: 900px; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); }
+        .btn-toggle { flex: 1; padding: 12px 2px; border: none; border-right: 1px solid rgba(255,255,255,0.15); cursor: pointer; color: rgba(255,255,255,0.7); background: var(--primary); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; }
+        .btn-toggle.active { background: var(--accent) !important; color: white !important; }
+
+        .container { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+        
+        .form-card { background: white; border-radius: 12px; width: 100%; max-width: 600px; border: 2px solid var(--primary); overflow: hidden; margin-bottom: 20px; }
+        .card-header { padding: 12px; background: #f8fafc; border-bottom: 2px solid var(--primary); text-align: center; }
+        .card-header h2 { margin: 0; font-size: 1rem; color: var(--primary); text-transform: uppercase; font-weight: 800; }
+        
+        .card-body { padding: 15px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .form-group { margin-bottom: 10px; }
+        label { display: block; margin-bottom: 4px; font-weight: 800; color: var(--primary); font-size: 0.65rem; text-transform: uppercase; }
+        
+        input { width: 100%; padding: 10px; border: 2px solid var(--border-main); border-radius: 8px; font-size: 0.9rem; box-sizing: border-box; font-weight: 600; }
+        input:read-only { background: #f1f5f9; color: #64748b; }
+
+        .input-with-action { display: flex; gap: 8px; }
+        .scan-btn { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 0 12px; cursor: pointer; }
+
+        .add-btn { width: 100%; background: var(--primary); color: white; padding: 12px; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; margin-top: 5px; }
+        .submit-btn { width: 100%; background: var(--success); color: white; padding: 16px; border: none; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; text-transform: uppercase; margin-top: 15px; box-shadow: 0 4px 0 #065f46; }
+        
+        .batch-list { margin-top: 15px; border-top: 2px solid var(--primary); padding-top: 15px; }
+        .batch-item { background: #fff; border: 1.5px solid var(--primary); padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .batch-item-info { font-size: 0.85rem; font-weight: 700; color: var(--primary); }
+        .remove-btn { background: #fee2e2; color: var(--danger); border: 1.5px solid var(--danger); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 900; }
+
+        #toast { visibility: hidden; min-width: 250px; background-color: var(--danger); color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 2000; bottom: 30px; font-weight: 800; }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        #reader { width: 100%; border-radius: 8px; display: none; margin-bottom: 10px; border: 2px solid var(--primary); }
     </style>
 </head>
 <body>
 
     <header class="navbar">
-        <button class="back-btn" onclick="location.href='inventory.html'">← BACK TO LIST</button>
-        <div style="font-weight: 800;">INBOUND RECEIVING</div>
+        <div class="nav-logo-text">EasiStock</div>
+        <button style="background:none; border:none; color:#ef4444; font-weight:800; cursor:pointer;" onclick="location.href='index.html'">LOGOUT ⏻</button>
     </header>
 
+    <div class="toggle-container">
+        <div class="toggle-group">
+            <button class="btn-toggle" onclick="location.href='inventory.html'"><span>📋</span><span>Inv</span></button>
+            <button class="btn-toggle active" onclick="location.href='receiving.html'"><span>🚚</span><span>Receive</span></button>
+            <button class="btn-toggle" onclick="location.href='orders.html'"><span>📝</span><span>Order</span></button>
+            <button class="btn-toggle" onclick="location.href='transfer.html'"><span>🔄</span><span>Trans</span></button>
+            <button class="btn-toggle" onclick="location.href='logs.html'"><span>📜</span><span>Logs</span></button>
+        </div>
+    </div>
+
+    <div id="toast">⚠️ PLEASE ENTER SUPPLIER DR#</div>
+
     <main class="container">
+        <div id="reader"></div>
+
         <div class="form-card">
-            <div class="card-header">
-                <h2>Receive New Stock</h2>
-                <p style="margin: 5px 0 0; color: #64748b; font-weight: 500;">Add incoming inventory with automatic tracking.</p>
-            </div>
-            
+            <div class="card-header"><h2>Batch Receiving</h2></div>
             <div class="card-body">
-                <div class="form-group">
-                    <label>Delivery Reference ID</label>
-                    <input type="text" id="delivery-ref" readonly>
-                </div>
-
-                <div class="form-group">
-                    <label>Receiving Date</label>
-                    <input type="date" id="receive-date" readonly>
-                </div>
-
-                <div class="form-group">
-                    <label>Search Item to Restock</label>
-                    <input list="items-list" id="item-search" placeholder="Search item name..." onchange="handleSelection()">
-                    <datalist id="items-list"></datalist>
-                </div>
-
-                <div id="details-box" class="details-panel">
-                    <div class="info-grid">
-                        <div>
-                            <div class="info-label">Current On Hand</div>
-                            <div class="info-val"><span id="view-qty">0</span> <span id="view-uom"></span></div>
-                        </div>
-                        <div>
-                            <div class="info-label">Storage Location</div>
-                            <div class="info-val" id="view-loc">-</div>
-                        </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Internal Ref</label>
+                        <input type="text" id="delivery-ref" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="receive-date">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Quantity to Add</label>
-                    <input type="number" id="add-qty" placeholder="Enter received amount" min="1" disabled oninput="validateForm()">
+                    <label>Supplier DR #</label>
+                    <div class="input-with-action">
+                        <input type="text" id="dr-number" placeholder="Enter or Scan DR#">
+                        <button class="scan-btn" onclick="toggleScanner()">📷</button>
+                    </div>
                 </div>
-            </div>
 
-            <div class="action-area">
-                <button id="save-btn" class="submit-btn" onclick="processReceiving()" disabled>
-                    Update Inventory
-                </button>
+                <div style="background: #f1f5f9; padding: 12px; border-radius: 8px; border: 1.5px dashed var(--primary);">
+                    <div class="form-group">
+                        <label>Search Existing Item</label>
+                        <input list="items-list" id="item-search" placeholder="Search name or SKU..." onchange="handleSelection()">
+                        <datalist id="items-list"></datalist>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" id="receive-loc" placeholder="Bin Location">
+                        </div>
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input type="number" id="add-qty" placeholder="0" min="1">
+                        </div>
+                    </div>
+                    <button class="add-btn" onclick="addToBatch()">+ ADD TO LIST</button>
+                </div>
+
+                <div class="batch-list" id="batch-container">
+                    <p style="text-align:center; font-size:0.75rem; color:#64748b;">List is empty.</p>
+                </div>
+
+                <button id="save-btn" class="submit-btn" onclick="processBatch()">Submit All Items</button>
             </div>
         </div>
     </main>
@@ -151,82 +141,108 @@
 
         let masterInventory = [];
         let selectedItem = null;
+        let batchItems = [];
+        let html5QrCode = null;
 
         function initForm() {
             const now = new Date();
-            document.getElementById('receive-date').valueAsDate = now;
             const dateStr = now.toISOString().slice(0,10).replace(/-/g, "");
-            const rand = Math.floor(1000 + Math.random() * 9000);
-            document.getElementById('delivery-ref').value = `DEL-${dateStr}-${rand}`;
+            document.getElementById('delivery-ref').value = `RCV-${dateStr}-${Math.floor(1000 + Math.random() * 9000)}`;
+            document.getElementById('receive-date').valueAsDate = now;
         }
 
         async function loadInventory() {
             const { data } = await _supabase.from('inventory').select('*').order('item_name');
             masterInventory = data || [];
             const list = document.getElementById('items-list');
-            masterInventory.forEach(item => {
-                const opt = document.createElement('option');
-                opt.value = `${item.item_name} — [${item.location}]`;
-                list.appendChild(opt);
-            });
+            list.innerHTML = masterInventory.map(i => `<option value="${i.item_name} [${i.sku || 'No SKU'}]">`).join('');
         }
 
         function handleSelection() {
             const searchVal = document.getElementById('item-search').value;
-            selectedItem = masterInventory.find(i => `${i.item_name} — [${i.location}]` === searchVal);
-            
-            if (selectedItem) {
-                document.getElementById('view-qty').textContent = selectedItem.quantity || 0;
-                document.getElementById('view-loc').textContent = selectedItem.location;
-                document.getElementById('view-uom').textContent = selectedItem.uom || '';
-                document.getElementById('details-box').style.display = 'block';
-                document.getElementById('add-qty').disabled = false;
-            } else {
-                document.getElementById('details-box').style.display = 'none';
-                document.getElementById('add-qty').disabled = true;
+            selectedItem = masterInventory.find(i => `${i.item_name} [${i.sku || 'No SKU'}]` === searchVal);
+            if(selectedItem) document.getElementById('receive-loc').value = selectedItem.location || "";
+        }
+
+        function addToBatch() {
+            const qty = parseInt(document.getElementById('add-qty').value);
+            const loc = document.getElementById('receive-loc').value.trim();
+            if (!selectedItem || !qty || qty < 1 || !loc) {
+                alert("Select an item, quantity, and location.");
+                return;
             }
-            validateForm();
+            batchItems.push({ ...selectedItem, receiveQty: qty, finalLoc: loc });
+            renderBatch();
+            document.getElementById('item-search').value = "";
+            document.getElementById('add-qty').value = "";
+            selectedItem = null;
         }
 
-        function validateForm() {
-            const qty = parseInt(document.getElementById('add-qty').value) || 0;
-            const saveBtn = document.getElementById('save-btn');
-            saveBtn.disabled = !(selectedItem && qty > 0);
+        function renderBatch() {
+            const container = document.getElementById('batch-container');
+            if (batchItems.length === 0) {
+                container.innerHTML = '<p style="text-align:center; font-size:0.75rem; color:#64748b;">List is empty.</p>';
+                return;
+            }
+            let html = `<div class="batch-header"><label>Batch Items</label></div>`;
+            batchItems.forEach((item, index) => {
+                html += `
+                    <div class="batch-item">
+                        <div class="batch-item-info">${item.item_name}<br><small style="color:var(--accent)">Adding +${item.receiveQty} to ${item.finalLoc}</small></div>
+                        <button class="remove-btn" onclick="batchItems.splice(${index},1);renderBatch();">✕</button>
+                    </div>`;
+            });
+            container.innerHTML = html;
         }
 
-        async function processReceiving() {
-            const addVal = parseInt(document.getElementById('add-qty').value);
-            const ref = document.getElementById('delivery-ref').value;
+        async function processBatch() {
+            const drNum = document.getElementById('dr-number').value.trim();
+            if (!drNum) return showToast();
+            if (batchItems.length === 0) return alert("List is empty.");
+
             const saveBtn = document.getElementById('save-btn');
-            
             saveBtn.disabled = true;
             saveBtn.textContent = "Processing...";
 
             try {
-                // 1. UPDATE INVENTORY TABLE
-                const { data: latest } = await _supabase.from('inventory').select('quantity').eq('id', selectedItem.id).single();
-                const newTotal = (latest.quantity || 0) + addVal;
-                const { error: invError } = await _supabase.from('inventory').update({ quantity: newTotal }).eq('id', selectedItem.id);
-                if (invError) throw invError;
-
-                // 2. INSERT INTO ACTIVITY_LOGS TABLE
-                const { error: logError } = await _supabase.from('activity_logs').insert([{
-                    type: 'RECEIVING',
-                    reference_id: ref,
-                    item_name: selectedItem.item_name,
-                    quantity: addVal,
-                    details: `Stock Replenishment at ${selectedItem.location}`
-                }]);
-                if (logError) throw logError;
-
-                alert(`Stock replenished.\nRef: ${ref}`);
+                for (const item of batchItems) {
+                    const { data: cur } = await _supabase.from('inventory').select('quantity').eq('id', item.id).single();
+                    await _supabase.from('inventory').update({ quantity: (cur.quantity || 0) + item.receiveQty, location: item.finalLoc }).eq('id', item.id);
+                    await _supabase.from('activity_logs').insert([{
+                        type: 'RECEIVING',
+                        reference_id: document.getElementById('delivery-ref').value,
+                        item_name: item.item_name,
+                        quantity: item.receiveQty,
+                        details: `DR# ${drNum} | Loc: ${item.finalLoc}`
+                    }]);
+                }
+                alert("Stock Level Updated Successfully!");
                 location.reload();
             } catch (err) {
                 alert("Error: " + err.message);
                 saveBtn.disabled = false;
-                saveBtn.textContent = "Update Inventory";
             }
         }
+
+        function showToast() {
+            const x = document.getElementById("toast");
+            x.className = "show";
+            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+        }
+
+        function toggleScanner() {
+            const readerDiv = document.getElementById('reader');
+            if (readerDiv.style.display === 'block') { stopScanner(); } 
+            else { readerDiv.style.display = 'block'; startScanner(); }
+        }
+        function startScanner() {
+            html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (decodedText) => {
+                document.getElementById('dr-number').value = decodedText;
+                stopScanner();
+            });
+        }
+        function stopScanner() { if (html5QrCode) html5QrCode.stop().then(() => document.getElementById('reader').style.display = 'none'); }
 
         initForm();
         loadInventory();

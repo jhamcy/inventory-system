@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Manager | EasiStock</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        :root { --primary: #0f172a; --accent: #0081ff; --success: #10b981; --danger: #ef4444; }
+        
+        body { 
+            margin: 0; font-family: 'Inter', sans-serif; 
+            background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
+            height: 100vh; display: flex; flex-direction: column;
+        }
+
+        .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; padding: 0 20px; color: white; font-weight: 800; justify-content: space-between; }
+        
+        .container { padding: 20px; max-width: 600px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+
+        .card { background: white; border-radius: 12px; border: 2px solid var(--primary); overflow: hidden; margin-bottom: 20px; }
+        .card-header { padding: 15px; background: #f8fafc; border-bottom: 2px solid var(--primary); font-weight: 800; text-transform: uppercase; color: var(--primary); }
+        .card-body { padding: 15px; }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.7rem; font-weight: 800; margin-bottom: 5px; color: var(--primary); }
+        input { width: 100%; padding: 12px; border: 2px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-weight: 600; }
+        
+        .btn-save { width: 100%; background: var(--success); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
+
+        .cat-list { background: white; border-radius: 12px; border: 2px solid var(--primary); }
+        .cat-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #e2e8f0; }
+        .cat-item:last-child { border-bottom: none; }
+        .cat-info { display: flex; flex-direction: column; }
+        .cat-name { font-weight: 700; color: var(--primary); }
+        .cat-code { font-family: monospace; font-weight: 800; color: var(--accent); font-size: 1.1rem; }
+        
+        .btn-del { background: #fee2e2; color: var(--danger); border: 1px solid var(--danger); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-weight: 800; }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div>EASISTOCK - CATEGORY SETUP</div>
+        <button onclick="location.href='inventory.html'" style="background:none; border:none; color:white; font-weight:800; cursor:pointer;">CLOSE ✕</button>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">Add New SKU Prefix</div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label>Category Name (e.g., Bearing)</label>
+                    <input type="text" id="cat-name" placeholder="Enter Full Name">
+                </div>
+                <div class="form-group">
+                    <label>3-Letter Code (e.g., BRG)</label>
+                    <input type="text" id="cat-code" maxlength="3" placeholder="MAX 3 LETTERS" style="text-transform: uppercase;">
+                </div>
+                <button class="btn-save" onclick="saveCategory()">Register Prefix</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Active SKU List</div>
+            <div id="category-list">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function loadCategories() {
+            const { data } = await _supabase.from('inventory_categories').select('*').order('name');
+            const list = document.getElementById('category-list');
+            
+            if (data.length === 0) {
+                list.innerHTML = '<div style="padding:20px; text-align:center; color:#64748b;">No categories defined.</div>';
+                return;
+            }
+
+            list.innerHTML = data.map(cat => `
+                <div class="cat-item">
+                    <div class="cat-info">
+                        <span class="cat-name">${cat.name}</span>
+                        <span class="cat-code">${cat.code}</span>
+                    </div>
+                    <button class="btn-del" onclick="deleteCategory(${cat.id})">DELETE</button>
+                </div>
+            `).join('');
+        }
+
+        async function saveCategory() {
+            const name = document.getElementById('cat-name').value.trim();
+            const code = document.getElementById('cat-code').value.trim().toUpperCase();
+
+            if (!name || code.length !== 3) {
+                alert("Please enter a name and a 3-letter code.");
+                return;
+            }
+
+            const { error } = await _supabase.from('inventory_categories').insert([{ name, code }]);
+            
+            if (error) {
+                alert("Error: " + error.message);
+            } else {
+                document.getElementById('cat-name').value = '';
+                document.getElementById('cat-code').value = '';
+                loadCategories();
+            }
+        }
+
+        async function deleteCategory(id) {
+            if (!confirm("Remove this category prefix?")) return;
+            await _supabase.from('inventory_categories').delete().eq('id', id);
+            loadCategories();
+        }
+
+        loadCategories();
+    </script>
+</body>
+</html>

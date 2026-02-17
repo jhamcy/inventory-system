@@ -2,152 +2,114 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Internal Transfer | Inventory Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Stock Transfer | EasiStock</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
         :root {
             --primary: #0f172a;
             --accent: #0081ff;
-            --warning: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
             --border-main: #94a3b8;
         }
 
         body {
             margin: 0; font-family: 'Inter', sans-serif;
-            background: url('images.jpeg') no-repeat center center fixed;
-            background-size: cover;
-            min-height: 100vh; display: flex; flex-direction: column;
+            background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        body::before {
-            content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(241, 245, 249, 0.88); z-index: -1;
-        }
+        .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 1000; }
+        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
+        
+        .toggle-container { padding: 10px; display: flex; justify-content: center; flex-shrink: 0; }
+        .toggle-group { display: flex; width: 100%; max-width: 900px; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); }
+        .btn-toggle { flex: 1; padding: 12px 2px; border: none; border-right: 1px solid rgba(255,255,255,0.15); cursor: pointer; color: rgba(255,255,255,0.7); background: var(--primary); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; }
+        .btn-toggle.active { background: var(--accent) !important; color: white !important; }
 
-        .navbar { 
-            height: 64px; background: var(--primary); color: white;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            position: sticky; top: 0; z-index: 1000;
-        }
+        .container { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+        
+        .form-card { background: white; border-radius: 12px; width: 100%; max-width: 600px; border: 2px solid var(--primary); overflow: hidden; margin-bottom: 20px; }
+        .card-header { padding: 12px; background: #f8fafc; border-bottom: 2px solid var(--primary); text-align: center; }
+        .card-header h2 { margin: 0; font-size: 1rem; color: var(--primary); text-transform: uppercase; font-weight: 800; }
+        
+        .card-body { padding: 15px; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 4px; font-weight: 800; color: var(--primary); font-size: 0.65rem; text-transform: uppercase; }
+        
+        input { width: 100%; padding: 10px; border: 2px solid var(--border-main); border-radius: 8px; font-size: 0.9rem; box-sizing: border-box; font-weight: 600; }
+        input:read-only { background: #f1f5f9; color: #64748b; }
 
-        .back-btn { 
-            background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.3); 
-            color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer;
-            font-size: 0.85rem; font-weight: 600;
-        }
+        .batch-item { background: #fff; border: 1.5px solid var(--primary); padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .batch-item-info { font-size: 0.85rem; font-weight: 700; color: var(--primary); }
+        .remove-btn { background: #fee2e2; color: var(--danger); border: 1.5px solid var(--danger); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 900; }
 
-        .container { padding: 40px 20px; max-width: 600px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-
-        .form-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
-            border: 2px solid var(--primary); overflow: hidden;
-        }
-
-        .card-header { padding: 30px; background: rgba(255, 251, 235, 0.8); border-bottom: 2px solid var(--primary); }
-        .card-header h2 { margin: 0; font-size: 1.5rem; color: var(--primary); }
-
-        .card-body { padding: 30px; }
-
-        .form-group { margin-bottom: 24px; }
-        label { display: block; margin-bottom: 8px; font-weight: 800; color: var(--primary); font-size: 0.85rem; text-transform: uppercase; }
-
-        input {
-            width: 100%; padding: 14px 16px; border: 2px solid var(--border-main);
-            border-radius: 8px; font-size: 1rem; box-sizing: border-box;
-            font-weight: 500; background: white;
-        }
-        input:focus { border-color: var(--accent); outline: none; }
-        input:read-only { background: #f1f5f9; color: #64748b; cursor: default; }
-
-        .details-panel {
-            background: rgba(15, 23, 42, 0.05); border: 2px solid var(--primary);
-            border-radius: 8px; padding: 20px; margin-bottom: 24px;
-            display: none;
-        }
-
-        .loc-display {
-            background: white; padding: 15px; border-radius: 8px;
-            border: 1.5px solid var(--border-main); margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .loc-label { font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 5px; }
-        .loc-val { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
-
-        .submit-btn {
-            width: 100%; background: var(--warning); color: var(--primary); padding: 16px;
-            border: none; border-radius: 8px; font-weight: 800; font-size: 1rem;
-            cursor: pointer; transition: 0.2s; text-transform: uppercase;
-        }
-        .submit-btn:hover { background: #d97706; color: white; }
-        .submit-btn:disabled { background: #cbd5e1; cursor: not-allowed; color: #94a3b8; }
+        .add-btn { width: 100%; background: var(--primary); color: white; padding: 12px; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; margin-top: 5px; }
+        .submit-btn { width: 100%; background: var(--success); color: white; padding: 16px; border: none; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; text-transform: uppercase; margin-top: 15px; box-shadow: 0 4px 0 #065f46; }
+        
+        #toast { visibility: hidden; min-width: 250px; background-color: var(--danger); color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 2000; bottom: 30px; font-weight: 800; left: 50%; transform: translateX(-50%); }
+        #toast.show { visibility: visible; }
     </style>
 </head>
 <body>
 
     <header class="navbar">
-        <button class="back-btn" onclick="location.href='inventory.html'">← BACK TO LIST</button>
-        <div style="font-weight: 800;">INTERNAL STOCK TRANSFER</div>
+        <div class="nav-logo-text">EasiStock</div>
+        <button style="background:none; border:none; color:#ef4444; font-weight:800; cursor:pointer;" onclick="location.href='index.html'">LOGOUT ⏻</button>
     </header>
+
+    <div class="toggle-container">
+        <div class="toggle-group">
+            <button class="btn-toggle" onclick="location.href='inventory.html'">📋 Inv</button>
+            <button class="btn-toggle" onclick="location.href='receiving.html'">🚚 Recv</button>
+            <button class="btn-toggle" onclick="location.href='orders.html'">📝 Order</button>
+            <button class="btn-toggle active" onclick="location.href='transfer.html'">🔄 Trans</button>
+            <button class="btn-toggle" onclick="location.href='logs.html'">📜 Logs</button>
+        </div>
+    </div>
+
+    <div id="toast">⚠️ PLEASE COMPLETE ALL FIELDS</div>
 
     <main class="container">
         <div class="form-card">
-            <div class="card-header">
-                <h2>Transfer Stocks</h2>
-                <p style="margin: 5px 0 0; color: #64748b; font-weight: 500;">Move items vertically between warehouse zones.</p>
-            </div>
-            
+            <div class="card-header"><h2>Stock Location Transfer</h2></div>
             <div class="card-body">
+                
                 <div class="form-group">
-                    <label>Transfer Reference #</label>
-                    <input type="text" id="ref-no" readonly>
+                    <label>Transfer Reference</label>
+                    <input type="text" id="trans-ref" readonly>
                 </div>
 
-                <div class="form-group">
-                    <label>Transfer Date</label>
-                    <input type="date" id="transfer-date" readonly>
-                </div>
-
-                <div class="form-group">
-                    <label>Select Item to Move</label>
-                    <input list="items-list" id="item-search" placeholder="Search item..." onchange="handleSelection()">
-                    <datalist id="items-list"></datalist>
-                </div>
-
-                <div id="details-box" class="details-panel">
-                    <div class="loc-display">
-                        <div class="loc-label">Current Source Location</div>
-                        <div class="loc-val" id="view-loc-from">-</div>
+                <div style="background: #f1f5f9; padding: 12px; border-radius: 8px; border: 1.5px dashed var(--primary);">
+                    <div class="form-group">
+                        <label>Select Item (Current Stock Info)</label>
+                        <input list="items-list" id="item-search" placeholder="Search Item..." onchange="handleSelection()">
+                        <datalist id="items-list"></datalist>
                     </div>
                     
-                    <div style="text-align: center; margin: 10px 0; font-size: 1.5rem;">⬇</div>
-
-                    <div class="form-group" style="margin-bottom: 10px;">
-                        <label>New Destination Location</label>
-                        <input type="text" id="new-location" placeholder="e.g. Shelf B-12" oninput="validateTransfer()">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div class="form-group">
+                            <label>Qty to Move</label>
+                            <input type="number" id="move-qty" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label>New Location</label>
+                            <input type="text" id="new-loc" placeholder="Target Bin/Shelf">
+                        </div>
                     </div>
-
-                    <div style="text-align: center; font-weight: 700; color: var(--accent); margin-top: 15px;">
-                        Available: <span id="view-qty">0</span> <span id="view-uom"></span>
-                    </div>
+                    
+                    <button class="add-btn" onclick="addToBatch()">+ ADD TO BATCH</button>
                 </div>
 
-                <div class="form-group">
-                    <label>Quantity to Transfer</label>
-                    <input type="number" id="transfer-qty" placeholder="0" min="1" disabled oninput="validateTransfer()">
+                <div class="batch-list" id="batch-container">
+                    <p style="text-align:center; font-size:0.75rem; color:#64748b;">Transfer list is empty.</p>
                 </div>
-            </div>
 
-            <div class="action-area" style="padding: 0 30px 30px;">
-                <button id="save-btn" class="submit-btn" onclick="processTransfer()" disabled>
-                    Confirm Transfer
+                <button id="save-btn" class="submit-btn" onclick="processTransfer()">
+                    Confirm Batch Transfer
                 </button>
             </div>
         </div>
@@ -160,89 +122,148 @@
 
         let masterInventory = [];
         let selectedItem = null;
+        let batchItems = [];
 
         function initForm() {
             const now = new Date();
-            document.getElementById('transfer-date').valueAsDate = now;
             const dateStr = now.toISOString().slice(0,10).replace(/-/g, "");
-            const rand = Math.floor(1000 + Math.random() * 9000);
-            document.getElementById('ref-no').value = `TR-${dateStr}-${rand}`;
+            document.getElementById('trans-ref').value = `TRF-${dateStr}-${Math.floor(1000 + Math.random() * 9000)}`;
         }
 
         async function loadInventory() {
             const { data } = await _supabase.from('inventory').select('*').order('item_name');
             masterInventory = data || [];
             const list = document.getElementById('items-list');
+            list.innerHTML = "";
             masterInventory.forEach(item => {
                 const opt = document.createElement('option');
-                opt.value = `${item.item_name} — [${item.location}]`;
+                opt.value = `${item.item_name} — [Loc: ${item.location} | SOH: ${item.quantity || 0}]`;
                 list.appendChild(opt);
             });
         }
 
         function handleSelection() {
             const searchVal = document.getElementById('item-search').value;
-            selectedItem = masterInventory.find(i => `${i.item_name} — [${i.location}]` === searchVal);
-            
-            if (selectedItem) {
-                document.getElementById('view-loc-from').textContent = selectedItem.location;
-                document.getElementById('view-qty').textContent = selectedItem.quantity || 0;
-                document.getElementById('view-uom').textContent = selectedItem.uom || '';
-                document.getElementById('details-box').style.display = 'block';
-                document.getElementById('transfer-qty').disabled = false;
-            } else {
-                document.getElementById('details-box').style.display = 'none';
-                document.getElementById('transfer-qty').disabled = true;
-            }
-            validateTransfer();
+            selectedItem = masterInventory.find(i => `${i.item_name} — [Loc: ${i.location} | SOH: ${i.quantity || 0}]` === searchVal);
         }
 
-        function validateTransfer() {
-            const qty = parseInt(document.getElementById('transfer-qty').value) || 0;
-            const newLoc = document.getElementById('new-location').value.trim();
-            const currentQty = selectedItem ? selectedItem.quantity : 0;
-            const saveBtn = document.getElementById('save-btn');
+        function addToBatch() {
+            const qty = parseInt(document.getElementById('move-qty').value);
+            const loc = document.getElementById('new-loc').value.trim();
 
-            if (selectedItem && qty > 0 && qty <= currentQty && newLoc !== "") {
-                saveBtn.disabled = false;
-            } else {
-                saveBtn.disabled = true;
+            if (!selectedItem || !qty || qty < 1 || !loc) {
+                alert("Please select item, quantity, and new location.");
+                return;
             }
+
+            if (qty > (selectedItem.quantity || 0)) {
+                alert("Cannot move more than current stock!");
+                return;
+            }
+
+            batchItems.push({ ...selectedItem, moveQty: qty, nextLoc: loc });
+            renderBatch();
+            
+            document.getElementById('item-search').value = "";
+            document.getElementById('move-qty').value = "";
+            document.getElementById('new-loc').value = "";
+            selectedItem = null;
+        }
+
+        function renderBatch() {
+            const container = document.getElementById('batch-container');
+            if (batchItems.length === 0) {
+                container.innerHTML = '<p style="text-align:center; font-size:0.75rem; color:#64748b;">Transfer list is empty.</p>';
+                return;
+            }
+            let html = `<div class="batch-header"><label>Moving Queue (${batchItems.length})</label></div>`;
+            batchItems.forEach((item, index) => {
+                html += `
+                    <div class="batch-item">
+                        <div class="batch-item-info">
+                            ${item.item_name}<br>
+                            <small style="color:var(--accent)">Move ${item.moveQty} from ${item.location} → ${item.nextLoc}</small>
+                        </div>
+                        <button class="remove-btn" onclick="confirmRemove(${index}, '${item.item_name}')">✕</button>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function confirmRemove(index, name) {
+            if (confirm(`Remove ${name}?`)) {
+                batchItems.splice(index, 1);
+                renderBatch();
+            }
+        }
+
+        function generateSmartSKU(category) {
+            const prefix = (category || 'GEN').substring(0, 3).toUpperCase();
+            const year = new Date().getFullYear().toString().slice(-2);
+            const random = Math.floor(1000 + Math.random() * 9000);
+            return `${prefix}-${year}-${random}`;
         }
 
         async function processTransfer() {
-            const qty = parseInt(document.getElementById('transfer-qty').value);
-            const newLoc = document.getElementById('new-location').value;
-            const ref = document.getElementById('ref-no').value;
+            if (batchItems.length === 0) {
+                alert("List is empty.");
+                return;
+            }
+
+            if (!confirm(`Confirm all transfers?`)) return;
+
             const saveBtn = document.getElementById('save-btn');
-            
             saveBtn.disabled = true;
             saveBtn.textContent = "Processing...";
 
             try {
-                // 1. Update Inventory Table (Location only)
-                const { error: invError } = await _supabase
-                    .from('inventory')
-                    .update({ location: newLoc }) 
-                    .eq('id', selectedItem.id);
-                if (invError) throw invError;
+                for (const item of batchItems) {
+                    // Get current source data to ensure SKU exists
+                    const { data: sourceData } = await _supabase.from('inventory').select('quantity, sku').eq('id', item.id).single();
+                    
+                    const sourceNewQty = (sourceData.quantity || 0) - item.moveQty;
+                    const currentSKU = sourceData.sku || generateSmartSKU(item.category);
 
-                // 2. Insert into Activity Logs
-                const { error: logError } = await _supabase.from('activity_logs').insert([{
-                    type: 'TRANSFER',
-                    reference_id: ref,
-                    item_name: selectedItem.item_name,
-                    quantity: qty,
-                    details: `Moved from ${selectedItem.location} to ${newLoc}`
-                }]);
-                if (logError) throw logError;
+                    // Update Source (Deduct + Ensure SKU)
+                    await _supabase.from('inventory').update({ quantity: sourceNewQty, sku: currentSKU }).eq('id', item.id);
 
-                alert("Transfer completed and logged successfully.");
+                    // Find if same item exists at Destination
+                    const { data: existingDest } = await _supabase.from('inventory')
+                        .select('id, quantity')
+                        .eq('item_name', item.item_name)
+                        .eq('location', item.nextLoc)
+                        .maybeSingle();
+
+                    if (existingDest) {
+                        // MERGE
+                        const destNewQty = (existingDest.quantity || 0) + item.moveQty;
+                        await _supabase.from('inventory').update({ quantity: destNewQty, sku: currentSKU }).eq('id', existingDest.id);
+                    } else {
+                        // CREATE NEW RECORD AT NEW LOCATION
+                        await _supabase.from('inventory').insert([{
+                            item_name: item.item_name,
+                            location: item.nextLoc,
+                            quantity: item.moveQty,
+                            uom: item.uom,
+                            category: item.category,
+                            sku: currentSKU
+                        }]);
+                    }
+
+                    // LOG
+                    await _supabase.from('activity_logs').insert([{
+                        type: 'TRANSFER',
+                        reference_id: document.getElementById('trans-ref').value,
+                        item_name: item.item_name,
+                        quantity: item.moveQty,
+                        details: `SKU: ${currentSKU} | ${item.location} -> ${item.nextLoc}`
+                    }]);
+                }
+                alert("Batch Transfer Successful!");
                 location.reload();
             } catch (err) {
                 alert("Error: " + err.message);
                 saveBtn.disabled = false;
-                saveBtn.textContent = "Confirm Transfer";
             }
         }
 
