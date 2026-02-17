@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Adjustment | Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        
+        :root { --primary: #0f172a; --accent: #0081ff; --warning: #f59e0b; }
+
+        body {
+            margin: 0; font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
+            height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+
+        .admin-card {
+            background: white; width: 95%; max-width: 480px;
+            padding: 30px; border-radius: 16px; border: 2px solid var(--primary);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { margin: 0; font-size: 1.3rem; color: var(--primary); text-transform: uppercase; font-weight: 800; }
+
+        /* ITEM PREVIEW BAR */
+        .item-info-bar {
+            background: #f1f5f9; padding: 15px; border-radius: 12px;
+            margin-bottom: 20px; border: 1px solid #cbd5e1;
+        }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .label-small { font-size: 0.6rem; font-weight: 800; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 2px; }
+        .val-small { font-size: 0.9rem; font-weight: 800; color: var(--primary); display: block; text-transform: uppercase; font-family: monospace; }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 6px; }
+        
+        input, select, textarea {
+            width: 100%; padding: 12px; border: 2px solid #cbd5e1; border-radius: 8px;
+            font-size: 0.9rem; font-weight: 600; box-sizing: border-box; outline: none;
+            text-transform: uppercase; 
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); background: #f8fafc; }
+
+        .btn-adj {
+            width: 100%; background: var(--primary); color: white; padding: 15px;
+            border: none; border-radius: 10px; font-weight: 800; cursor: pointer;
+            transition: 0.2s; text-transform: uppercase; font-size: 0.9rem;
+            box-shadow: 0 4px 0 #000;
+        }
+        .btn-adj:hover { background: var(--warning); color: var(--primary); transform: translateY(-2px); }
+        .btn-adj:active { transform: translateY(0); box-shadow: none; }
+
+        .btn-back { 
+            display: block; text-align: center; margin-top: 15px; 
+            color: var(--primary); text-decoration: none; font-size: 0.75rem; 
+            font-weight: 800; text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<div class="admin-card">
+    <div class="header">
+        <h1>Inventory Adjustment</h1>
+    </div>
+
+    <div class="item-info-bar">
+        <div class="info-grid">
+            <div>
+                <span class="label-small">SKU / Code</span>
+                <span id="display-sku" class="val-small">---</span>
+            </div>
+            <div>
+                <span class="label-small">Current Stock</span>
+                <span id="display-qty" class="val-small" style="color:var(--accent); font-size: 1.1rem;">0</span>
+            </div>
+        </div>
+        <div style="margin-top:10px; border-top: 1px dashed #cbd5e1; padding-top: 8px;">
+            <span class="label-small">Item Description</span>
+            <span id="display-name" class="val-small" style="font-family: 'Inter';">---</span>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+            <label>Adj. Date</label>
+            <input type="date" id="adj-date">
+        </div>
+        <div class="form-group">
+            <label>Set Total Qty</label>
+            <input type="number" id="adj-qty" placeholder="0">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Reason for Change</label>
+        <select id="adj-reason">
+            <option value="">-- SELECT REASON --</option>
+            <option value="BEGINNING BALANCE">BEGINNING BALANCE</option>
+            <option value="PHYSICAL COUNT">PHYSICAL COUNT CORRECTION</option>
+            <option value="DAMAGED">DAMAGED / EXPIRED</option>
+            <option value="ENTRY ERROR">DATA ENTRY ERROR</option>
+            <option value="OTHER">OTHER (SEE NOTES)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Administrative Notes</label>
+        <textarea id="adj-notes" rows="2" placeholder="ADDITIONAL CONTEXT..." oninput="this.value = this.value.toUpperCase()"></textarea>
+    </div>
+
+    <button class="btn-adj" onclick="processAdjustment()">Apply Final Adjustment</button>
+    <a href="dashboard.html" class="btn-back">Cancel & Return</a>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const itemId = urlParams.get('id');
+
+    // Default to today
+    document.getElementById('adj-date').valueAsDate = new Date();
+
+    async function loadItem() {
+        if (!itemId) return window.location.href = 'dashboard.html';
+        const { data, error } = await _supabase.from('inventory').select('*').eq('id', itemId).single();
+        if (data) {
+            document.getElementById('display-sku').innerText = data.sku.toUpperCase();
+            document.getElementById('display-name').innerText = data.item_name.toUpperCase();
+            document.getElementById('display-qty').innerText = data.quantity;
+            document.getElementById('adj-qty').value = data.quantity;
+        }
+    }
+
+    async function processAdjustment() {
+        const newQty = parseInt(document.getElementById('adj-qty').value);
+        const reason = document.getElementById('adj-reason').value;
+        const notes = document.getElementById('adj-notes').value.trim();
+        const adjDate = document.getElementById('adj-date').value;
+        const oldQty = parseInt(document.getElementById('display-qty').innerText);
+        const itemName = document.getElementById('display-name').innerText;
+        const sku = document.getElementById('display-sku').innerText;
+
+        if (isNaN(newQty) || !reason) return alert("MISSING DATA: PROVIDE QUANTITY AND REASON.");
+
+        const btn = document.querySelector('.btn-adj');
+        btn.disabled = true;
+        btn.innerText = "UPDATING...";
+
+        try {
+            // Update the master stock
+            const { error: updateErr } = await _supabase.from('inventory')
+                .update({ quantity: newQty })
+                .eq('id', itemId);
+            if (updateErr) throw updateErr;
+
+            // Log the "Difference" so the audit math works
+            const diff = newQty - oldQty;
+            const logEntry = {
+                type: 'SYSTEM',
+                reference_id: 'ADJ-' + new Date().getTime().toString().slice(-6),
+                item_name: itemName,
+                quantity: diff, 
+                details: `ADJ: ${reason} | SKU: ${sku} | DATE: ${adjDate} | ${notes}`.toUpperCase()
+            };
+
+            const { error: logErr } = await _supabase.from('activity_logs').insert([logEntry]);
+            if (logErr) throw logErr;
+
+            alert("STOCK ADJUSTED AND LOGGED.");
+            window.location.href = 'dashboard.html';
+
+        } catch (err) {
+            alert(err.message.toUpperCase());
+            btn.disabled = false;
+            btn.innerText = "APPLY FINAL ADJUSTMENT";
+        }
+    }
+
+    loadItem();
+</script>
+
+</body>
+</html>
