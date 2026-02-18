@@ -35,7 +35,6 @@
             border-radius: 12px; padding: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); 
         }
 
-        /* FORM LAYOUT: Stacked on mobile, side-by-side on desktop */
         .form-grid { 
             display: grid; 
             grid-template-columns: 1fr; 
@@ -44,7 +43,7 @@
 
         @media (min-width: 600px) {
             .form-grid { grid-template-columns: 1fr 1fr; }
-            .permission-box, .btn-action, .full-width { grid-column: span 2; }
+            .permission-box, .btn-group, .full-width { grid-column: span 2; }
         }
         
         input, select { 
@@ -68,23 +67,32 @@
             border: 1px solid var(--excel-border);
         }
 
+        /* Grouping for Create and Update buttons */
+        .btn-group { display: flex; gap: 10px; width: 100%; }
+
         .btn-action { 
-            background: var(--primary); color: white; 
+            flex: 1; background: var(--primary); color: white; 
             padding: 14px; border: none; border-radius: 8px; font-weight: 800; 
             cursor: pointer; text-transform: uppercase; font-size: 0.85rem;
             box-shadow: 0 4px 0px #000;
         }
+
+        .btn-update { background: var(--accent); display: none; }
+        .btn-cancel { background: #64748b; display: none; }
+
         .btn-action:active { transform: translateY(2px); box-shadow: 0 2px 0px #000; }
 
         .table-container { 
             background: white; border-radius: 12px; border: 2px solid var(--primary); 
-            overflow-x: auto; /* Horizontal scroll for mobile tables */
-            -webkit-overflow-scrolling: touch;
+            overflow-x: auto;
         }
 
         table { width: 100%; border-collapse: collapse; min-width: 500px; }
         th { background: #f1f5f9; padding: 12px; font-size: 0.65rem; text-transform: uppercase; border-bottom: 2px solid var(--primary); }
         td { padding: 12px; text-align: center; border-bottom: 1px solid var(--excel-border); font-weight: 700; font-size: 0.75rem; text-transform: uppercase; }
+
+        tbody tr { cursor: pointer; transition: background 0.2s; }
+        tbody tr:hover { background: #f0f9ff; }
 
         .role-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; color: white; background: #64748b; }
         .role-admin { background: var(--danger); }
@@ -101,7 +109,7 @@
 
     <div class="main-content">
         <div class="card">
-            <div style="font-size:0.6rem; font-weight:800; color:#64748b; margin-bottom:10px; text-transform: uppercase;">Register New Staff Account</div>
+            <div id="form-header" style="font-size:0.6rem; font-weight:800; color:#64748b; margin-bottom:10px; text-transform: uppercase;">Register New Staff Account</div>
             <div class="form-grid">
                 <input type="text" id="user-in" placeholder="Username">
                 <input type="text" id="pass-in" placeholder="Password">
@@ -114,7 +122,7 @@
                 </div>
                 
                 <div class="permission-box" id="perm-list">
-                    <div style="width: 100%; font-size: 0.6rem; font-weight: 800; color: #64748b; margin-bottom: 5px;">ALLOWED BUTTONS:</div>
+                    <div style="width: 100%; font-size: 0.6rem; font-weight: 800; color: #64748b; margin-bottom: 5px;">ALLOWED BUTTONS (PERMISSIONS):</div>
                     <div class="perm-item"><input type="checkbox" value="add.html"> ADD</div>
                     <div class="perm-item"><input type="checkbox" value="edit.html"> EDIT</div>
                     <div class="perm-item"><input type="checkbox" value="adj.html"> ADJUST</div>
@@ -122,7 +130,11 @@
                     <div class="perm-item"><input type="checkbox" value="logs.html"> LOGS</div>
                 </div>
                 
-                <button class="btn-action" onclick="saveUser()">Create Account</button>
+                <div class="btn-group">
+                    <button id="btn-save" class="btn-action" onclick="saveUser()">Create Account</button>
+                    <button id="btn-update" class="btn-action btn-update" onclick="updateUser()">Update User</button>
+                    <button id="btn-cancel" class="btn-action btn-cancel" onclick="resetForm()">Cancel</button>
+                </div>
             </div>
         </div>
 
@@ -137,8 +149,7 @@
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody id="user-table-body">
-                    </tbody>
+                <tbody id="user-table-body"></tbody>
             </table>
         </div>
     </div>
@@ -148,22 +159,82 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        let editingUser = null;
+
         async function loadTable() {
             const { data, error } = await _supabase.from('staff_accounts').select('*').order('username');
             if(error) return;
 
             const tbody = document.getElementById('user-table-body');
             tbody.innerHTML = data.map(u => `
-                <tr>
+                <tr onclick="editMode('${u.username}', '${u.password}', '${u.role}', '${JSON.stringify(u.permissions)}')">
                     <td style="color:var(--primary);">${u.username}</td>
                     <td style="color:var(--accent);">${u.password}</td>
                     <td><span class="role-badge ${u.role === 'admin' ? 'role-admin' : ''}">${u.role}</span></td>
                     <td style="font-size:0.5rem; color:#64748b;">${u.permissions.join(', ') || 'NONE'}</td>
                     <td>
-                        ${u.username !== 'ADMIN_MASTER' ? `<button class="btn-del" onclick="delUser('${u.username}')">DEL</button>` : '---'}
+                        ${u.username !== 'ADMIN_MASTER' ? `<button class="btn-del" onclick="event.stopPropagation(); delUser('${u.username}')">DEL</button>` : '---'}
                     </td>
                 </tr>
             `).join('');
+        }
+
+        // --- THE "CHANGE" FUNCTIONALITY ---
+        function editMode(username, password, role, permsJson) {
+            editingUser = username; // Mark who we are editing
+            const perms = JSON.parse(permsJson);
+
+            // 1. Fill the form
+            document.getElementById('form-header').innerText = "Updating Permissions for: " + username;
+            document.getElementById('user-in').value = username;
+            document.getElementById('user-in').disabled = true; // Don't change username
+            document.getElementById('pass-in').value = password;
+            document.getElementById('role-in').value = role;
+
+            // 2. Set the checkboxes
+            document.querySelectorAll('#perm-list input').forEach(checkbox => {
+                checkbox.checked = perms.includes(checkbox.value);
+            });
+
+            // 3. Switch Buttons
+            document.getElementById('btn-save').style.display = 'none';
+            document.getElementById('btn-update').style.display = 'block';
+            document.getElementById('btn-cancel').style.display = 'block';
+        }
+
+        function resetForm() {
+            editingUser = null;
+            document.getElementById('form-header').innerText = "Register New Staff Account";
+            document.getElementById('user-in').value = "";
+            document.getElementById('user-in').disabled = false;
+            document.getElementById('pass-in').value = "";
+            document.querySelectorAll('#perm-list input').forEach(cb => cb.checked = false);
+
+            document.getElementById('btn-save').style.display = 'block';
+            document.getElementById('btn-update').style.display = 'none';
+            document.getElementById('btn-cancel').style.display = 'none';
+        }
+
+        async function updateUser() {
+            const password = document.getElementById('pass-in').value.trim();
+            const role = document.getElementById('role-in').value;
+            const perms = [];
+            document.querySelectorAll('#perm-list input:checked').forEach(i => perms.push(i.value));
+
+            if(!password) return alert("Enter a password");
+
+            const { error } = await _supabase
+                .from('staff_accounts')
+                .update({ password: password, role: role, permissions: perms })
+                .eq('username', editingUser);
+
+            if(error) {
+                alert("Update Error: " + error.message);
+            } else {
+                alert("User updated successfully!");
+                resetForm();
+                loadTable();
+            }
         }
 
         async function saveUser() {
@@ -183,8 +254,7 @@
             if(error) alert("Username already exists");
             else {
                 alert("Account Created!");
-                document.getElementById('user-in').value = "";
-                document.getElementById('pass-in').value = "";
+                resetForm();
                 loadTable();
             }
         }
