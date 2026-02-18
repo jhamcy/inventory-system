@@ -25,29 +25,29 @@
             padding: 40px; 
             border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-            width: 100%; 
-            max-width: 400px; 
+            width: 90%; 
+            max-width: 380px; 
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.3);
-            animation: fadeInCard 0.8s ease-out;
         }
 
         .logo-container img {
-            width: 200px; 
+            width: 120px; 
             height: auto;
             margin-bottom: 10px;
             display: block;
             margin-left: auto;
             margin-right: auto;
+            border-radius: 15px;
         }
 
         .brand-title {
             margin-top: 0;
             margin-bottom: 30px; 
             color: #0f172a; 
-            font-size: 2.2rem; 
+            font-size: 2rem; 
             font-weight: 800;
-            letter-spacing: -1.5px;
+            letter-spacing: -1px;
             text-transform: uppercase;
         }
 
@@ -55,19 +55,18 @@
             width: 100%; 
             padding: 14px 16px; 
             margin: 8px 0;
-            border: 1.5px solid #e2e8f0; 
+            border: 2px solid #e2e8f0; 
             border-radius: 12px; 
             box-sizing: border-box;
             font-size: 1rem;
-            background: #fdfdfd;
+            font-weight: 600;
             transition: all 0.3s ease;
-            text-transform: uppercase; /* Visual feedback for uppercase username */
         }
 
         input:focus {
             outline: none;
             border-color: #0081ff;
-            box-shadow: 0 0 0 4px rgba(0, 129, 255, 0.1);
+            background: white;
         }
 
         .btn-login {
@@ -78,22 +77,20 @@
             border: none; 
             border-radius: 12px;
             cursor: pointer; 
-            font-weight: 700; 
+            font-weight: 800; 
             margin-top: 20px;
-            font-size: 1.1rem;
-            transition: transform 0.2s, background 0.2s;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .btn-login:hover { 
-            transform: scale(1.02);
-            background: #1e293b;
-        }
+        .btn-login:hover { background: #1e293b; }
 
         .divider {
-            margin: 25px 0; 
-            font-size: 0.75rem; 
-            color: #94a3b8; 
-            font-weight: 600;
+            margin-top: 25px; 
+            font-size: 0.65rem; 
+            color: #64748b; 
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 2px;
         }
@@ -103,17 +100,17 @@
 
     <div class="login-container">
         <div class="logo-container">
-            <img src="logo.jpg" alt="EasiStock Logo">
+            <img src="logo.jpg" alt="LOGO">
         </div>
         
         <div class="brand-title">EasiStock</div>
         
-        <input type="text" id="username" placeholder="Username">
-        <input type="password" id="password" placeholder="Password">
+        <input type="text" id="username" placeholder="USERNAME" style="text-transform: uppercase;">
+        <input type="password" id="password" placeholder="PASSWORD">
         
-        <button class="btn-login" onclick="signIn()">Log In</button>
+        <button class="btn-login" onclick="signIn()">Enter System</button>
         
-        <div class="divider">Secured Portal</div>
+        <div class="divider">Secured Portal v3.0</div>
     </div>
 
     <script>
@@ -122,47 +119,71 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function signIn() {
-            const userIn = document.getElementById('username').value.trim().toUpperCase();
-            const passIn = document.getElementById('password').value;
+            const userField = document.getElementById('username');
+            const passField = document.getElementById('password');
+            
+            const userIn = userField.value.trim().toUpperCase();
+            const passIn = passField.value.trim();
             
             if (!userIn || !passIn) {
-                alert("Please enter both username and password.");
+                alert("Missing Credentials");
                 return;
             }
 
-            // Fetch user from the custom staff_accounts table
-            const { data, error } = await _supabase
-                .from('staff_accounts')
-                .select('*')
-                .eq('username', userIn)
-                .single();
+            console.log("Attempting Login for:", userIn);
 
-            if (error || !data) {
-                alert("Login Failed: User not found.");
-                console.error(error);
-                return;
-            }
+            try {
+                // 1. Fetch user from table
+                const { data, error } = await _supabase
+                    .from('staff_accounts')
+                    .select('*')
+                    .eq('username', userIn);
 
-            // Verify Password (Matching plain text as per your setup)
-            if (data.password === passIn) {
-                // Store session info
-                localStorage.setItem('activeAdmin', data.username);
-                localStorage.setItem('userRole', data.role);
-                localStorage.setItem('userPermissions', JSON.stringify(data.permissions || []));
-
-                // Routing Logic
-                if (data.role === 'admin') {
-                    window.location.href = 'dashboard.html';
-                } else {
-                    window.location.href = 'inventory.html';
+                // 2. Check for Connection Errors (like RLS blocking)
+                if (error) {
+                    console.error("Supabase Error:", error);
+                    alert("System Error: " + error.message);
+                    return;
                 }
-            } else {
-                alert("Login Failed: Incorrect password.");
+
+                // 3. Check if user exists
+                if (!data || data.length === 0) {
+                    alert("User not found. Check spelling.");
+                    return;
+                }
+
+                const userData = data[0];
+
+                // 4. Verify Password
+                if (userData.password === passIn) {
+                    // Success! Store session details
+                    localStorage.setItem('activeAdmin', userData.username);
+                    localStorage.setItem('userRole', userData.role);
+                    
+                    // Store permissions as a JSON string so other pages can read them
+                    const perms = userData.permissions || [];
+                    localStorage.setItem('userPermissions', JSON.stringify(perms));
+
+                    console.log("Success! Redirecting...");
+
+                    // 5. Route based on role
+                    if (userData.role === 'admin') {
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        window.location.href = 'inventory.html';
+                    }
+                } else {
+                    alert("Wrong Password.");
+                }
+
+            } catch (err) {
+                console.error("Unexpected Error:", err);
+                alert("An unexpected error occurred.");
             }
         }
 
-        // Allow pressing "Enter" to login
-        document.addEventListener('keypress', function (e) {
+        // Enter key support
+        document.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') signIn();
         });
     </script>
