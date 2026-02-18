@@ -15,34 +15,29 @@
             --success: #10b981;
             --report: #8b5cf6;
             --warning: #f59e0b;
+            --user-manage: #ec4899; 
         }
-
         body {
             margin: 0; font-family: 'Inter', sans-serif;
             background: #f1f5f9; min-height: 100vh;
         }
-
         .navbar { 
             height: 64px; background: var(--primary); color: white;
             display: flex; align-items: center; justify-content: space-between;
             padding: 0 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-
         .container { padding: 20px; max-width: 1100px; margin: 0 auto; }
-
         .welcome-section { margin-bottom: 25px; }
         .welcome-section h1 { margin: 0; color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 1.5rem; letter-spacing: -1px; }
-
+        
         .dash-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr); 
             gap: 15px; margin-bottom: 30px;
         }
-
         @media (min-width: 768px) {
             .dash-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
         }
-
         .dash-card {
             background: white; padding: 25px 10px; border-radius: 12px;
             border: 2px solid var(--primary); transition: all 0.2s ease;
@@ -50,14 +45,11 @@
             display: flex; flex-direction: column; align-items: center; gap: 10px;
             position: relative; overflow: hidden;
         }
-
-        /* Hover animation to show it's a button */
         .dash-card:hover { 
             transform: translateY(-5px); 
             box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
             background: #f8fafc;
         }
-
         .dash-card span { font-size: 2.2rem; }
         .dash-card h3 { margin: 0; text-transform: uppercase; font-size: 0.8rem; color: var(--primary); font-weight: 800; }
         .dash-card p { margin: 0; font-size: 0.65rem; color: #64748b; font-weight: 600; }
@@ -77,14 +69,15 @@
         .stat-item { display: flex; flex-direction: column; align-items: center; }
         .stat-label { font-size: 0.6rem; font-weight: 800; color: #64748b; text-transform: uppercase; }
         .stat-value { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
-
         .btn-inventory { background: var(--accent); color: white; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; }
+        
+        /* Helper for Permission Hiding */
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-
     <div class="navbar">
-        <div style="font-weight: 800; letter-spacing: 0.5px; font-size: 0.9rem;">EASISTOCK ADMIN</div>
+        <div id="nav-brand" style="font-weight: 800; letter-spacing: 0.5px; font-size: 0.9rem;">EASISTOCK ADMIN</div>
         <div style="display: flex; gap: 10px; align-items: center;">
             <a href="inventory.html" class="btn-inventory">MASTER LIST</a>
             <button onclick="logout()" style="background:none; border:none; color:#ef4444; font-weight:800; cursor:pointer; font-size:0.7rem;">LOGOUT</button>
@@ -93,31 +86,28 @@
 
     <div class="container">
         <div class="welcome-section">
-            <h1>Control Dashboard</h1>
-            <p style="color: #64748b; font-size: 0.8rem; font-weight: 600;">Inventory Management System</p>
+            <h1 id="welcome-user">Control Dashboard</h1>
+            <p id="role-subtitle" style="color: #64748b; font-size: 0.8rem; font-weight: 600;">Inventory Management System</p>
         </div>
 
         <div class="section-title">Operations</div>
         <div class="dash-grid">
-            <div class="dash-card" onclick="navTo('add.html')" style="border-bottom: 6px solid var(--success);">
+            <div class="dash-card" data-perm="add.html" onclick="navTo('add.html')" style="border-bottom: 6px solid var(--success);">
                 <span>📦</span>
                 <h3>Add Item</h3>
                 <p>Bulk Loader</p>
             </div>
-
-            <div class="dash-card" onclick="navTo('adj.html')" style="border-bottom: 6px solid var(--warning);">
+            <div class="dash-card" data-perm="adj.html" onclick="navTo('adj.html')" style="border-bottom: 6px solid var(--warning);">
                 <span>⚖️</span>
                 <h3>Adjust</h3>
                 <p>Stock Levels</p>
             </div>
-
-            <div class="dash-card" onclick="navTo('edit.html')" style="border-bottom: 6px solid var(--accent);">
+            <div class="dash-card" data-perm="edit.html" onclick="navTo('edit.html')" style="border-bottom: 6px solid var(--accent);">
                 <span>📝</span>
                 <h3>Edit</h3>
                 <p>Modify Info</p>
             </div>
-
-            <div class="dash-card" onclick="navTo('delete.html')" style="border-bottom: 6px solid var(--danger);">
+            <div class="dash-card" data-perm="delete.html" onclick="navTo('delete.html')" style="border-bottom: 6px solid var(--danger);">
                 <span>🗑️</span>
                 <h3>Delete</h3>
                 <p>Remove SKU</p>
@@ -125,17 +115,23 @@
         </div>
 
         <div class="section-title">Configuration</div>
-        <div class="dash-grid" style="grid-template-columns: repeat(2, 1fr);">
-            <div class="dash-card" onclick="navTo('categories.html')" style="border-bottom: 6px solid var(--warning);">
+        <div class="dash-grid">
+            <div class="dash-card" data-perm="categories.html" onclick="navTo('categories.html')" style="border-bottom: 6px solid var(--warning);">
                 <span>🏷️</span>
                 <h3>Categories</h3>
                 <p>Prefix Manager</p>
             </div>
             
-            <div class="dash-card" onclick="navTo('logs.html')" style="border-bottom: 6px solid var(--report);">
+            <div class="dash-card" data-perm="logs.html" onclick="navTo('logs.html')" style="border-bottom: 6px solid var(--report);">
                 <span>📜</span>
                 <h3>History</h3>
                 <p>Audit Logs</p>
+            </div>
+
+            <div class="dash-card" id="user-manage-card" onclick="navTo('user.html')" style="border-bottom: 6px solid var(--user-manage);">
+                <span>👥</span>
+                <h3>User Accounts</h3>
+                <p>Staff Access</p>
             </div>
         </div>
 
@@ -156,14 +152,45 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Navigation Helper with Debugging
+        // --- AUTH & PERMISSION LOGIC ---
+        const activeUser = localStorage.getItem('activeAdmin');
+        const userRole = localStorage.getItem('userRole');
+        let userPermissions = [];
+
+        try {
+            userPermissions = JSON.parse(localStorage.getItem('userPermissions')) || [];
+        } catch(e) { userPermissions = []; }
+
+        function checkAccess() {
+            if (!activeUser) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            document.getElementById('welcome-user').innerText = "Hello, " + activeUser;
+            document.getElementById('role-subtitle').innerText = (userRole === 'admin' ? "System Administrator" : "Staff Operations");
+
+            // Hide cards based on permissions if not an admin
+            if (userRole !== 'admin') {
+                // Hide User Management Card completely for staff
+                document.getElementById('user-manage-card').classList.add('hidden');
+
+                // Check each card for permission
+                document.querySelectorAll('.dash-card[data-perm]').forEach(card => {
+                    const requiredPage = card.getAttribute('data-perm');
+                    if (!userPermissions.includes(requiredPage)) {
+                        card.classList.add('hidden');
+                    }
+                });
+            }
+        }
+
         function navTo(page) {
-            console.log("Navigating to:", page);
             window.location.href = page;
         }
 
         function logout() {
-            localStorage.removeItem('activeAdmin');
+            localStorage.clear(); // Clears all session info
             window.location.href = 'index.html';
         }
 
@@ -171,7 +198,6 @@
             try {
                 const { count: total } = await _supabase.from('inventory').select('*', { count: 'exact', head: true });
                 const { count: low } = await _supabase.from('inventory').select('*', { count: 'exact', head: true }).lt('quantity', 5);
-
                 document.getElementById('total-items').innerText = total || 0;
                 document.getElementById('low-stock').innerText = low || 0;
             } catch (e) {
@@ -179,6 +205,8 @@
             }
         }
 
+        // Run on load
+        checkAccess();
         loadStats();
     </script>
 </body>

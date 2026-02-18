@@ -33,13 +33,12 @@
         }
 
         .logo-container img {
-            width: 240px; 
+            width: 200px; 
             height: auto;
-            margin-bottom: -15px;
+            margin-bottom: 10px;
             display: block;
             margin-left: auto;
             margin-right: auto;
-            animation: logoEntrance 1s ease-out;
         }
 
         .brand-title {
@@ -50,23 +49,6 @@
             font-weight: 800;
             letter-spacing: -1.5px;
             text-transform: uppercase;
-            animation: textSlideUp 1.2s ease-out;
-        }
-
-        @keyframes fadeInCard {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes logoEntrance {
-            0% { opacity: 0; transform: scale(0.8) rotate(-5deg); }
-            100% { opacity: 1; transform: scale(1) rotate(0); }
-        }
-
-        @keyframes textSlideUp {
-            0% { opacity: 0; transform: translateY(15px); }
-            50% { opacity: 0; }
-            100% { opacity: 1; transform: translateY(0); }
         }
 
         input {
@@ -79,13 +61,13 @@
             font-size: 1rem;
             background: #fdfdfd;
             transition: all 0.3s ease;
+            text-transform: uppercase; /* Visual feedback for uppercase username */
         }
 
         input:focus {
             outline: none;
             border-color: #0081ff;
             box-shadow: 0 0 0 4px rgba(0, 129, 255, 0.1);
-            background: #fff;
         }
 
         .btn-login {
@@ -115,22 +97,6 @@
             text-transform: uppercase;
             letter-spacing: 2px;
         }
-
-        .btn-demo {
-            width: 100%; 
-            padding: 12px; 
-            background: #f1f5f9;
-            color: #475569; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 12px;
-            cursor: pointer; 
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        .btn-demo:hover { 
-            background: #e2e8f0;
-            color: #0f172a;
-        }
     </style>
 </head>
 <body>
@@ -142,14 +108,12 @@
         
         <div class="brand-title">EasiStock</div>
         
-        <input type="email" id="email" placeholder="Email Address">
+        <input type="text" id="username" placeholder="Username">
         <input type="password" id="password" placeholder="Password">
         
         <button class="btn-login" onclick="signIn()">Log In</button>
         
         <div class="divider">Secured Portal</div>
-        
-        <button class="btn-demo" onclick="demoLogin()">Launch Demo</button>
     </div>
 
     <script>
@@ -158,41 +122,49 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function signIn() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const userIn = document.getElementById('username').value.trim().toUpperCase();
+            const passIn = document.getElementById('password').value;
             
-            if (!email || !password) {
-                alert("Please enter both email and password.");
+            if (!userIn || !passIn) {
+                alert("Please enter both username and password.");
                 return;
             }
 
-            const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+            // Fetch user from the custom staff_accounts table
+            const { data, error } = await _supabase
+                .from('staff_accounts')
+                .select('*')
+                .eq('username', userIn)
+                .single();
 
-            if (error) {
-                alert("Login Failed: " + error.message);
+            if (error || !data) {
+                alert("Login Failed: User not found.");
+                console.error(error);
+                return;
+            }
+
+            // Verify Password (Matching plain text as per your setup)
+            if (data.password === passIn) {
+                // Store session info
+                localStorage.setItem('activeAdmin', data.username);
+                localStorage.setItem('userRole', data.role);
+                localStorage.setItem('userPermissions', JSON.stringify(data.permissions || []));
+
+                // Routing Logic
+                if (data.role === 'admin') {
+                    window.location.href = 'dashboard.html';
+                } else {
+                    window.location.href = 'inventory.html';
+                }
             } else {
-                // SET PERMISSIONS: Dashboard link will be ACTIVE
-                localStorage.setItem('loginType', 'standard_login');
-                localStorage.setItem('activeAdmin', email.split('@')[0].toUpperCase());
-                window.location.href = 'dashboard.html';
+                alert("Login Failed: Incorrect password.");
             }
         }
 
-        async function demoLogin() {
-            const { error } = await _supabase.auth.signInWithPassword({ 
-                email: 'demo@example.com', 
-                password: 'demo1234' 
-            });
-
-            if (error) {
-                alert("Demo Access Error");
-            } else {
-                // SET PERMISSIONS: Dashboard link will be DISABLED
-                localStorage.setItem('loginType', 'direct_demo');
-                localStorage.setItem('activeAdmin', 'DEMO_USER');
-                window.location.href = 'inventory.html';
-            }
-        }
+        // Allow pressing "Enter" to login
+        document.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') signIn();
+        });
     </script>
 </body>
 </html>
