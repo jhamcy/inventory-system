@@ -13,22 +13,19 @@
             --primary: #0f172a;
             --accent: #0081ff;
             --success: #10b981;
+            --danger: #ef4444;
             --excel-border: #cbd5e1;
         }
+
+        * { box-sizing: border-box; }
 
         body {
             margin: 0; font-family: 'Inter', sans-serif;
             background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
-            /* Using dvh to fix mobile address bar issues */
-            height: 100dvh; 
-            display: flex; flex-direction: column; overflow: hidden;
+            height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        .navbar { 
-            height: 56px; background: var(--primary); 
-            display: flex; align-items: center; justify-content: space-between; 
-            padding: 0 15px; flex-shrink: 0;
-        }
+        .navbar { height: 56px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; flex-shrink: 0; }
         .nav-logo-text { color: white; font-weight: 800; font-size: 1rem; text-transform: uppercase; }
 
         .main-content { flex: 1; padding: 10px; display: flex; flex-direction: column; overflow: hidden; }
@@ -46,48 +43,72 @@
         }
         .bulk-header h2 { margin: 0; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--primary); }
 
-        .grid-area { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; }
-        table { border-collapse: collapse; width: 100%; min-width: 900px; }
+        .grid-area { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; position: relative; }
+        
+        table { border-collapse: collapse; width: 100%; min-width: 1100px; table-layout: fixed; }
         
         thead th { 
             position: sticky; top: 0; background: #f1f5f9; 
-            padding: 10px; font-size: 0.65rem; font-weight: 800; 
+            font-size: 0.65rem; font-weight: 800; 
             border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border);
-            text-transform: uppercase; color: #475569; z-index: 10;
+            text-transform: uppercase; color: #475569; z-index: 20; 
+            height: 45px; padding: 0 10px;
         }
 
-        tbody td { border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); }
+        .resizer {
+            position: absolute; right: 0; top: 0; height: 100%; width: 6px;
+            cursor: col-resize; user-select: none;
+        }
+        .resizer:hover { background: var(--accent); opacity: 0.5; }
+
+        /* STICKY COLUMNS */
+        .sticky-action { position: sticky !important; left: 0; z-index: 36 !important; width: 40px !important; background: #f1f5f9 !important; border-right: 1px solid var(--excel-border); text-align: center; }
+        .sticky-num { position: sticky !important; left: 40px; z-index: 35 !important; width: 45px !important; background: #f1f5f9 !important; border-right: 2px solid var(--primary) !important; text-align: center; }
+
+        tbody td { border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); height: 48px; }
+        tbody tr td:nth-child(1), tbody tr td:nth-child(2) { background: #f8fafc; }
+
+        .col-desc { width: 300px; }
+        .col-brand { width: 130px; }
+        .col-cat { width: 160px; }
+        .col-sku { width: 160px; }
+        .col-uom { width: 100px; }
+        .col-loc { width: 150px; }
 
         input, select {
-            width: 100%; padding: 12px 8px; border: none; outline: none;
+            width: 100%; height: 100%; padding: 0 8px; border: none; outline: none;
             font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-            box-sizing: border-box; background: transparent;
+            background: transparent;
         }
-        input:focus { background: #f0f9ff; }
+        input:focus, select:focus { background: #f0f9ff; }
 
-        .sku-cell { font-family: monospace; color: var(--accent); background: #f8fafc; font-weight: 800; text-align: center; }
+        .btn-remove { 
+            color: var(--danger); font-weight: 900; cursor: pointer; border: none; 
+            background: none; font-size: 1rem; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-remove:hover { background: #fee2e2; }
+
+        .sku-cell-input { font-family: monospace; color: var(--accent); font-weight: 800; text-align: center; background: #f8fafc !important; }
 
         .bulk-footer {
-            padding: 12px; border-top: 2px solid var(--primary);
-            display: flex; justify-content: space-between; gap: 8px;
+            padding: 10px; border-top: 2px solid var(--primary);
+            display: flex; align-items: center; gap: 6px;
             background: white; flex-shrink: 0;
         }
 
         .btn {
-            padding: 0 15px; height: 44px; border-radius: 8px; font-weight: 800; 
-            text-transform: uppercase; font-size: 0.7rem; cursor: pointer; border: none;
-            display: flex; align-items: center; justify-content: center;
+            height: 44px; border-radius: 8px; font-weight: 800; 
+            text-transform: uppercase; font-size: 0.65rem; cursor: pointer; border: none;
+            display: flex; align-items: center; justify-content: center; text-decoration: none;
         }
-        .btn-import { background: var(--success); color: white; }
-        .btn-add { background: #e2e8f0; color: var(--primary); }
-        .btn-save { background: var(--primary); color: white; flex: 1; }
-        .btn-back { background: #ef4444; color: white; text-decoration: none; }
+        .btn-import { background: var(--success); color: white; padding: 0 12px; }
+        .btn-add { background: #f1f5f9; color: var(--primary); border: 1px solid var(--excel-border); width: 100px; }
+        .btn-save { background: var(--primary); color: white; flex: 1; font-size: 0.75rem; }
+        .btn-back { background: var(--danger); color: white; width: 55px; }
         
         #excel-upload { display: none; }
-
-        @media (max-width: 600px) {
-            .btn-text { display: none; } /* Hides text on small screens to save space */
-        }
+        @media (max-width: 600px) { .btn-text { display: none; } }
     </style>
 </head>
 <body>
@@ -108,16 +129,17 @@
         </div>
 
         <div class="grid-area">
-            <table>
+            <table id="resizeTable">
                 <thead>
                     <tr>
-                        <th style="width: 40px;">#</th>
-                        <th>Description</th>
-                        <th style="width: 120px;">Brand</th>
-                        <th style="width: 150px;">Category</th>
-                        <th style="width: 150px;">Generated SKU</th>
-                        <th style="width: 70px;">UOM</th>
-                        <th style="width: 90px;">Location</th>
+                        <th class="sticky-action">DEL</th>
+                        <th class="sticky-num">#</th>
+                        <th class="col-desc">Description<div class="resizer"></div></th>
+                        <th class="col-brand">Brand<div class="resizer"></div></th>
+                        <th class="col-cat">Category<div class="resizer"></div></th>
+                        <th class="col-sku">Generated SKU<div class="resizer"></div></th>
+                        <th class="col-uom">UOM<div class="resizer"></div></th>
+                        <th class="col-loc">Location<div class="resizer"></div></th>
                     </tr>
                 </thead>
                 <tbody id="bulk-body"></tbody>
@@ -126,8 +148,8 @@
 
         <div class="bulk-footer">
             <a href="dashboard.html" class="btn btn-back">EXIT</a>
-            <button class="btn btn-add" onclick="addNewRow()">+ <span class="btn-text">Add Row</span></button>
             <button class="btn btn-save" id="save-btn" onclick="saveAllItems()">Register All Items</button>
+            <button class="btn btn-add" onclick="addNewRow()">+ Add Row</button>
         </div>
     </div>
 </main>
@@ -137,17 +159,58 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let categories = [];
+    let categories = [], uomList = [], locList = [];
 
     async function init() {
-        const { data } = await _supabase.from('inventory_categories').select('*').order('name');
-        categories = data || [];
-        for(let i=0; i<5; i++) addNewRow();
+        const { data: catData } = await _supabase.from('inventory_categories').select('*').order('name');
+        categories = catData || [];
+        const { data: uomData } = await _supabase.from('inventory_uom').select('name').order('name');
+        uomList = uomData || [];
+        const { data: locData } = await _supabase.from('inventory_locations').select('name').order('name');
+        locList = locData || [];
+
+        for(let i=0; i<10; i++) addNewRow();
+        initResizer();
+    }
+
+    function initResizer() {
+        const table = document.getElementById('resizeTable');
+        const cols = table.querySelectorAll('th');
+        cols.forEach(col => {
+            const resizer = col.querySelector('.resizer');
+            if (!resizer) return;
+            let startX, startWidth;
+            resizer.addEventListener('mousedown', (e) => {
+                startX = e.pageX; startWidth = col.offsetWidth;
+                document.addEventListener('mousemove', mouseMoveHandler);
+                document.addEventListener('mouseup', mouseUpHandler);
+            });
+            resizer.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].pageX; startWidth = col.offsetWidth;
+                document.addEventListener('touchmove', touchMoveHandler);
+                document.addEventListener('touchend', touchEndHandler);
+            });
+            const mouseMoveHandler = (e) => {
+                const width = startWidth + (e.pageX - startX);
+                if (width > 50) col.style.width = width + 'px';
+            };
+            const mouseUpHandler = () => {
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+            };
+            const touchMoveHandler = (e) => {
+                const width = startWidth + (e.touches[0].pageX - startX);
+                if (width > 50) col.style.width = width + 'px';
+            };
+            const touchEndHandler = () => {
+                document.removeEventListener('touchmove', touchMoveHandler);
+                document.removeEventListener('touchend', touchEndHandler);
+            };
+        });
     }
 
     function addNewRow(initialData = {}) {
         const tbody = document.getElementById('bulk-body');
-        const rowCount = tbody.children.length + 1;
         const tr = document.createElement('tr');
         
         let catOptions = `<option value="">-- SELECT --</option>`;
@@ -156,19 +219,48 @@
             catOptions += `<option value="${c.name}" data-code="${c.code}" ${selected}>${c.name.toUpperCase()}</option>`;
         });
 
+        let uomOptions = `<option value="">--</option>`;
+        uomList.forEach(u => {
+            const unitName = u.name.toUpperCase();
+            const isSelected = initialData.uom && initialData.uom.toUpperCase() === unitName ? 'selected' : '';
+            uomOptions += `<option value="${unitName}" ${isSelected}>${unitName}</option>`;
+        });
+
+        let locOptions = `<option value="">--</option>`;
+        locList.forEach(l => {
+            const locName = l.name.toUpperCase();
+            const isSelected = initialData.location && initialData.location.toUpperCase() === locName ? 'selected' : '';
+            locOptions += `<option value="${locName}" ${isSelected}>${locName}</option>`;
+        });
+
         tr.innerHTML = `
-            <td style="text-align:center; font-weight:800; font-size:0.6rem; color:#94a3b8;">${rowCount}</td>
+            <td class="sticky-action"><button class="btn-remove" onclick="removeRow(this)">✕</button></td>
+            <td class="sticky-num" style="color:#94a3b8; font-weight:800; font-size:0.6rem;">0</td>
             <td><input type="text" class="row-name" value="${initialData.item_name || ''}" placeholder="DESCRIPTION"></td>
             <td><input type="text" class="row-brand" value="${initialData.brand || ''}" placeholder="BRAND"></td>
             <td><select class="row-cat" onchange="generateRowSKU(this)">${catOptions}</select></td>
-            <td><input type="text" class="row-sku sku-cell" readonly value="${initialData.sku || '---'}"></td>
-            <td><input type="text" class="row-uom" value="${initialData.uom || 'PCS'}" placeholder="PCS"></td>
-            <td><input type="text" class="row-loc" value="${initialData.location || '-'}" placeholder="BIN"></td>
+            <td><input type="text" class="row-sku sku-cell-input" readonly value="${initialData.sku || '---'}"></td>
+            <td><select class="row-uom">${uomOptions}</select></td>
+            <td><select class="row-loc">${locOptions}</select></td>
         `;
         tbody.appendChild(tr);
+        updateRowNumbers();
 
         const select = tr.querySelector('.row-cat');
         if(select.value) generateRowSKU(select);
+    }
+
+    function removeRow(btn) {
+        if (document.querySelectorAll('#bulk-body tr').length <= 1) return alert("MUST HAVE AT LEAST ONE ROW.");
+        btn.closest('tr').remove();
+        updateRowNumbers();
+    }
+
+    function updateRowNumbers() {
+        const rows = document.querySelectorAll('#bulk-body tr');
+        rows.forEach((row, index) => {
+            row.querySelector('.sticky-num').innerText = index + 1;
+        });
     }
 
     function generateRowSKU(selectEl) {
@@ -176,8 +268,7 @@
         const skuInput = tr.querySelector('.row-sku');
         const opt = selectEl.options[selectEl.selectedIndex];
         if (!opt.value) { skuInput.value = "---"; return; }
-
-        const prefix = opt.dataset.code;
+        const prefix = opt.dataset.code || 'ITEM';
         const year = new Date().getFullYear().toString().slice(-2);
         const random = Math.floor(1000 + Math.random() * 9000);
         skuInput.value = `${prefix}-${year}-${random}`;
@@ -191,15 +282,14 @@
             const workbook = XLSX.read(data, { type: 'array' });
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
             const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-            
             document.getElementById('bulk-body').innerHTML = '';
             jsonData.forEach(item => {
                 addNewRow({
                     item_name: item.Description || item.description || '',
                     brand: item.Brand || item.brand || '',
                     category: item.Category || item.category || '',
-                    uom: item.UOM || item.uom || 'PCS',
-                    location: item.Location || item.location || '-'
+                    uom: item.UOM || item.uom || '',
+                    location: item.Location || item.location || ''
                 });
             });
         };
@@ -209,31 +299,29 @@
     async function saveAllItems() {
         const rows = document.querySelectorAll('#bulk-body tr');
         const itemsToInsert = [];
-
         rows.forEach(row => {
             const name = row.querySelector('.row-name').value.trim();
             const sku = row.querySelector('.row-sku').value;
-            if (name && sku !== "---") {
+            const cat = row.querySelector('.row-cat').value;
+            if (name && sku !== "---" && cat) {
                 itemsToInsert.push({
                     item_name: name,
                     brand: row.querySelector('.row-brand').value.trim(),
-                    category: row.querySelector('.row-cat').value,
+                    category: cat,
                     sku: sku,
-                    uom: row.querySelector('.row-uom').value.trim() || 'PCS',
-                    location: row.querySelector('.row-loc').value.trim() || '-',
+                    uom: row.querySelector('.row-uom').value || 'PCS',
+                    location: row.querySelector('.row-loc').value || '-',
                     quantity: 0
                 });
             }
         });
-
         if (itemsToInsert.length === 0) return alert("NO VALID DATA.");
         const btn = document.getElementById('save-btn');
         btn.disabled = true; btn.innerText = "SAVING...";
-
         try {
             const { error } = await _supabase.from('inventory').insert(itemsToInsert);
             if (error) throw error;
-            alert(`SUCCESS: ${itemsToInsert.length} ITEMS ADDED.`);
+            alert(`SUCCESS: ${itemsToInsert.length} ITEMS REGISTERED.`);
             window.location.href = 'inventory.html';
         } catch (err) {
             alert("UPLOAD ERROR: " + err.message);
