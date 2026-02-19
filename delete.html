@@ -12,25 +12,24 @@
             --primary: #0f172a;
             --accent: #0081ff;
             --danger: #ef4444;
+            --success: #10b981;
             --border-gray: #cbd5e1;
         }
+
+        * { box-sizing: border-box; }
 
         body {
             margin: 0; font-family: 'Inter', sans-serif;
             background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
-            /* Mobile footer fix */
-            height: 100dvh; 
-            display: flex; flex-direction: column; overflow: hidden;
+            height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
+            font-size: 0.75rem;
         }
 
-        .navbar { 
-            height: 56px; background: var(--primary); 
-            display: flex; align-items: center; justify-content: space-between; 
-            padding: 0 15px; flex-shrink: 0;
-        }
-        .nav-logo-text { color: white; font-weight: 800; font-size: 1rem; text-transform: uppercase; }
+        .navbar { height: 50px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; flex-shrink: 0; }
+        .nav-logo-text { color: white; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; }
+        .user-tag { color: var(--danger); font-size: 0.6rem; font-weight: 800; text-transform: uppercase; border: 1px solid var(--danger); padding: 2px 6px; border-radius: 4px; }
 
-        .main-content { flex: 1; padding: 10px; display: flex; flex-direction: column; overflow: hidden; }
+        .main-content { flex: 1; padding: 8px; display: flex; flex-direction: column; overflow: hidden; }
 
         .bulk-container {
             background: white; border: 2px solid var(--primary); border-radius: 12px;
@@ -39,95 +38,94 @@
         }
 
         .bulk-header {
-            padding: 12px; border-bottom: 2px solid var(--primary);
-            display: flex; justify-content: space-between; align-items: center; background: #fef2f2;
-            gap: 10px; flex-shrink: 0;
+            padding: 10px; border-bottom: 2px solid var(--primary);
+            display: flex; flex-direction: column; background: #fef2f2;
+            gap: 8px; flex-shrink: 0;
         }
-        .bulk-header h2 { margin: 0; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--danger); }
 
-        .filter-box { display: flex; gap: 6px; align-items: center; }
-        .filter-box select { padding: 8px; border-radius: 6px; border: 1px solid var(--border-gray); font-weight: 700; font-size: 0.7rem; background: white; }
+        #search-box { 
+            width: 100%; padding: 12px; border-radius: 8px; 
+            border: 2px solid var(--danger); font-size: 0.85rem; 
+            font-weight: 700; outline: none; text-transform: uppercase;
+        }
 
         .grid-area { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; }
-        table { border-collapse: collapse; width: 100%; min-width: 900px; }
+        
+        table { border-collapse: separate; border-spacing: 0; width: 100%; table-layout: fixed; }
         
         thead th { 
             position: sticky; top: 0; background: #f8fafc; 
-            padding: 12px; font-size: 0.65rem; font-weight: 800; 
+            padding: 8px; font-size: 0.6rem; font-weight: 800; 
             border-bottom: 2px solid var(--primary); border-right: 1px solid #e2e8f0;
-            text-transform: uppercase; color: #475569; text-align: left; z-index: 10;
+            text-transform: uppercase; color: #475569; text-align: left; z-index: 20;
         }
 
-        tbody td { padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.8rem; font-weight: 600; color: var(--primary); }
-        tr:hover { background: #fff1f2; }
-
-        input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; accent-color: var(--danger); }
-
-        .sku-tag { font-family: monospace; font-weight: 800; color: var(--accent); }
-
-        .bulk-footer {
-            padding: 12px; border-top: 2px solid var(--primary);
-            display: flex; justify-content: space-between; gap: 8px; align-items: center;
-            background: white; flex-shrink: 0;
+        .sticky-col {
+            position: sticky !important; left: 0; background: #f8fafc !important;
+            z-index: 25 !important; border-right: 2px solid var(--primary) !important;
+            width: 90px;
         }
-
-        .btn {
-            height: 44px; padding: 0 15px; border-radius: 8px; font-weight: 800; 
-            text-transform: uppercase; font-size: 0.7rem; cursor: pointer; border: none;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .btn-load { background: var(--primary); color: white; }
-        .btn-delete { background: var(--danger); color: white; flex: 1; }
-        .btn-back { background: #64748b; color: white; text-decoration: none; }
         
-        #selected-count { font-size: 0.65rem; font-weight: 800; color: var(--danger); text-align: center; min-width: 60px; }
-
-        @media (max-width: 600px) {
-            .btn-text { display: none; }
+        tbody td { 
+            padding: 8px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; 
+            font-size: 0.65rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
+
+        .btn-remove-row {
+            background: #fee2e2; color: var(--danger); border: 1px solid var(--danger);
+            border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 0.7rem; font-weight: 800;
+        }
+
+        .bulk-footer { padding: 10px; border-top: 2px solid var(--primary); display: flex; gap: 6px; background: white; align-items: center; }
+        
+        .btn { 
+            height: 40px; padding: 0 12px; border-radius: 8px; font-weight: 800; 
+            text-transform: uppercase; cursor: pointer; border: none; font-size: 0.65rem;
+        }
+        .btn-delete { background: var(--danger); color: white; flex: 2; }
+        .btn-back { background: #64748b; color: white; flex: 1; text-align: center; text-decoration: none; line-height: 40px; }
+        
+        #selected-count { font-size: 0.6rem; font-weight: 800; color: var(--danger); width: 70px; text-align: center; }
+        .sku-tag { font-family: monospace; font-weight: 800; color: var(--accent); }
     </style>
 </head>
 <body>
 
 <header class="navbar">
     <div class="nav-logo-text">EasiStock Delete</div>
-    <div style="color: var(--danger); font-size: 0.65rem; font-weight: 800;">⚠️ REMOVAL MODE</div>
+    <div id="active-user-tag" class="user-tag">UNAUTHORIZED</div>
 </header>
 
 <main class="main-content">
     <div class="bulk-container">
         <div class="bulk-header">
-            <h2>Cleanup</h2>
-            <div class="filter-box">
-                <select id="cat-filter">
-                    <option value="ALL">-- ALL CATEGORIES --</option>
-                </select>
-                <button class="btn btn-load" onclick="loadInventory()">🔍 <span class="btn-text">View List</span></button>
-            </div>
+            <input type="text" id="search-box" placeholder="START TYPING SKU OR NAME..." oninput="this.value = this.value.toUpperCase(); instantSearch(this.value);">
         </div>
 
         <div class="grid-area">
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 50px; text-align: center;"><input type="checkbox" id="master-check" onclick="toggleAll(this)"></th>
-                        <th style="width: 180px;">SKU</th>
-                        <th>Item Description</th>
-                        <th>Brand</th>
-                        <th style="width: 100px;">Stock</th>
-                        <th style="width: 120px;">Category</th>
+                        <th style="width: 40px; text-align: center;"><input type="checkbox" onclick="toggleAll(this)"></th>
+                        <th class="sticky-col">SKU</th>
+                        <th style="width: 180px;">DESCRIPTION</th>
+                        <th style="width: 80px;">LOC</th>
+                        <th style="width: 80px;">BRAND</th>
+                        <th style="width: 60px;">UOM</th>
+                        <th style="width: 60px;">STK</th>
+                        <th style="width: 45px; text-align: center;">🗑️</th>
                     </tr>
                 </thead>
                 <tbody id="bulk-body">
-                    <tr><td colspan="6" style="text-align:center; padding:40px; color:#94a3b8; font-weight:700;">Select category & Load Records</td></tr>
+                    <tr><td colspan="8" style="text-align:center; padding:40px; color:#94a3b8;">Search to load items...</td></tr>
                 </tbody>
             </table>
         </div>
 
         <div class="bulk-footer">
-            <a href="dashboard.html" class="btn btn-back">CANCEL</a>
+            <a href="inventory.html" class="btn btn-back">EXIT</a>
             <div id="selected-count">0 SELECTED</div>
-            <button class="btn btn-delete" id="delete-btn" onclick="deleteSelected()" disabled>Delete Selected</button>
+            <button class="btn btn-delete" id="delete-btn" onclick="deleteSelected()" disabled>DELETE PERMANENTLY</button>
         </div>
     </div>
 </main>
@@ -135,51 +133,77 @@
 <script>
     const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    let _supabase;
 
     async function init() {
-        const { data } = await _supabase.from('inventory_categories').select('*').order('name');
-        const filter = document.getElementById('cat-filter');
-        if(data) {
-            data.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.name;
-                opt.textContent = c.name.toUpperCase();
-                filter.appendChild(opt);
-            });
+        if (typeof supabase !== 'undefined') {
+            _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } else {
+            alert("Library Error: Supabase failed to load.");
+            return;
         }
+
+        // Display Active User
+        const activeUser = localStorage.getItem('activeAdmin') || 'STAFF';
+        document.getElementById('active-user-tag').innerText = activeUser.toUpperCase();
     }
 
-    async function loadInventory() {
-        const filterVal = document.getElementById('cat-filter').value;
+    async function instantSearch(queryStr) {
         const tbody = document.getElementById('bulk-body');
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px;">Loading Data...</td></tr>`;
-
-        let query = _supabase.from('inventory').select('*').order('item_name');
-        if(filterVal !== "ALL") query = query.eq('category', filterVal);
-
-        const { data, error } = await query;
-
-        if(data) {
-            tbody.innerHTML = '';
-            data.forEach((item) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td style="text-align:center;"><input type="checkbox" class="row-check" value="${item.id}" onchange="updateCount()"></td>
-                    <td class="sku-tag">${item.sku}</td>
-                    <td>${item.item_name}</td>
-                    <td>${item.brand || '---'}</td>
-                    <td>${item.quantity} ${item.uom}</td>
-                    <td style="font-size:0.65rem; color:#64748b;">${item.category}</td>
-                `;
-                tbody.appendChild(tr);
-            });
+        
+        if (!queryStr.trim()) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:40px; color:#94a3b8;">Search to load items...</td></tr>`;
             updateCount();
+            return;
         }
+
+        try {
+            const { data, error } = await _supabase
+                .from('inventory')
+                .select('*')
+                .or(`item_name.ilike.%${queryStr}%,sku.ilike.%${queryStr}%`)
+                .limit(40);
+
+            if (error) throw error;
+
+            tbody.innerHTML = '';
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:40px;">No matches found.</td></tr>`;
+            } else {
+                data.forEach((item) => {
+                    const tr = document.createElement('tr');
+                    tr.dataset.id = item.id;
+                    tr.dataset.name = item.item_name;
+                    tr.dataset.sku = item.sku;
+                    tr.dataset.loc = item.location || '';
+                    
+                    tr.innerHTML = `
+                        <td style="text-align:center;"><input type="checkbox" class="row-check" value="${item.id}" onchange="updateCount()"></td>
+                        <td class="sticky-col sku-tag">${item.sku}</td>
+                        <td style="text-transform: uppercase;">${item.item_name}</td>
+                        <td style="font-size:0.6rem; color:#64748b;">${item.location || '-'}</td>
+                        <td style="color:#94a3b8; font-size:0.55rem;">${item.brand || '-'}</td>
+                        <td style="text-align:center;">${item.uom || '-'}</td>
+                        <td style="font-weight:800; text-align:center;">${item.quantity}</td>
+                        <td style="text-align:center;"><button class="btn-remove-row" onclick="removeRow(this)">✕</button></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; padding:20px;">Database Error: ${err.message}</td></tr>`;
+        }
+        updateCount();
+    }
+
+    function removeRow(btn) {
+        btn.closest('tr').remove();
+        updateCount();
     }
 
     function toggleAll(master) {
-        document.querySelectorAll('.row-check').forEach(c => c.checked = master.checked);
+        document.querySelectorAll('.row-check').forEach(cb => cb.checked = master.checked);
         updateCount();
     }
 
@@ -191,26 +215,44 @@
 
     async function deleteSelected() {
         const checkedBoxes = document.querySelectorAll('.row-check:checked');
+        const activeUser = (localStorage.getItem('activeAdmin') || 'STAFF').toUpperCase();
         const idsToDelete = Array.from(checkedBoxes).map(cb => cb.value);
+        const logs = [];
 
-        if (!confirm(`CRITICAL: Delete ${idsToDelete.length} records permanently?`)) return;
+        checkedBoxes.forEach(cb => {
+            const row = cb.closest('tr');
+            logs.push({
+                type: 'DELETE',
+                item_name: row.dataset.name.toUpperCase(),
+                reference_id: row.dataset.sku,
+                details: `[BY: ${activeUser}] PERMANENT REMOVAL. LOC: ${row.dataset.loc}`.toUpperCase()
+            });
+        });
+
+        if (!confirm(`CAUTION: PERMANENTLY DELETE ${idsToDelete.length} ITEMS?`)) return;
 
         const btn = document.getElementById('delete-btn');
         btn.disabled = true; btn.innerText = "DELETING...";
 
         try {
+            // Delete from inventory
             const { error } = await _supabase.from('inventory').delete().in('id', idsToDelete);
             if (error) throw error;
 
-            alert("RECORDS REMOVED.");
-            loadInventory();
+            // Create Audit Trail
+            await _supabase.from('activity_logs').insert(logs);
+
+            alert("DELETED SUCCESSFULLY");
+            document.getElementById('search-box').value = "";
+            instantSearch(""); 
         } catch (err) {
-            alert("DELETE ERROR: " + err.message);
-            btn.disabled = false; btn.innerText = "DELETE SELECTED";
+            alert("ERROR: " + err.message);
+            btn.disabled = false;
+            btn.innerText = "DELETE PERMANENTLY";
         }
     }
 
-    init();
+    window.onload = init;
 </script>
 </body>
 </html>
