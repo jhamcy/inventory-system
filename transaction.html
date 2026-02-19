@@ -21,7 +21,9 @@
         body {
             margin: 0; font-family: 'Inter', sans-serif;
             background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
-            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            /* Using dvh (dynamic viewport height) to account for mobile browser bars */
+            height: 100dvh; 
+            display: flex; flex-direction: column; overflow: hidden;
             align-items: center;
         }
 
@@ -29,84 +31,98 @@
             width: 100%; height: 60px; background: var(--primary); 
             display: flex; align-items: center; justify-content: space-between; 
             padding: 0 20px; flex-shrink: 0; box-sizing: border-box;
+            z-index: 100;
         }
         .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
 
         .main-content {
-            width: 100%; max-width: 1000px; flex: 1; padding: 15px;
-            display: flex; flex-direction: column; gap: 12px; overflow: hidden; box-sizing: border-box;
+            width: 100%; max-width: 1000px; flex: 1; padding: 10px 15px;
+            display: flex; flex-direction: column; gap: 10px; overflow: hidden; box-sizing: border-box;
         }
 
         .info-card {
-            background: white; border-radius: 12px; padding: 15px;
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;
+            background: white; border-radius: 12px; padding: 12px;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
             border: 2px solid var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            flex-shrink: 0;
         }
         .info-item { display: flex; flex-direction: column; }
         .info-label { font-size: 0.55rem; font-weight: 800; color: #64748b; text-transform: uppercase; }
-        .info-value { font-size: 0.8rem; font-weight: 700; color: var(--primary); }
+        .info-value { font-size: 0.75rem; font-weight: 700; color: var(--primary); }
 
         .notes-area {
             grid-column: span 4; background: #f8fafc; border-left: 4px solid var(--accent);
-            padding: 12px; border-radius: 4px; margin-top: 5px;
+            padding: 8px 12px; border-radius: 4px; margin-top: 2px;
         }
-        .notes-text { font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; line-height: 1.4; }
+        .notes-text { font-size: 0.7rem; font-weight: 700; color: var(--primary); text-transform: uppercase; line-height: 1.3; }
 
         .table-container {
             background: white; border: 2px solid var(--primary);
             border-radius: 12px; overflow: hidden;
             display: flex; flex-direction: column; flex: 1;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 5px;
         }
         .table-wrapper { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; min-width: 900px; table-layout: fixed; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; table-layout: fixed; }
         
         thead { position: sticky; top: 0; background: #f1f5f9; z-index: 10; }
         th { 
-            padding: 12px 10px; font-size: 0.65rem; text-transform: uppercase; 
+            padding: 10px; font-size: 0.6rem; text-transform: uppercase; 
             border-bottom: 2px solid var(--primary); color: var(--primary); 
             font-weight: 800; text-align: left; 
         }
-        td { padding: 12px 10px; border-bottom: 1px solid var(--excel-border); font-size: 0.75rem; color: #1e293b; vertical-align: middle; }
+        td { padding: 10px; border-bottom: 1px solid var(--excel-border); font-size: 0.75rem; color: #1e293b; vertical-align: middle; }
 
         .sku-code { font-family: monospace; font-weight: 800; color: var(--accent); }
         .uom-tag { font-size: 0.6rem; color: white; background: #64748b; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
         
-        .qty-badge { font-weight: 800; padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; min-width: 55px; text-align: center; display: inline-block; }
+        .qty-badge { font-weight: 800; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; min-width: 50px; text-align: center; display: inline-block; }
         .plus { color: var(--success); background: #ecfdf5; border: 1px solid var(--success); }
         .minus { color: var(--danger); background: #fef2f2; border: 1px solid var(--danger); }
         .reorder-style { color: var(--reorder); background: #fff7ed; border: 1px solid var(--reorder); }
 
-        .footer-actions { text-align: center; padding: 15px 0; flex-shrink: 0; }
+        /* FOOTER FIX FOR MOBILE */
+        .footer-actions { 
+            width: 100%;
+            text-align: center; 
+            padding: 10px 0 25px 0; /* Extra bottom padding for home indicators */
+            flex-shrink: 0; 
+            background: transparent;
+        }
         .btn-back {
             background: var(--primary); color: white; border: none;
-            padding: 12px 40px; border-radius: 8px; font-weight: 800;
-            cursor: pointer; text-transform: uppercase; font-size: 0.75rem;
+            padding: 14px 45px; border-radius: 10px; font-weight: 800;
+            cursor: pointer; text-transform: uppercase; font-size: 0.8rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
         }
+        .btn-back:active { transform: scale(0.95); }
 
         @media (max-width: 800px) {
             .info-card { grid-template-columns: 1fr 1fr; }
             .notes-area { grid-column: span 2; }
+            .main-content { padding: 8px; }
         }
     </style>
 </head>
 <body>
 
     <header class="navbar">
-        <div class="nav-logo-text">Transaction Detail Report</div>
-        <div id="disp-ref-top" style="color: white; font-weight: 800; font-size: 0.8rem; background: var(--accent); padding: 5px 15px; border-radius: 6px;">---</div>
+        <div class="nav-logo-text">Detail Report</div>
+        <div id="disp-ref-top" style="color: white; font-weight: 800; font-size: 0.7rem; background: var(--accent); padding: 5px 12px; border-radius: 6px;">---</div>
     </header>
 
     <main class="main-content">
         <div class="info-card">
-            <div class="info-item"><span class="info-label">Reference</span><span id="val-ref" class="info-value">---</span></div>
+            <div class="info-item"><span class="info-label">Ref</span><span id="val-ref" class="info-value">---</span></div>
             <div class="info-item"><span class="info-label">Action</span><span id="val-type" class="info-value">---</span></div>
-            <div class="info-item"><span class="info-label">Operator</span><span id="val-user" class="info-value">---</span></div>
-            <div class="info-item"><span class="info-label">Date/Time</span><span id="val-date" class="info-value">---</span></div>
+            <div class="info-item"><span class="info-label">User</span><span id="val-user" class="info-value">---</span></div>
+            <div class="info-item"><span class="info-label">Date</span><span id="val-date" class="info-value">---</span></div>
             
             <div class="notes-area" id="notes-box">
                 <div class="info-label" style="color: var(--accent); margin-bottom: 4px;">Summary</div>
-                <div id="val-notes" class="notes-text">NO ADDITIONAL DETAILS PROVIDED.</div>
+                <div id="val-notes" class="notes-text">LOADING...</div>
             </div>
         </div>
 
@@ -116,11 +132,11 @@
                     <thead>
                         <tr id="table-head-row">
                             <th style="width: 15%;">SKU</th>
-                            <th style="width: 30%;">Item Description</th>
+                            <th style="width: 30%;">Description</th>
                             <th style="width: 15%;">Brand</th>
-                            <th style="width: 15%;">Location</th>
+                            <th style="width: 15%;">Loc</th>
                             <th style="width: 10%;">UOM</th>
-                            <th style="width: 15%; text-align: center;" id="qty-header">Qty Transacted</th>
+                            <th style="width: 15%; text-align: center;" id="qty-header">Qty</th>
                         </tr>
                     </thead>
                     <tbody id="inventory-body">
@@ -131,7 +147,7 @@
         </div>
 
         <div class="footer-actions">
-            <button class="btn-back" onclick="location.href='logs.html'">Close & Return to Logs</button>
+            <button class="btn-back" onclick="location.href='logs.html'">Return to Logs</button>
         </div>
     </main>
 
@@ -153,26 +169,24 @@
                     document.getElementById('disp-ref-top').innerText = ref;
                     document.getElementById('val-type').innerText = logData.type || 'N/A';
                     document.getElementById('val-user').innerText = logData.performed_by || 'ADMIN';
-                    document.getElementById('val-date').innerText = new Date(logData.created_at).toLocaleString('en-GB');
-                    document.getElementById('val-notes').innerText = logData.summary || 'PROCUREMENT PLAN GENERATED.';
+                    document.getElementById('val-date').innerText = new Date(logData.created_at).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' });
+                    document.getElementById('val-notes').innerText = logData.summary || 'TRANSACTION COMPLETED.';
                     
-                    // Apply Reorder Theme if applicable
                     if(logData.type === 'REORDER') {
                         document.getElementById('disp-ref-top').style.background = 'var(--reorder)';
-                        document.getElementById('qty-header').innerText = 'Suggested Buy';
+                        document.getElementById('qty-header').innerText = 'Suggested';
                         document.getElementById('notes-box').style.borderLeftColor = 'var(--reorder)';
-                        loadReorderItems(); // Load specific reorder view
+                        loadReorderItems(); 
                         return;
                     }
                 }
 
-                // Standard Transaction Loading
                 const { data: items } = await sb.from('inventory_transactions').select('*').eq('reference_id', ref);
                 
                 if(items && items.length > 0) {
                     renderStandardTable(items);
                 } else {
-                    document.getElementById('inventory-body').innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px;">No specific item lines found for this log.</td></tr>`;
+                    document.getElementById('inventory-body').innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px;">No records found.</td></tr>`;
                 }
             } catch (err) { console.error(err); }
         }
@@ -186,7 +200,7 @@
                 return `
                 <tr>
                     <td><span class="sku-code">${row.sku || 'N/A'}</span></td>
-                    <td style="font-weight: 700; text-transform: uppercase;">${row.item_name || 'UNKNOWN ITEM'}</td>
+                    <td style="font-weight: 700; text-transform: uppercase; font-size: 0.65rem;">${row.item_name || 'UNKNOWN'}</td>
                     <td>${row.brand || '---'}</td>
                     <td style="font-weight: 700;">${row.location || 'MAIN'}</td>
                     <td><span class="uom-tag">${row.uom || 'PCS'}</span></td>
@@ -198,13 +212,11 @@
         }
 
         async function loadReorderItems() {
-            // For REORDER logs, we fetch current items that are low stock (matching reorder logic)
             const { data: items } = await sb.from('inventory').select('*').lt('quantity', 10);
-            
             document.getElementById('inventory-body').innerHTML = items.map(row => `
                 <tr>
                     <td><span class="sku-code">${row.sku || 'N/A'}</span></td>
-                    <td style="font-weight: 700; text-transform: uppercase;">${row.item_name || 'UNKNOWN'}</td>
+                    <td style="font-weight: 700; text-transform: uppercase; font-size: 0.65rem;">${row.item_name || 'UNKNOWN'}</td>
                     <td>${row.brand || '---'}</td>
                     <td style="font-weight: 700;">${row.location || 'MAIN'}</td>
                     <td><span class="uom-tag">${row.uom || 'PCS'}</span></td>
