@@ -20,7 +20,8 @@
         body {
             margin: 0; font-family: 'Inter', sans-serif;
             background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
-            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            /* Fix for mobile viewport overlapping */
+            height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
             align-items: center;
         }
 
@@ -39,20 +40,21 @@
         }
 
         .main-content { 
-            width: 100%; max-width: 700px; flex: 1; padding: 12px; 
+            width: 100%; max-width: 700px; flex: 1; padding: 10px; 
             display: flex; flex-direction: column; overflow: hidden;
             box-sizing: border-box;
         }
 
+        /* FILTERS - Stay at top */
         .filter-grid { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; 
-            margin-bottom: 12px; width: 100%; background: white;
-            padding: 12px; border-radius: 12px; border: 2px solid var(--primary);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); box-sizing: border-box; flex-shrink: 0;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 6px; 
+            margin-bottom: 10px; width: 100%; background: white;
+            padding: 10px; border-radius: 12px; border: 2px solid var(--primary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); box-sizing: border-box; 
+            flex-shrink: 0; 
         }
 
         .search-wrapper { grid-column: span 2; }
-
         .search-input, .type-select, .date-input { 
             width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;
             font-size: 0.8rem; font-weight: 700; box-sizing: border-box; outline: none; background: #f8fafc;
@@ -60,43 +62,49 @@
 
         .btn-reset { 
             grid-column: span 2; background: #64748b; color: white; border: none; 
-            padding: 10px; border-radius: 8px; font-weight: 800; font-size: 0.7rem; 
+            padding: 8px; border-radius: 8px; font-weight: 800; font-size: 0.65rem; 
             cursor: pointer; text-transform: uppercase; 
         }
 
         .section-header { 
-            width: 100%; background: var(--primary); color: white; padding: 12px 15px; 
-            border-radius: 12px 12px 0 0; font-size: 0.7rem; font-weight: 800; 
-            text-transform: uppercase; display: flex; justify-content: space-between; box-sizing: border-box;
+            width: 100%; background: var(--primary); color: white; padding: 10px 15px; 
+            border-radius: 12px 12px 0 0; font-size: 0.65rem; font-weight: 800; 
+            text-transform: uppercase; display: flex; justify-content: space-between; 
+            box-sizing: border-box; flex-shrink: 0;
         }
 
+        /* DATA TABLE - Only this part scrolls */
         .table-area { 
             width: 100%; background: white; border: 2px solid var(--primary); border-top: none; 
             border-radius: 0 0 12px 12px; overflow-y: auto;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1); flex: 1;
+            -webkit-overflow-scrolling: touch;
         }
         
         table { border-collapse: collapse; width: 100%; table-layout: fixed; }
 
         thead th { 
             position: sticky; top: 0; z-index: 10; background: #f1f5f9;
-            padding: 12px 10px; font-size: 0.6rem; text-transform: uppercase; 
+            padding: 10px; font-size: 0.55rem; text-transform: uppercase; 
             border-bottom: 2px solid var(--primary); color: var(--primary); font-weight: 800; text-align: left;
         }
 
-        tbody td { padding: 12px 10px; border-bottom: 1px solid var(--excel-border); font-size: 0.7rem; font-weight: 600; vertical-align: middle; }
-
-        tbody tr:hover { background-color: #f0f9ff; cursor: pointer; }
+        tbody td { padding: 10px; border-bottom: 1px solid var(--excel-border); font-size: 0.7rem; font-weight: 600; vertical-align: middle; word-wrap: break-word; }
 
         .badge { 
-            padding: 4px 6px; border-radius: 4px; font-weight: 800; font-size: 0.55rem; 
+            padding: 4px 2px; border-radius: 4px; font-weight: 800; font-size: 0.5rem; 
             color: white; text-align: center; display: block; width: 100%; box-sizing: border-box;
         }
 
-        .ref-id { color: var(--accent); font-weight: 800; font-family: monospace; font-size: 0.75rem; }
+        .ref-id { color: var(--accent); font-weight: 800; font-family: monospace; font-size: 0.7rem; }
+        .summary-text { font-size: 0.55rem; color: #64748b; font-weight: 500; display: block; margin-top: 2px; text-transform: uppercase; }
 
-        .summary-text { font-size: 0.6rem; color: #64748b; font-weight: 500; display: block; margin-top: 2px; text-transform: uppercase; }
-
+        @media (max-width: 480px) {
+            .navbar { height: 50px; }
+            .section-header { padding: 8px 10px; }
+            thead th:nth-child(1), tbody td:nth-child(1) { width: 20%; font-size: 0.5rem; }
+            thead th:nth-child(4), tbody td:nth-child(4) { width: 15%; font-size: 0.5rem; }
+        }
     </style>
 </head>
 <body>
@@ -108,7 +116,7 @@
     <main class="main-content">
         <div class="filter-grid">
             <div class="search-wrapper">
-                <input type="text" id="mainSearch" class="search-input" placeholder="🔍 SEARCH REF ID OR SUMMARY..." onkeyup="applyFilters()">
+                <input type="text" id="mainSearch" class="search-input" placeholder="🔍 SEARCH REF OR NOTE..." onkeyup="applyFilters()">
             </div>
             <select id="typeFilter" class="type-select" onchange="applyFilters()">
                 <option value="ALL">ALL ACTIVITIES</option>
@@ -117,9 +125,6 @@
                 <option value="TRANSFER">🔄 TRANSFERS</option>
                 <option value="RETURN">↩️ RETURNS</option>
                 <option value="ADJUST">⚖️ ADJUSTMENTS</option>
-                <option value="ADD">➕ ADD ITEM</option>
-                <option value="EDIT">✏️ EDIT ITEM</option>
-                <option value="DELETE">🗑️ DELETE</option>
             </select>
             <div style="display: flex; gap: 4px;">
                 <input type="date" id="dateFrom" class="date-input" onchange="applyFilters()">
@@ -137,14 +142,14 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 22%;">Date</th>
-                        <th style="width: 23%;">Type</th>
-                        <th style="width: 35%;">Ref / Summary</th>
+                        <th style="width: 20%;">Date</th>
+                        <th style="width: 25%;">Type</th>
+                        <th style="width: 35%;">Ref / Note</th>
                         <th style="width: 20%; text-align: right;">User</th>
                     </tr>
                 </thead>
                 <tbody id="logs-master-body">
-                    <tr><td colspan="4" style="text-align:center; padding:30px;">Loading Audit Data...</td></tr>
+                    <tr><td colspan="4" style="text-align:center; padding:30px;">Loading...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -182,19 +187,19 @@
             document.getElementById('log-count').innerText = `${list.length} RECORDS`;
 
             if (list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px;">No records match your criteria.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px;">No records.</td></tr>';
                 return;
             }
 
             tbody.innerHTML = list.map(row => `
                 <tr onclick="location.href='transaction.html?ref=${encodeURIComponent(row.ref)}'">
-                    <td style="font-size: 0.6rem; color: #64748b;">${row.displayDate}</td>
+                    <td style="font-size: 0.55rem; color: #64748b;">${row.displayDate}</td>
                     <td><span class="badge" style="background:${getTypeColor(row.type)}">${row.type}</span></td>
                     <td>
                         <span class="ref-id">${row.ref}</span>
                         <span class="summary-text">${row.summary}</span>
                     </td>
-                    <td style="text-align:right; font-size: 0.6rem; color: var(--primary); font-weight: 800;">${row.user}</td>
+                    <td style="text-align:right; font-size: 0.55rem; color: var(--primary); font-weight: 800;">${row.user}</td>
                 </tr>
             `).join('');
         }
@@ -203,11 +208,7 @@
             if (type.includes('RECV')) return '#059669';
             if (type.includes('ORDER')) return '#6366f1';
             if (type.includes('TRANS')) return '#0081ff';
-            if (type.includes('RTN') || type.includes('RETURN')) return '#f59e0b'; // New Return Color
-            if (type.includes('ADJ')) return '#64748b';
-            if (type.includes('ADD')) return '#10b981';
-            if (type.includes('EDIT')) return '#8b5cf6';
-            if (type.includes('DEL')) return '#ef4444';
+            if (type.includes('RTN') || type.includes('RETURN')) return '#f59e0b';
             return '#475569';
         }
 
@@ -220,14 +221,11 @@
             const filtered = masterLogData.filter(item => {
                 const matchesSearch = item.ref.includes(searchVal) || item.summary.toUpperCase().includes(searchVal);
                 const matchesType = (typeVal === "ALL") || (item.type.includes(typeVal));
-                
                 let matchesDate = true;
                 if (fromVal && item.rawDate < fromVal) matchesDate = false;
                 if (toVal && item.rawDate > toVal) matchesDate = false;
-
                 return matchesSearch && matchesType && matchesDate;
             });
-
             renderTable(filtered);
         }
 
