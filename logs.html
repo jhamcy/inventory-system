@@ -12,7 +12,6 @@
             --accent: #0081ff;
             --success: #10b981;
             --danger: #ef4444;
-            --warning: #f59e0b;
             --excel-border: #cbd5e1;
         }
         body {
@@ -21,71 +20,71 @@
             height: 100vh; display: flex; flex-direction: column; overflow: hidden;
             align-items: center;
         }
-        /* NAVBAR */
-        .navbar { width: 100%; height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; }
+        .navbar { width: 100%; height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 100; }
+        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
 
-        /* NAVIGATION BUTTONS */
         .toggle-container { width: 100%; padding: 10px; display: flex; justify-content: center; flex-shrink: 0; box-sizing: border-box; }
         .toggle-group { 
             display: flex; width: 100%; max-width: 500px; 
             border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         .btn-toggle { 
             flex: 1; padding: 10px 0; border: none; cursor: pointer; 
             color: rgba(255,255,255,0.6); background: var(--primary); 
             font-size: 0.6rem; font-weight: 800; text-transform: uppercase; 
             display: flex; flex-direction: column; align-items: center; gap: 2px;
-            border-right: 1px solid rgba(255,255,255,0.1);
         }
-        .btn-toggle:last-child { border-right: none; }
-        .btn-toggle span:first-child { font-size: 1.1rem; }
         .btn-toggle.active { background: var(--accent) !important; color: white !important; }
 
-        /* MAIN CONTENT AREA */
-        .main-content { width: 100%; max-width: 600px; flex: 1; padding: 10px; display: flex; flex-direction: column; align-items: center; overflow: hidden; box-sizing: border-box; }
+        /* FIXED MAIN CONTENT WRAPPER */
+        .main-content { 
+            width: 100%; max-width: 600px; flex: 1; padding: 10px; 
+            display: flex; flex-direction: column; overflow: hidden; /* Crucial for internal scrolling */
+            box-sizing: border-box;
+        }
         
-        /* FILTERS */
+        /* FILTERS (STAYS AT TOP) */
         .filter-grid { 
             display: grid; grid-template-columns: 1fr 1fr; gap: 8px; 
             margin-bottom: 12px; width: 100%; background: white;
-            padding: 15px; border-radius: 12px; border: 2px solid var(--primary);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); box-sizing: border-box;
+            padding: 12px; border-radius: 12px; border: 2px solid var(--primary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); box-sizing: border-box; flex-shrink: 0;
         }
         .search-wrapper { position: relative; grid-column: span 2; }
         .search-input, .type-select, .date-input { 
-            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;
+            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;
             font-size: 0.8rem; font-weight: 700; box-sizing: border-box; outline: none; background: #f8fafc;
         }
         .date-label { font-size: 0.6rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 4px; display: block; }
-        .btn-reset { grid-column: span 2; background: var(--primary); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 800; font-size: 0.7rem; cursor: pointer; text-transform: uppercase; margin-top: 5px; }
+        .btn-reset { grid-column: span 2; background: var(--primary); color: white; border: none; padding: 8px; border-radius: 8px; font-weight: 800; font-size: 0.7rem; cursor: pointer; text-transform: uppercase; }
 
-        /* SCROLLABLE TABLE AREA WITH STICKY HEADERS */
+        /* TABLE SECTION (SCROLLS INTERNALLY) */
         .section-header { 
             width: 100%; background: var(--primary); color: white; padding: 12px 15px; 
             border-radius: 12px 12px 0 0; font-size: 0.7rem; font-weight: 800; 
-            text-transform: uppercase; display: flex; justify-content: space-between; box-sizing: border-box;
+            text-transform: uppercase; display: flex; justify-content: space-between; box-sizing: border-box; flex-shrink: 0;
         }
         .table-area { 
             width: 100%; background: white; border: 2px solid var(--primary); border-top: none; 
             border-radius: 0 0 12px 12px; overflow-y: auto; overflow-x: auto; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px;
-            flex: 1; /* Allows table to fill remaining space and scroll internally */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            margin-bottom: 15px; /* Added spacing to prevent overlap */
+            flex: 1; /* Makes the table area take all available middle space */
+            -webkit-overflow-scrolling: touch; /* Smooth scroll for iOS */
         }
         
         table { border-collapse: collapse; width: 100%; min-width: 400px; table-layout: fixed; }
-        
-        /* STICKY THEAD LOGIC */
-        thead { position: sticky; top: 0; z-index: 10; }
+        thead { position: sticky; top: 0; z-index: 10; background: #f1f5f9; }
         thead th { 
-            background: #f1f5f9; padding: 12px 10px; font-size: 0.6rem; 
-            text-transform: uppercase; border-bottom: 2px solid var(--primary); 
-            color: var(--primary); font-weight: 800; text-align: left;
+            padding: 12px 10px; font-size: 0.6rem; text-transform: uppercase; 
+            border-bottom: 2px solid var(--primary); color: var(--primary); font-weight: 800; text-align: left;
         }
+        tbody td { padding: 12px 10px; border-bottom: 1px solid var(--excel-border); font-size: 0.75rem; font-weight: 600; }
         
-        tbody td { padding: 12px 10px; border-bottom: 1px solid var(--excel-border); font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .ref-link { color: var(--accent); font-weight: 800; cursor: pointer; text-decoration: underline; font-family: monospace; }
+        /* PADDING BOTTOM FOR TABLE CONTENT */
+        tbody tr:last-child td { border-bottom: none; padding-bottom: 25px; }
+
+        .ref-link { color: var(--accent); font-weight: 800; cursor: pointer; text-decoration: underline; }
         .badge { padding: 4px 8px; border-radius: 6px; font-weight: 800; font-size: 0.55rem; color: white; text-align: center; min-width: 65px; display: inline-block;}
     </style>
 </head>
@@ -107,7 +106,7 @@
     <main class="main-content">
         <div class="filter-grid">
             <div class="search-wrapper">
-                <input type="text" id="mainSearch" class="search-input" placeholder="🔍 SEARCH REFERENCE ID..." onkeyup="applyFilters()">
+                <input type="text" id="mainSearch" class="search-input" placeholder="🔍 SEARCH REF ID..." onkeyup="applyFilters()">
             </div>
             <div style="grid-column: span 2;">
                 <span class="date-label">Category Filter</span>
@@ -115,20 +114,12 @@
                     <option value="ALL">ALL CATEGORIES</option>
                     <option value="RECEIVING">🚚 RECEIVING</option>
                     <option value="ORDER">📝 ORDERS</option>
-                    <option value="TRANSFER">🔄 TRANSFER</option>
-                    <option value="ADD">➕ NEW ITEMS</option>
                     <option value="ADJUST">⚖️ ADJUSTMENTS</option>
                 </select>
             </div>
-            <div>
-                <span class="date-label">From Date</span>
-                <input type="date" id="dateFrom" class="date-input" onchange="applyFilters()">
-            </div>
-            <div>
-                <span class="date-label">To Date</span>
-                <input type="date" id="dateTo" class="date-input" onchange="applyFilters()">
-            </div>
-            <button class="btn-reset" onclick="resetFilters()">Reset All Filters</button>
+            <div><input type="date" id="dateFrom" class="date-input" onchange="applyFilters()"></div>
+            <div><input type="date" id="dateTo" class="date-input" onchange="applyFilters()"></div>
+            <button class="btn-reset" onclick="resetFilters()">Reset Filters</button>
         </div>
 
         <div class="section-header">
@@ -147,7 +138,7 @@
                     </tr>
                 </thead>
                 <tbody id="logs-master-body">
-                    <tr><td colspan="4" style="text-align:center; padding:30px;">Syncing with database...</td></tr>
+                    <tr><td colspan="4" style="text-align:center; padding:30px;">Syncing...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -217,33 +208,23 @@
 
         function renderTable(list) {
             const tbody = document.getElementById('logs-master-body');
-            if (list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px; color:#64748b;">No results found.</td></tr>';
-                document.getElementById('log-count').innerText = "0 RECORDS";
-                return;
-            }
-
             tbody.innerHTML = list.map(row => {
                 let displayRef = row.ref;
                 if (row.type === 'RECEIVING') displayRef = "DR-" + row.ref.split('-').pop();
                 else if (row.type === 'ORDER') displayRef = "OR-" + row.ref.split('-').pop();
-                else if (['ADD', 'EDIT', 'ADJUST', 'DELETE'].includes(row.type)) displayRef = "MNT-" + row.ref.split('-').pop();
-
                 return `
                 <tr>
                     <td>${row.displayDate}</td>
                     <td><span class="badge" style="background:${getTypeColor(row.type)}">${row.type}</span></td>
-                    <td><span class="ref-link" onclick="location.href='transaction.html?ref=${encodeURIComponent(row.ref)}'">${displayRef} 🔍</span></td>
-                    <td style="text-align:right; font-weight:800; color:${row.totalQty < 0 ? 'var(--danger)' : (row.totalQty > 0 ? 'var(--success)' : '#64748b')}">
-                        ${row.totalQty > 0 ? '+' : ''}${row.totalQty}
-                    </td>
+                    <td><span class="ref-link" onclick="location.href='transaction.html?ref=${encodeURIComponent(row.ref)}'">${displayRef}</span></td>
+                    <td style="text-align:right; font-weight:800; color:${row.totalQty < 0 ? 'var(--danger)' : 'var(--success)'}">${row.totalQty > 0 ? '+' : ''}${row.totalQty}</td>
                 </tr>`;
-            }).join('');
+            }).join('') || '<tr><td colspan="4" style="text-align:center; padding:30px;">No records.</td></tr>';
             document.getElementById('log-count').innerText = `${list.length} RECORDS`;
         }
 
         function getTypeColor(type) {
-            const colors = { RECEIVING: '#059669', ORDER: '#6366f1', ADJUST: '#f59e0b', TRANSFER: '#0081ff', ADD: '#10b981', DELETE: '#ef4444' };
+            const colors = { RECEIVING: '#059669', ORDER: '#6366f1', ADJUST: '#f59e0b', TRANSFER: '#0081ff' };
             return colors[type] || '#64748b';
         }
         window.onload = initLogs;
