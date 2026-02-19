@@ -153,7 +153,6 @@
     let _supabase;
     let categories = [], uomList = [], locList = [];
 
-    // --- FIX: Initialize only after window loads ---
     async function init() {
         if (typeof supabase !== 'undefined') {
             _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -162,19 +161,22 @@
             return;
         }
 
-        // Show Active User
         const activeUser = localStorage.getItem('activeAdmin') || 'STAFF';
         document.getElementById('display-user').innerText = activeUser.toUpperCase();
 
-        const { data: catData } = await _supabase.from('inventory_categories').select('*').order('name');
-        categories = catData || [];
-        const { data: uomData } = await _supabase.from('inventory_uom').select('name').order('name');
-        uomList = uomData || [];
-        const { data: locData } = await _supabase.from('inventory_locations').select('name').order('name');
-        locList = locData || [];
+        try {
+            const { data: catData } = await _supabase.from('inventory_categories').select('*').order('name');
+            categories = catData || [];
+            const { data: uomData } = await _supabase.from('inventory_uom').select('name').order('name');
+            uomList = uomData || [];
+            const { data: locData } = await _supabase.from('inventory_locations').select('name').order('name');
+            locList = locData || [];
 
-        for(let i=0; i<10; i++) addNewRow();
-        initResizer();
+            for(let i=0; i<10; i++) addNewRow();
+            initResizer();
+        } catch (error) {
+            console.error("Initialization Error:", error);
+        }
     }
 
     function initResizer() {
@@ -186,13 +188,16 @@
             let startX, startWidth;
             resizer.addEventListener('mousedown', (e) => {
                 startX = e.pageX; startWidth = col.offsetWidth;
-                document.addEventListener('mousemove', (e) => {
+                const onMouseMove = (e) => {
                     const width = startWidth + (e.pageX - startX);
                     if (width > 50) col.style.width = width + 'px';
-                });
-                document.addEventListener('mouseup', () => {
-                    document.onmousemove = null;
-                }, { once: true });
+                };
+                const onMouseUp = () => {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                };
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
             });
         });
     }
@@ -282,7 +287,6 @@
         reader.readAsArrayBuffer(file);
     }
 
-    // --- UPDATED LOGGING LOGIC ---
     async function saveAllItems() {
         const rows = document.querySelectorAll('#bulk-body tr');
         const activeUser = (localStorage.getItem('activeAdmin') || 'STAFF').toUpperCase();
@@ -324,11 +328,9 @@
         btn.disabled = true; btn.innerText = "UPDATING...";
 
         try {
-            // 1. Insert Inventory
             const { error: invError } = await _supabase.from('inventory').insert(itemsToInsert);
             if (invError) throw invError;
 
-            // 2. Insert Logs
             const { error: logError } = await _supabase.from('activity_logs').insert(logsToInsert);
             if (logError) console.warn("Log tracking failed.");
 
