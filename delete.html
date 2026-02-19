@@ -43,7 +43,7 @@
 
         #search-box { 
             width: 100%; padding: 12px; border-radius: 8px; 
-            border: 2px solid var(--accent); font-size: 0.85rem; 
+            border: 2px solid var(--danger); font-size: 0.85rem; 
             font-weight: 700; outline: none; text-transform: uppercase;
         }
 
@@ -58,7 +58,6 @@
             text-transform: uppercase; color: #475569; text-align: left; z-index: 20;
         }
 
-        /* STICKY LOCATION COLUMN */
         .sticky-col {
             position: sticky !important; left: 0; 
             background: #f1f5f9 !important;
@@ -67,8 +66,6 @@
             width: 110px;
         }
 
-        thead th.sticky-col { z-index: 30 !important; background: #f8fafc !important; }
-        
         tbody td { 
             padding: 8px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; 
             font-size: 0.65rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -84,25 +81,23 @@
         .btn { 
             height: 44px; padding: 0 12px; border-radius: 8px; font-weight: 800; 
             text-transform: uppercase; cursor: pointer; border: none; font-size: 0.7rem;
+            display: flex; align-items: center; justify-content: center; text-decoration: none;
         }
         .btn-delete { background: var(--danger); color: white; flex: 2; }
+        .btn-back { background: #64748b; color: white; width: 160px; }
         
-        /* EXIT BUTTON POINTING TO DASHBOARD */
-        .btn-back { background: #64748b; color: white; width: 70px; display: flex; align-items: center; justify-content: center; text-decoration: none; }
-        
-        #selected-count { font-size: 0.6rem; font-weight: 800; color: var(--danger); width: 70px; text-align: center; }
+        #selected-count { font-size: 0.6rem; font-weight: 800; color: var(--danger); width: 80px; text-align: center; }
         .sku-tag { font-family: monospace; font-weight: 800; color: var(--accent); }
-        .loc-tag { font-weight: 800; color: var(--primary); }
     </style>
 </head>
 <body>
 
-<header class="navbar"><div class="nav-logo-text">EasiStock Delete</div></header>
+<header class="navbar"><div class="nav-logo-text">EasiStock | Inventory Purge</div></header>
 
 <main class="main-content">
     <div class="bulk-container">
         <div class="bulk-header">
-            <input type="text" id="search-box" placeholder="START TYPING SKU OR NAME..." oninput="this.value = this.value.toUpperCase(); instantSearch(this.value);">
+            <input type="text" id="search-box" placeholder="START TYPING SKU OR NAME TO DELETE..." oninput="this.value = this.value.toUpperCase(); instantSearch(this.value);">
         </div>
 
         <div class="grid-area">
@@ -120,13 +115,13 @@
                     </tr>
                 </thead>
                 <tbody id="bulk-body">
-                    <tr><td colspan="8" style="text-align:center; padding:40px; color:#94a3b8;">Search to load items...</td></tr>
+                    <tr><td colspan="8" style="text-align:center; padding:40px; color:#94a3b8;">Search to load items for deletion...</td></tr>
                 </tbody>
             </table>
         </div>
 
         <div class="bulk-footer">
-            <button class="btn btn-back" onclick="window.location.href='dashboard.html'">EXIT</button>
+            <a href="dashboard.html" class="btn btn-back">EXIT TO DASHBOARD</a>
             <div id="selected-count">0 SELECTED</div>
             <button class="btn btn-delete" id="delete-btn" onclick="deleteSelected()" disabled>DELETE PERMANENTLY</button>
         </div>
@@ -140,60 +135,47 @@
 
     async function instantSearch(queryStr) {
         const tbody = document.getElementById('bulk-body');
-        
         if (!queryStr.trim()) {
             tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:40px; color:#94a3b8;">Search to load items...</td></tr>`;
             updateCount();
             return;
         }
 
-        try {
-            const { data, error } = await _supabase
-                .from('inventory')
-                .select('*')
-                .or(`item_name.ilike.%${queryStr}%,sku.ilike.%${queryStr}%`)
-                .limit(40);
+        const { data, error } = await _supabase
+            .from('inventory')
+            .select('*')
+            .or(`item_name.ilike.%${queryStr}%,sku.ilike.%${queryStr}%`)
+            .limit(30);
 
-            if (error) throw error;
+        if (error) return;
 
-            tbody.innerHTML = '';
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:40px;">No matches found.</td></tr>`;
-            } else {
-                data.forEach((item) => {
-                    const tr = document.createElement('tr');
-                    tr.dataset.id = item.id;
-                    tr.dataset.name = item.item_name;
-                    tr.dataset.sku = item.sku;
-                    tr.dataset.loc = item.location || 'MAIN';
-                    
-                    tr.innerHTML = `
-                        <td class="sticky-col loc-tag">${tr.dataset.loc}</td>
-                        <td class="sku-tag">${item.sku}</td>
-                        <td style="text-transform: uppercase;">${item.item_name}</td>
-                        <td style="color:#94a3b8; font-size:0.55rem;">${item.brand || '-'}</td>
-                        <td style="text-align:center;">${item.uom || '-'}</td>
-                        <td style="font-weight:800; text-align:center;">${item.quantity}</td>
-                        <td style="text-align:center;"><input type="checkbox" class="row-check" value="${item.id}" onchange="updateCount()"></td>
-                        <td style="text-align:center;"><button class="btn-remove-row" onclick="removeRow(this)">✕</button></td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-        } catch (err) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red; padding:20px;">Database Error: ${err.message}</td></tr>`;
-        }
+        tbody.innerHTML = data.length ? '' : `<tr><td colspan="8" style="text-align:center; padding:40px;">No matches found.</td></tr>`;
+        data.forEach((item) => {
+            const tr = document.createElement('tr');
+            tr.dataset.id = item.id;
+            tr.dataset.name = item.item_name;
+            tr.dataset.sku = item.sku;
+            tr.dataset.loc = item.location || 'MAIN';
+            
+            tr.innerHTML = `
+                <td class="sticky-col" style="font-weight:800;">${tr.dataset.loc}</td>
+                <td class="sku-tag">${item.sku}</td>
+                <td style="text-transform: uppercase;">${item.item_name}</td>
+                <td style="color:#94a3b8; font-size:0.55rem;">${item.brand || '-'}</td>
+                <td style="text-align:center;">${item.uom || '-'}</td>
+                <td style="font-weight:800; text-align:center;">${item.quantity}</td>
+                <td style="text-align:center;"><input type="checkbox" class="row-check" value="${item.id}" onchange="updateCount()"></td>
+                <td style="text-align:center;"><button class="btn-remove-row" onclick="removeRow(this)">✕</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
         updateCount();
     }
 
-    function removeRow(btn) {
-        btn.closest('tr').remove();
-        updateCount();
-    }
-
-    function toggleAll(master) {
-        document.querySelectorAll('.row-check').forEach(cb => cb.checked = master.checked);
-        updateCount();
+    function removeRow(btn) { btn.closest('tr').remove(); updateCount(); }
+    function toggleAll(master) { 
+        document.querySelectorAll('.row-check').forEach(cb => cb.checked = master.checked); 
+        updateCount(); 
     }
 
     function updateCount() {
@@ -208,53 +190,34 @@
         const activeUser = (localStorage.getItem('activeAdmin') || 'STAFF').toUpperCase();
         
         let itemsWithStock = [];
-        const logs = [];
-
         checkedBoxes.forEach(cb => {
             const row = cb.closest('tr');
-            const qty = parseInt(row.cells[5].innerText) || 0;
-            
-            if (qty > 0) {
-                itemsWithStock.push(`${row.dataset.sku}`);
-            }
-
-            logs.push({
-                type: 'DELETE',
-                item_name: row.dataset.name.toUpperCase(),
-                sku: row.dataset.sku,
-                quantity: 0,
-                reference_id: row.dataset.sku,
-                field: row.dataset.loc,
-                details: `[BY: ${activeUser}] PERMANENT REMOVAL`.toUpperCase()
-            });
+            if (parseInt(row.cells[5].innerText) > 0) itemsWithStock.push(row.dataset.sku);
         });
 
-        // STRICT BLOCK: IF STOCK > 0, STOP DELETION
         if (itemsWithStock.length > 0) {
-            alert(`❌ ACTION BLOCKED: ${itemsWithStock.length} item(s) currently have stock.\n\n` +
-                  `You must adjust these items to 0 quantity before deleting them from the system:\n` + 
-                  itemsWithStock.slice(0, 5).join(', ') + (itemsWithStock.length > 5 ? '...' : ''));
+            alert(`❌ BLOCKED: Clear stock for ${itemsWithStock[0]} before deleting.`);
             return; 
         }
 
-        if (!confirm(`Permanently delete ${idsToDelete.length} items? This cannot be undone.`)) return;
+        if (!confirm(`Delete ${idsToDelete.length} items permanently?`)) return;
 
         const btn = document.getElementById('delete-btn');
-        btn.disabled = true; btn.innerText = "DELETING...";
+        btn.disabled = true; btn.innerText = "PURGING...";
 
-        try {
-            const { error } = await _supabase.from('inventory').delete().in('id', idsToDelete);
-            if (error) throw error;
-            
-            await _supabase.from('activity_logs').insert(logs);
-
-            alert("SUCCESS: ITEMS REMOVED.");
-            document.getElementById('search-box').value = "";
-            instantSearch(""); 
-        } catch (err) {
-            alert("ERROR: " + err.message);
+        const { error } = await _supabase.from('inventory').delete().in('id', idsToDelete);
+        
+        if (!error) {
+            await _supabase.from('activity_logs').insert([{
+                type: 'DELETE',
+                performed_by: activeUser,
+                summary: `PERMANENTLY REMOVED ${idsToDelete.length} ITEMS`
+            }]);
+            alert("ITEMS REMOVED SUCCESSFULY");
+            window.location.href = 'inventory.html';
+        } else {
+            alert("ERROR: " + error.message);
             btn.disabled = false;
-            btn.innerText = "DELETE PERMANENTLY";
         }
     }
 </script>

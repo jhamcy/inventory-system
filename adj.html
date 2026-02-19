@@ -44,14 +44,9 @@
             gap: 8px; flex-shrink: 0;
         }
 
-        /* SEARCH BOX UPPERCASE FIX */
         #search-box { 
-            padding: 8px; 
-            border-radius: 6px; 
-            border: 1px solid var(--border-gray); 
-            width: 180px; 
-            font-size: 0.7rem;
-            text-transform: uppercase; /* VISUAL UPPERCASE */
+            padding: 8px; border-radius: 6px; border: 1px solid var(--border-gray); 
+            width: 180px; font-size: 0.7rem; text-transform: uppercase;
         }
 
         .grid-area { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; position: relative; }
@@ -59,57 +54,30 @@
         table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 950px; table-layout: fixed; }
         
         thead th { 
-            position: sticky; top: 0; background: #f8fafc; 
-            padding: 8px; font-size: 0.6rem; font-weight: 800; 
+            position: sticky; top: 0; background: #f8fafc; padding: 8px; font-size: 0.6rem; font-weight: 800; 
             border-bottom: 2px solid var(--primary); border-right: 1px solid #e2e8f0;
             text-transform: uppercase; color: #475569; text-align: left; z-index: 20;
         }
 
         .sticky-col {
-            position: sticky !important; left: 0;
-            background: #f8fafc !important; z-index: 25 !important;
-            border-right: 2px solid var(--primary) !important; 
-            width: 100px;
+            position: sticky !important; left: 0; background: #f8fafc !important; 
+            z-index: 25 !important; border-right: 2px solid var(--primary) !important; width: 100px;
         }
         
-        tbody td.sticky-col { 
-            background: #f1f5f9 !important; 
-            z-index: 15 !important; 
-            font-size: 0.6rem; 
-            font-weight: 800;
-            color: var(--primary);
-        }
+        tbody td.sticky-col { background: #f1f5f9 !important; z-index: 15 !important; font-size: 0.6rem; font-weight: 800; color: var(--primary); }
 
-        .resizer { position: absolute; right: 0; top: 0; height: 100%; width: 8px; cursor: col-resize; user-select: none; z-index: 30; }
+        tbody td { padding: 6px 8px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; font-size: 0.65rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        tbody td { 
-            padding: 6px 8px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; 
-            font-size: 0.65rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; 
-        }
-
-        .adj-input { 
-            width: 100%; padding: 6px; border: 1.5px solid var(--border-gray); border-radius: 4px; 
-            font-weight: 800; color: var(--accent); font-size: 0.7rem; outline: none; text-align: center;
-        }
+        .adj-input { width: 100%; padding: 6px; border: 1.5px solid var(--border-gray); border-radius: 4px; font-weight: 800; color: var(--accent); font-size: 0.7rem; outline: none; text-align: center; }
         
-        .reason-select { 
-            width: 100%; padding: 5px; border: 1px solid var(--border-gray); border-radius: 4px; 
-            font-size: 0.55rem; font-weight: 700; text-transform: uppercase; background: #fdfdfd;
-        }
+        .reason-select { width: 100%; padding: 5px; border: 1px solid var(--border-gray); border-radius: 4px; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; background: #fdfdfd; }
 
         .bulk-footer { padding: 10px; border-top: 2px solid var(--primary); display: flex; gap: 6px; background: white; flex-shrink: 0; }
         
-        .btn { 
-            height: 44px; padding: 0 15px; border-radius: 8px; font-weight: 800; 
-            text-transform: uppercase; cursor: pointer; border: none; display: flex; 
-            align-items: center; justify-content: center; text-decoration: none; font-size: 0.7rem;
-        }
+        .btn { height: 44px; padding: 0 15px; border-radius: 8px; font-weight: 800; text-transform: uppercase; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 0.7rem; }
         .btn-update { background: var(--primary); color: white; flex: 2; }
         .btn-back { background: #64748b; color: white; flex: 1; }
 
-        .meta-tag { color: #94a3b8; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; }
-        .sku-tag { color: var(--accent); font-family: monospace; font-weight: 800; }
-        
         .diff-tag { font-size: 0.55rem; font-weight: 900; margin-left: 4px; }
         .diff-plus { color: var(--success); }
         .diff-minus { color: var(--danger); }
@@ -126,31 +94,30 @@
     <div class="adj-container">
         <div class="adj-header">
             <h2 style="font-size:0.65rem; color:var(--warning); margin:0;">STK RECONCILE</h2>
-            <input type="text" id="search-box" placeholder="SEARCH LOC/SKU/NAME..." 
-                   oninput="this.value = this.value.toUpperCase(); filterRows()">
+            <input type="text" id="search-box" placeholder="SEARCH..." oninput="this.value = this.value.toUpperCase(); filterRows()">
         </div>
 
         <div class="grid-area">
-            <table id="resizeTable">
+            <table>
                 <thead>
                     <tr>
-                        <th class="sticky-col">LOCATION <div class="resizer"></div></th>
-                        <th style="width: 110px;">SKU <div class="resizer"></div></th>
-                        <th style="width: 220px;">DESCRIPTION <div class="resizer"></div></th>
-                        <th style="width: 90px;">BRAND <div class="resizer"></div></th>
-                        <th style="width: 100px; text-align: center;">CURRENT QTY <div class="resizer"></div></th>
-                        <th style="width: 110px; text-align: center;">NEW QTY <div class="resizer"></div></th>
-                        <th style="width: 140px;">REASON <div class="resizer"></div></th>
+                        <th class="sticky-col">LOCATION</th>
+                        <th style="width: 110px;">SKU</th>
+                        <th style="width: 220px;">DESCRIPTION</th>
+                        <th style="width: 90px;">BRAND</th>
+                        <th style="width: 100px; text-align: center;">CURRENT</th>
+                        <th style="width: 110px; text-align: center;">NEW QTY</th>
+                        <th style="width: 140px;">REASON</th>
                     </tr>
                 </thead>
                 <tbody id="adj-body">
-                    <tr><td colspan="7" style="text-align:center; padding:30px; font-size: 0.7rem;">Syncing inventory...</td></tr>
+                    <tr><td colspan="7" style="text-align:center; padding:30px;">Loading Inventory...</td></tr>
                 </tbody>
             </table>
         </div>
 
         <div class="bulk-footer">
-            <button class="btn btn-back" onclick="window.location.href='dashboard.html'">EXIT</button>
+            <a href="dashboard.html" class="btn btn-back">EXIT TO DASHBOARD</a>
             <button class="btn btn-update" id="save-btn" onclick="applyAdjustments()">POST CHANGES</button>
         </div>
     </div>
@@ -159,43 +126,27 @@
 <script>
     const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     
-    let _supabase;
     const reasons = ["COUNT DISCREPANCY", "DAMAGED/EXPIRED", "RETURN TO VENDOR", "ENTRY ERROR", "LOST/STOLEN", "BEGINNING BALANCE"];
 
     async function init() {
-        if (typeof supabase !== 'undefined') {
-            _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        } else {
-            alert("Supabase library not found.");
-            return;
-        }
-
         const activeUser = localStorage.getItem('activeAdmin') || 'STAFF';
         document.getElementById('active-user-tag').innerText = activeUser.toUpperCase();
-
         loadInventory();
     }
 
     async function loadInventory() {
-        const { data, error } = await _supabase.from('inventory').select('*').order('field', { ascending: true });
+        const { data } = await _supabase.from('inventory').select('*').order('location', { ascending: true });
         const tbody = document.getElementById('adj-body');
-        if(error || !data) return;
+        if(!data) return;
         
-        tbody.innerHTML = '';
-        data.forEach(item => {
-            const tr = document.createElement('tr');
-            tr.dataset.id = item.id;
-            tr.dataset.name = item.item_name;
-            tr.dataset.sku = item.sku;
-            tr.dataset.oldqty = item.quantity;
-            tr.dataset.location = item.field || 'MAIN';
-            
-            tr.innerHTML = `
-                <td class="sticky-col">${item.field || 'MAIN'}</td>
-                <td class="sku-tag">${item.sku}</td>
+        tbody.innerHTML = data.map(item => `
+            <tr data-id="${item.id}" data-name="${item.item_name}" data-sku="${item.sku}" data-oldqty="${item.quantity}" data-location="${item.location || 'MAIN'}">
+                <td class="sticky-col">${item.location || 'MAIN'}</td>
+                <td style="color:var(--accent); font-family:monospace;">${item.sku}</td>
                 <td style="text-transform: uppercase;">${item.item_name}</td>
-                <td class="meta-tag">${item.brand || '---'}</td>
+                <td style="color:#94a3b8; font-size:0.55rem;">${item.brand || '---'}</td>
                 <td style="font-weight: 800; text-align:center; background:#f8fafc;">${item.quantity}</td>
                 <td>
                     <div style="display:flex; align-items:center;">
@@ -203,11 +154,14 @@
                         <span class="diff-tag"></span>
                     </div>
                 </td>
-                <td><select class="reason-select"><option value="">-- REASON --</option>${reasons.map(r => `<option value="${r}">${r}</option>`).join('')}</select></td>
-            `;
-            tbody.appendChild(tr);
-        });
-        initResizer();
+                <td>
+                    <select class="reason-select">
+                        <option value="">-- REASON --</option>
+                        ${reasons.map(r => `<option value="${r}">${r}</option>`).join('')}
+                    </select>
+                </td>
+            </tr>
+        `).join('');
     }
 
     function calcDiff(input) {
@@ -215,43 +169,10 @@
         const oldQty = parseInt(tr.dataset.oldqty);
         const newQty = parseInt(input.value);
         const diffSpan = tr.querySelector('.diff-tag');
-        
         if(isNaN(newQty)) { diffSpan.innerText = ""; return; }
-        
         const diff = newQty - oldQty;
-        if(diff === 0) {
-            diffSpan.innerText = "";
-        } else if(diff > 0) {
-            diffSpan.innerText = `(+${diff})`;
-            diffSpan.className = "diff-tag diff-plus";
-        } else {
-            diffSpan.innerText = `(${diff})`;
-            diffSpan.className = "diff-tag diff-minus";
-        }
-    }
-
-    function initResizer() {
-        const table = document.getElementById('resizeTable');
-        const headerCols = table.querySelectorAll('th');
-
-        headerCols.forEach(col => {
-            const resizer = col.querySelector('.resizer');
-            if (!resizer) return;
-            const onMouseMove = (e) => {
-                const width = startWidth + (e.pageX - startX);
-                if (width > 35) { col.style.width = `${width}px`; col.style.minWidth = `${width}px`; }
-            };
-            const onMouseUp = () => {
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-            };
-            let startX, startWidth;
-            resizer.addEventListener('mousedown', (e) => {
-                startX = e.pageX; startWidth = col.offsetWidth;
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
-            });
-        });
+        diffSpan.innerText = diff === 0 ? "" : (diff > 0 ? `(+${diff})` : `(${diff})`);
+        diffSpan.className = `diff-tag ${diff > 0 ? 'diff-plus' : 'diff-minus'}`;
     }
 
     function filterRows() {
@@ -264,62 +185,49 @@
 
     async function applyAdjustments() {
         const rows = document.querySelectorAll('#adj-body tr');
-        const activeUser = (localStorage.getItem('activeAdmin') || 'STAFF').toUpperCase();
-        const updates = [], logs = [];
+        const activeUser = document.getElementById('active-user-tag').innerText;
+        const transEntries = [];
         const batchRef = "ADJ-" + Date.now().toString().slice(-6);
+        let count = 0;
 
-        let missingReason = false;
-
-        rows.forEach(row => {
+        for (const row of rows) {
             const newQtyVal = row.querySelector('.adj-input').value;
             const reason = row.querySelector('.reason-select').value;
             const oldQty = parseInt(row.dataset.oldqty);
             
             if(newQtyVal !== "" && parseInt(newQtyVal) !== oldQty) {
-                if(!reason) { 
-                    row.querySelector('.reason-select').style.borderColor = 'red';
-                    missingReason = true;
-                } else {
-                    row.querySelector('.reason-select').style.borderColor = '';
-                    const newQty = parseInt(newQtyVal);
-                    const netChange = newQty - oldQty;
-                    
-                    updates.push({ id: row.dataset.id, quantity: newQty });
-                    logs.push({
-                        type: "ADJUST",
-                        item_name: row.dataset.name.toUpperCase(),
-                        sku: row.dataset.sku,
-                        quantity: netChange,
-                        reference_id: batchRef,
-                        field: row.dataset.location,
-                        details: `[BY: ${activeUser}] ${reason}: ${oldQty} → ${newQty}`.toUpperCase()
-                    });
-                }
-            }
-        });
+                if(!reason) return alert(`Select a reason for ${row.dataset.sku}`);
+                
+                const newQty = parseInt(newQtyVal);
+                await _supabase.from('inventory').update({ quantity: newQty }).eq('id', row.dataset.id);
 
-        if (missingReason) return alert("PLEASE SELECT A REASON FOR ALL CHANGES.");
-        if (updates.length === 0) return alert("NO CHANGES DETECTED.");
-        
-        const btn = document.getElementById('save-btn');
-        btn.disabled = true; btn.innerText = "POSTING...";
+                transEntries.push({
+                    reference_id: batchRef,
+                    sku: row.dataset.sku,
+                    item_name: row.dataset.name,
+                    qty_change: newQty - oldQty,
+                    location: row.dataset.location,
+                    notes: reason
+                });
+                count++;
+            }
+        }
+
+        if (count === 0) return alert("No changes detected.");
+        document.getElementById('save-btn').disabled = true;
 
         try {
-            for (const item of updates) { 
-                const { error } = await _supabase.from('inventory').update({ quantity: item.quantity }).eq('id', item.id);
-                if(error) throw error;
-            }
-            
-            const { error: logError } = await _supabase.from('activity_logs').insert(logs);
-            if(logError) console.warn("Logging failed:", logError.message);
+            await _supabase.from('inventory_transactions').insert(transEntries);
+            await _supabase.from('activity_logs').insert([{
+                type: "ADJUST",
+                reference_id: batchRef,
+                performed_by: activeUser,
+                summary: `AUDITED ${count} ITEMS`.toUpperCase()
+            }]);
 
-            alert(`SUCCESS: ${updates.length} ADJUSTMENTS POSTED BY ${activeUser}`); 
-            window.location.href = 'dashboard.html';
-        } catch (err) { 
-            alert("ERROR: " + err.message); 
-            btn.disabled = false; 
-            btn.innerText = "POST CHANGES";
-        }
+            alert("ADJUSTMENTS POSTED");
+            window.location.href = 'inventory.html';
+        } catch (err) { alert(err.message); document.getElementById('save-btn').disabled = false; }
     }
 
     window.onload = init;

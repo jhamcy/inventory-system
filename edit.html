@@ -15,52 +15,43 @@
             --danger: #ef4444;
             --excel-border: #cbd5e1;
         }
-
         * { box-sizing: border-box; }
-
         body {
             margin: 0; font-family: 'Inter', sans-serif;
             background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
             height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
         }
-
         input[type="text"] { text-transform: uppercase; }
-
         .navbar { height: 56px; background: var(--primary); display: flex; align-items: center; padding: 0 15px; flex-shrink: 0; }
         .nav-logo-text { color: white; font-weight: 800; font-size: 1rem; text-transform: uppercase; }
-
+        
         .main-content { flex: 1; padding: 10px; display: flex; flex-direction: column; overflow-y: auto; gap: 15px; }
-
+        
         .bulk-container {
             background: white; border: 2px solid var(--primary); border-radius: 12px;
             display: flex; flex-direction: column; height: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             overflow: hidden; flex-shrink: 0;
         }
-
         .bulk-header {
             padding: 12px; border-bottom: 2px solid var(--primary);
             display: flex; flex-direction: column; background: #f8fafc;
             gap: 10px; flex-shrink: 0;
         }
-
         .header-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
         .header-top h2 { margin: 0; font-size: 0.75rem; font-weight: 800; color: var(--primary); }
-
         .cat-select { 
             padding: 0 8px; border-radius: 6px; border: 1px solid var(--excel-border); 
             font-weight: 700; font-size: 0.65rem; height: 36px; width: 160px;
             background: white; text-transform: uppercase;
         }
-
         .search-row { width: 100%; }
         .search-input { 
             width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--excel-border); 
             font-size: 0.75rem; font-weight: 600; outline: none; background: white;
         }
-
         .result-count { font-size: 0.6rem; font-weight: 800; color: var(--accent); margin-top: 2px; }
-
         .grid-area { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; }
+
         table { border-collapse: collapse; width: 100%; min-width: 900px; table-layout: fixed; }
         
         thead th { 
@@ -69,58 +60,50 @@
             border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border);
             text-transform: uppercase; color: #475569; z-index: 20; height: 45px;
         }
-
         .sticky-col { 
             position: sticky !important; left: 0; z-index: 35 !important; 
             background: #f1f5f9 !important; width: 45px !important; 
             border-right: 2px solid var(--primary) !important; text-align: center;
         }
-
         tbody td { border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); height: 48px; }
         tbody td input { width: 100%; height: 100%; padding: 0 8px; border: none; outline: none; font-size: 0.75rem; font-weight: 700; background: transparent; }
+        
+        /* Highlight edited rows visually */
+        .row-dirty { background-color: #fffbeb !important; }
 
         .bulk-footer { 
             padding: 10px; border-top: 2px solid var(--primary); 
             display: flex; align-items: center; gap: 6px; background: white; 
         }
-
         .btn { 
             height: 44px; border-radius: 8px; font-weight: 800; text-transform: uppercase; 
             cursor: pointer; border: none; display: flex; 
             align-items: center; justify-content: center; text-decoration: none;
         }
-
         .btn-page { background: #f1f5f9; color: var(--primary); border: 1px solid var(--excel-border); width: 55px; font-size: 0.6rem; }
         .btn-page:disabled { opacity: 0.3; cursor: not-allowed; }
-
         .btn-save { background: var(--primary); color: white; flex: 1; font-size: 0.7rem; }
-        
-        /* UPDATED EXIT BUTTON STYLE */
-        .btn-back { background: var(--danger); color: white; width: 70px; font-size: 0.65rem; }
+        .btn-back { background: #64748b; color: white; width: 150px; font-size: 0.65rem; }
 
         .dictionary-section { background: white; border: 2px solid var(--primary); border-radius: 12px; padding: 12px; margin-bottom: 20px; flex-shrink: 0; }
         .dict-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .dict-box { min-width: 0; display: flex; flex-direction: column; }
         .dict-box h4 { margin: 0 0 8px 0; font-size: 0.65rem; color: var(--primary); font-weight: 800; display: flex; justify-content: space-between; }
-
         .dict-input-row { display: flex; gap: 6px; margin-bottom: 8px; width: 100%; }
         .dict-input-row input { flex: 1; height: 38px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--excel-border); font-size: 0.75rem; font-weight: 700; }
-        
         .btn-dict-add { width: 60px; flex-shrink: 0; height: 38px; border-radius: 6px; border: none; background: var(--accent); color: white; font-weight: 800; font-size: 0.65rem; cursor: pointer; }
-        
         .dict-scroll { height: 110px; overflow-y: auto; border: 1px solid var(--excel-border); border-radius: 6px; background: #f1f5f9; }
         .dict-table { width: 100%; border-collapse: collapse; }
         .dict-table td { padding: 8px; font-size: 0.7rem; font-weight: 700; border-bottom: 1px solid #edf2f7; text-transform: uppercase; }
         .del-btn { color: var(--danger); cursor: pointer; text-align: right; padding-right: 12px; font-weight: 900; }
-
         @media (max-width: 600px) { .dict-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
+
 <body>
-
 <header class="navbar"><div class="nav-logo-text">EasiStock Edit Items</div></header>
-
 <main class="main-content">
+
     <div class="bulk-container">
         <div class="bulk-header">
             <div class="header-top">
@@ -137,7 +120,6 @@
                 <div id="count-label" class="result-count"></div>
             </div>
         </div>
-
         <div class="grid-area">
             <table>
                 <thead>
@@ -155,9 +137,8 @@
                 </tbody>
             </table>
         </div>
-
         <div class="bulk-footer">
-            <button class="btn btn-back" onclick="window.location.href='dashboard.html'">EXIT</button>
+            <a href="dashboard.html" class="btn btn-back">EXIT TO DASHBOARD</a>
             <button class="btn btn-save" id="save-btn" onclick="saveChanges()" disabled>UPDATE ALL CHANGES</button>
             <button class="btn btn-page" id="prev-btn" onclick="changePage(-1)" disabled>PREV</button>
             <button class="btn btn-page" id="next-btn" onclick="changePage(1)" disabled>NEXT</button>
@@ -190,7 +171,7 @@
     const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
     
-    let _supabase; 
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let searchTimer;
     let currentPage = 0;
     const itemsPerPage = 50;
@@ -198,13 +179,6 @@
     let currentLocs = [];
 
     async function init() {
-        if (typeof supabase !== 'undefined') {
-            _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        } else {
-            alert("Connection Error: Supabase library not loaded.");
-            return;
-        }
-
         const { data } = await _supabase.from('inventory_categories').select('*').order('name');
         const filter = document.getElementById('cat-filter');
         if(data) data.forEach(c => {
@@ -259,8 +233,8 @@
         const countLabel = document.getElementById('count-label');
 
         if (!category && !searchVal) return;
-
         b.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">LOADING...</td></tr>';
+
         let query = _supabase.from('inventory').select('*', { count: 'exact' });
         if(category && category !== "ALL") query = query.eq('category', category);
         if(searchVal) query = query.or(`sku.ilike.%${searchVal}%,item_name.ilike.%${searchVal}%`);
@@ -277,12 +251,18 @@
             data.forEach((item, i) => {
                 const tr = document.createElement('tr');
                 tr.dataset.id = item.id;
+                // Store original values to detect changes
+                tr.dataset.origName = item.item_name;
+                tr.dataset.origBrand = item.brand || '';
+                tr.dataset.origUom = item.uom;
+                tr.dataset.origLoc = item.location;
+
                 tr.innerHTML = `<td class="sticky-col" style="color:#94a3b8; font-weight:800; font-size:0.6rem;">${from + i + 1}</td>
-                    <td><input type="text" value="${item.sku}" readonly></td>
-                    <td><input type="text" class="row-name" value="${item.item_name}"></td>
-                    <td><input type="text" class="row-brand" value="${item.brand || ''}"></td>
-                    <td><input type="text" class="row-uom" value="${item.uom}"></td>
-                    <td><input type="text" class="row-loc" value="${item.location}"></td>`;
+                    <td><input type="text" value="${item.sku}" readonly style="background:#f8fafc; color:#64748b;"></td>
+                    <td><input type="text" class="row-name" value="${item.item_name}" oninput="markDirty(this)"></td>
+                    <td><input type="text" class="row-brand" value="${item.brand || ''}" oninput="markDirty(this)"></td>
+                    <td><input type="text" class="row-uom" value="${item.uom}" oninput="markDirty(this)"></td>
+                    <td><input type="text" class="row-loc" value="${item.location}" oninput="markDirty(this)"></td>`;
                 b.appendChild(tr);
             });
             document.getElementById('save-btn').disabled = false;
@@ -297,50 +277,46 @@
         }
     }
 
+    function markDirty(input) {
+        input.closest('tr').classList.add('row-dirty');
+    }
+
     async function saveChanges() {
         const btn = document.getElementById('save-btn');
         const activeUser = (localStorage.getItem('activeAdmin') || 'ADMIN').toUpperCase();
-        
+        const rows = document.querySelectorAll('#bulk-body tr.row-dirty');
+
+        if (rows.length === 0) return alert("NO CHANGES DETECTED");
+
         btn.disabled = true; btn.innerText = "SAVING...";
-        
-        const rows = document.querySelectorAll('#bulk-body tr');
-        const logsToInsert = [];
         const batchRef = "EDT-" + Date.now().toString().slice(-6);
+        let successCount = 0;
 
         try {
             for (const row of rows) {
-                if(!row.dataset.id) continue;
-
                 const newName = row.querySelector('.row-name').value.trim().toUpperCase();
                 const newBrand = row.querySelector('.row-brand').value.trim().toUpperCase();
                 const newUom = row.querySelector('.row-uom').value.trim().toUpperCase();
                 const newLoc = row.querySelector('.row-loc').value.trim().toUpperCase();
-                const sku = row.cells[1].querySelector('input').value;
 
-                const { error: updateError } = await _supabase.from('inventory').update({
-                    item_name: newName,
-                    brand: newBrand,
-                    uom: newUom,
-                    location: newLoc
+                const { error } = await _supabase.from('inventory').update({
+                    item_name: newName, brand: newBrand, uom: newUom, location: newLoc
                 }).eq('id', row.dataset.id);
-
-                if (updateError) throw updateError;
-
-                logsToInsert.push({
-                    type: 'EDIT',
-                    item_name: newName,
-                    quantity: 0,
-                    reference_id: batchRef,
-                    details: `[BY: ${activeUser}] SKU ${sku} UPDATED (LOC: ${newLoc})`.toUpperCase()
-                });
+                
+                if (!error) successCount++;
             }
 
-            if (logsToInsert.length > 0) {
-                await _supabase.from('activity_logs').insert(logsToInsert);
-            }
+            // Record high-level audit log
+            await _supabase.from('activity_logs').insert([{
+                type: 'EDIT',
+                reference_id: batchRef,
+                performed_by: activeUser,
+                summary: `UPDATED ${successCount} ITEMS IN BATCH`.toUpperCase()
+            }]);
 
-            alert(`UPDATE SUCCESSFUL\nBATCH ID: ${batchRef}`);
-            window.location.href = 'dashboard.html'; // UPDATED REDIRECT AFTER SUCCESS
+            alert(`SUCCESSFULLY UPDATED ${successCount} ITEMS`);
+            window.location.href = 'inventory.html'; 
+
         } catch (err) {
             alert("UPDATE ERROR: " + err.message);
         } finally {
@@ -353,16 +329,9 @@
         const inp = document.getElementById(type === 'uom' ? 'new-uom' : 'new-loc');
         const val = inp.value.trim().toUpperCase();
         if(!val) return;
-
-        const listToCheck = (type === 'uom') ? currentUOMs : currentLocs;
-        if (listToCheck.some(item => item.name.toUpperCase() === val)) {
-            alert(`"${val}" ALREADY EXISTS`);
-            return;
-        }
-
         const tableName = (type === 'uom') ? 'inventory_uom' : 'inventory_locations';
         const { error } = await _supabase.from(tableName).insert([{ name: val }]);
-        if (error) alert(error.message);
+        if (error) alert("ALREADY EXISTS OR ERROR");
         else { inp.value = ""; refreshSystemLists(); }
     }
 

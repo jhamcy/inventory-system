@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Activity Logs | EasiStock</title>
+    <title>Audit Logs | EasiStock</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
         :root {
             --primary: #0f172a;
             --accent: #0081ff;
@@ -14,116 +15,110 @@
             --danger: #ef4444;
             --excel-border: #cbd5e1;
         }
+
         body {
             margin: 0; font-family: 'Inter', sans-serif;
             background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
             height: 100vh; display: flex; flex-direction: column; overflow: hidden;
             align-items: center;
         }
-        .navbar { width: 100%; height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 100; }
-        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
 
-        .toggle-container { width: 100%; padding: 10px; display: flex; justify-content: center; flex-shrink: 0; box-sizing: border-box; }
-        .toggle-group { 
-            display: flex; width: 100%; max-width: 500px; 
-            border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); 
+        /* NEW CLEAN NAVBAR WITH HOME BUTTON */
+        .navbar { 
+            width: 100%; height: 60px; background: var(--primary); 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 0 15px; flex-shrink: 0; box-sizing: border-box;
         }
-        .btn-toggle { 
-            flex: 1; padding: 10px 0; border: none; cursor: pointer; 
-            color: rgba(255,255,255,0.6); background: var(--primary); 
-            font-size: 0.6rem; font-weight: 800; text-transform: uppercase; 
-            display: flex; flex-direction: column; align-items: center; gap: 2px;
+        .nav-logo-text { color: white; font-weight: 800; font-size: 1rem; text-transform: uppercase; }
+        .btn-home {
+            background: var(--accent); color: white; border: none; padding: 8px 15px;
+            border-radius: 8px; font-weight: 800; font-size: 0.7rem; cursor: pointer;
+            text-decoration: none; text-transform: uppercase;
         }
-        .btn-toggle.active { background: var(--accent) !important; color: white !important; }
 
-        /* FIXED MAIN CONTENT WRAPPER */
         .main-content { 
-            width: 100%; max-width: 600px; flex: 1; padding: 10px; 
-            display: flex; flex-direction: column; overflow: hidden; /* Crucial for internal scrolling */
+            width: 100%; max-width: 700px; flex: 1; padding: 12px; 
+            display: flex; flex-direction: column; overflow: hidden;
             box-sizing: border-box;
         }
         
-        /* FILTERS (STAYS AT TOP) */
+        /* FILTERS SECTION */
         .filter-grid { 
             display: grid; grid-template-columns: 1fr 1fr; gap: 8px; 
             margin-bottom: 12px; width: 100%; background: white;
             padding: 12px; border-radius: 12px; border: 2px solid var(--primary);
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); box-sizing: border-box; flex-shrink: 0;
         }
-        .search-wrapper { position: relative; grid-column: span 2; }
+        .search-wrapper { grid-column: span 2; }
         .search-input, .type-select, .date-input { 
             width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;
             font-size: 0.8rem; font-weight: 700; box-sizing: border-box; outline: none; background: #f8fafc;
         }
-        .date-label { font-size: 0.6rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 4px; display: block; }
-        .btn-reset { grid-column: span 2; background: var(--primary); color: white; border: none; padding: 8px; border-radius: 8px; font-weight: 800; font-size: 0.7rem; cursor: pointer; text-transform: uppercase; }
+        .btn-reset { 
+            grid-column: span 2; background: #64748b; color: white; border: none; 
+            padding: 10px; border-radius: 8px; font-weight: 800; font-size: 0.7rem; 
+            cursor: pointer; text-transform: uppercase; 
+        }
 
-        /* TABLE SECTION (SCROLLS INTERNALLY) */
+        /* DATA TABLE */
         .section-header { 
             width: 100%; background: var(--primary); color: white; padding: 12px 15px; 
             border-radius: 12px 12px 0 0; font-size: 0.7rem; font-weight: 800; 
-            text-transform: uppercase; display: flex; justify-content: space-between; box-sizing: border-box; flex-shrink: 0;
+            text-transform: uppercase; display: flex; justify-content: space-between; box-sizing: border-box;
         }
         .table-area { 
             width: 100%; background: white; border: 2px solid var(--primary); border-top: none; 
-            border-radius: 0 0 12px 12px; overflow-y: auto; overflow-x: auto; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-            margin-bottom: 15px; /* Added spacing to prevent overlap */
-            flex: 1; /* Makes the table area take all available middle space */
-            -webkit-overflow-scrolling: touch; /* Smooth scroll for iOS */
+            border-radius: 0 0 12px 12px; overflow-y: auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); flex: 1;
         }
         
-        table { border-collapse: collapse; width: 100%; min-width: 400px; table-layout: fixed; }
-        thead { position: sticky; top: 0; z-index: 10; background: #f1f5f9; }
+        table { border-collapse: collapse; width: 100%; table-layout: fixed; }
         thead th { 
+            position: sticky; top: 0; z-index: 10; background: #f1f5f9;
             padding: 12px 10px; font-size: 0.6rem; text-transform: uppercase; 
             border-bottom: 2px solid var(--primary); color: var(--primary); font-weight: 800; text-align: left;
         }
-        tbody td { padding: 12px 10px; border-bottom: 1px solid var(--excel-border); font-size: 0.75rem; font-weight: 600; }
-        
-        /* PADDING BOTTOM FOR TABLE CONTENT */
-        tbody tr:last-child td { border-bottom: none; padding-bottom: 25px; }
+        tbody td { padding: 12px 10px; border-bottom: 1px solid var(--excel-border); font-size: 0.7rem; font-weight: 600; vertical-align: middle; }
+        tbody tr:hover { background-color: #f0f9ff; cursor: pointer; }
 
-        .ref-link { color: var(--accent); font-weight: 800; cursor: pointer; text-decoration: underline; }
-        .badge { padding: 4px 8px; border-radius: 6px; font-weight: 800; font-size: 0.55rem; color: white; text-align: center; min-width: 65px; display: inline-block;}
+        .badge { 
+            padding: 4px 6px; border-radius: 4px; font-weight: 800; font-size: 0.55rem; 
+            color: white; text-align: center; display: block; width: 100%; box-sizing: border-box;
+        }
+        .ref-id { color: var(--accent); font-weight: 800; font-family: monospace; font-size: 0.75rem; }
+        .summary-text { font-size: 0.6rem; color: #64748b; font-weight: 500; display: block; margin-top: 2px; text-transform: uppercase; }
     </style>
 </head>
 <body>
     <header class="navbar">
         <div class="nav-logo-text">Audit Master Log</div>
+        <a href="dashboard.html" class="btn-home">🏠 Home</a>
     </header>
-
-    <div class="toggle-container">
-        <div class="toggle-group">
-            <button class="btn-toggle" onclick="location.href='inventory.html'"><span>📋</span><span>Inv</span></button>
-            <button class="btn-toggle" onclick="location.href='receiving.html'"><span>🚚</span><span>Recv</span></button>
-            <button class="btn-toggle" onclick="location.href='orders.html'"><span>📝</span><span>Order</span></button>
-            <button class="btn-toggle" onclick="location.href='transfer.html'"><span>🔄</span><span>Trans</span></button>
-            <button class="btn-toggle active" onclick="location.href='logs.html'"><span>📜</span><span>Logs</span></button>
-        </div>
-    </div>
 
     <main class="main-content">
         <div class="filter-grid">
             <div class="search-wrapper">
-                <input type="text" id="mainSearch" class="search-input" placeholder="🔍 SEARCH REF ID..." onkeyup="applyFilters()">
+                <input type="text" id="mainSearch" class="search-input" placeholder="🔍 SEARCH REF ID OR SUMMARY..." onkeyup="applyFilters()">
             </div>
-            <div style="grid-column: span 2;">
-                <span class="date-label">Category Filter</span>
-                <select id="typeFilter" class="type-select" onchange="applyFilters()">
-                    <option value="ALL">ALL CATEGORIES</option>
-                    <option value="RECEIVING">🚚 RECEIVING</option>
-                    <option value="ORDER">📝 ORDERS</option>
-                    <option value="ADJUST">⚖️ ADJUSTMENTS</option>
-                </select>
+            <select id="typeFilter" class="type-select" onchange="applyFilters()">
+                <option value="ALL">ALL ACTIVITIES</option>
+                <option value="RECEIVING">🚚 RECEIVING</option>
+                <option value="ORDER">📝 ORDERS</option>
+                <option value="TRANSFER">🔄 TRANSFERS</option>
+                <option value="ADJUST">⚖️ ADJUSTMENTS</option>
+                <option value="ADD">➕ ADD ITEM</option>
+                <option value="EDIT">✏️ EDIT ITEM</option>
+                <option value="DELETE">🗑️ DELETE</option>
+            </select>
+            <div style="display: flex; gap: 4px;">
+                <input type="date" id="dateFrom" class="date-input" onchange="applyFilters()">
+                <input type="date" id="dateTo" class="date-input" onchange="applyFilters()">
             </div>
-            <div><input type="date" id="dateFrom" class="date-input" onchange="applyFilters()"></div>
-            <div><input type="date" id="dateTo" class="date-input" onchange="applyFilters()"></div>
-            <button class="btn-reset" onclick="resetFilters()">Reset Filters</button>
+            <button class="btn-reset" onclick="resetFilters()">Reset All Filters</button>
         </div>
 
         <div class="section-header">
-            <span>📑 System Audit</span>
+            <span>📑 System History</span>
             <span id="log-count">0 RECORDS</span>
         </div>
         
@@ -131,14 +126,14 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 25%;">Date</th>
-                        <th style="width: 25%;">Type</th>
-                        <th style="width: 35%;">Ref ID</th>
-                        <th style="width: 15%; text-align: right;">Qty</th>
+                        <th style="width: 22%;">Date</th>
+                        <th style="width: 23%;">Type</th>
+                        <th style="width: 35%;">Ref / Summary</th>
+                        <th style="width: 20%; text-align: right;">User</th>
                     </tr>
                 </thead>
                 <tbody id="logs-master-body">
-                    <tr><td colspan="4" style="text-align:center; padding:30px;">Syncing...</td></tr>
+                    <tr><td colspan="4" style="text-align:center; padding:30px;">Loading Audit Data...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -147,49 +142,71 @@
     <script>
         const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
-        let _supabase, masterLogData = [];
-
-        async function initLogs() {
-            if (typeof supabase !== 'undefined') {
-                _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                fetchLogs();
-            }
-        }
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let masterLogData = [];
 
         async function fetchLogs() {
-            const { data, error } = await _supabase.from('activity_logs').select('*').order('created_at', { ascending: false });
+            const { data, error } = await _supabase
+                .from('activity_logs')
+                .select('*')
+                .order('created_at', { ascending: false });
+
             if (error) return;
 
-            const grouped = data.reduce((acc, log) => {
-                const ref = log.reference_id || 'GENERAL';
-                const d = new Date(log.created_at);
-                const dateOnly = d.toISOString().split('T')[0];
-                if (!acc[ref]) {
-                    acc[ref] = {
-                        rawDate: dateOnly,
-                        displayDate: d.toLocaleDateString('en-GB'),
-                        type: (log.type || 'INFO').toUpperCase(),
-                        ref: ref,
-                        totalQty: 0
-                    };
-                }
-                acc[ref].totalQty += (parseInt(log.quantity) || 0);
-                return acc;
-            }, {});
+            masterLogData = data.map(log => ({
+                rawDate: log.created_at.split('T')[0],
+                displayDate: new Date(log.created_at).toLocaleDateString('en-GB'),
+                type: (log.type || 'INFO').toUpperCase(),
+                ref: log.reference_id || '---',
+                summary: log.summary || '',
+                user: (log.performed_by || 'STAFF').toUpperCase()
+            }));
 
-            masterLogData = Object.values(grouped);
             renderTable(masterLogData);
         }
 
+        function renderTable(list) {
+            const tbody = document.getElementById('logs-master-body');
+            document.getElementById('log-count').innerText = `${list.length} RECORDS`;
+
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px;">No records match your criteria.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = list.map(row => `
+                <tr onclick="location.href='transaction.html?ref=${encodeURIComponent(row.ref)}'">
+                    <td style="font-size: 0.6rem; color: #64748b;">${row.displayDate}</td>
+                    <td><span class="badge" style="background:${getTypeColor(row.type)}">${row.type}</span></td>
+                    <td>
+                        <span class="ref-id">${row.ref}</span>
+                        <span class="summary-text">${row.summary}</span>
+                    </td>
+                    <td style="text-align:right; font-size: 0.6rem; color: var(--primary); font-weight: 800;">${row.user}</td>
+                </tr>
+            `).join('');
+        }
+
+        function getTypeColor(type) {
+            if (type.includes('RECV')) return '#059669';
+            if (type.includes('ORDER')) return '#6366f1';
+            if (type.includes('TRANS')) return '#0081ff';
+            if (type.includes('ADJ')) return '#f59e0b';
+            if (type.includes('ADD')) return '#10b981';
+            if (type.includes('EDIT')) return '#8b5cf6';
+            if (type.includes('DEL')) return '#ef4444';
+            return '#64748b';
+        }
+
         function applyFilters() {
-            const searchVal = document.getElementById('mainSearch').value.toLowerCase();
+            const searchVal = document.getElementById('mainSearch').value.toUpperCase();
             const typeVal = document.getElementById('typeFilter').value;
             const fromVal = document.getElementById('dateFrom').value;
             const toVal = document.getElementById('dateTo').value;
 
             const filtered = masterLogData.filter(item => {
-                const matchesSearch = item.ref.toLowerCase().includes(searchVal);
-                const matchesType = (typeVal === "ALL") || (item.type === typeVal);
+                const matchesSearch = item.ref.includes(searchVal) || item.summary.toUpperCase().includes(searchVal);
+                const matchesType = (typeVal === "ALL") || (item.type.includes(typeVal));
                 let matchesDate = true;
                 if (fromVal && item.rawDate < fromVal) matchesDate = false;
                 if (toVal && item.rawDate > toVal) matchesDate = false;
@@ -206,28 +223,7 @@
             renderTable(masterLogData);
         }
 
-        function renderTable(list) {
-            const tbody = document.getElementById('logs-master-body');
-            tbody.innerHTML = list.map(row => {
-                let displayRef = row.ref;
-                if (row.type === 'RECEIVING') displayRef = "DR-" + row.ref.split('-').pop();
-                else if (row.type === 'ORDER') displayRef = "OR-" + row.ref.split('-').pop();
-                return `
-                <tr>
-                    <td>${row.displayDate}</td>
-                    <td><span class="badge" style="background:${getTypeColor(row.type)}">${row.type}</span></td>
-                    <td><span class="ref-link" onclick="location.href='transaction.html?ref=${encodeURIComponent(row.ref)}'">${displayRef}</span></td>
-                    <td style="text-align:right; font-weight:800; color:${row.totalQty < 0 ? 'var(--danger)' : 'var(--success)'}">${row.totalQty > 0 ? '+' : ''}${row.totalQty}</td>
-                </tr>`;
-            }).join('') || '<tr><td colspan="4" style="text-align:center; padding:30px;">No records.</td></tr>';
-            document.getElementById('log-count').innerText = `${list.length} RECORDS`;
-        }
-
-        function getTypeColor(type) {
-            const colors = { RECEIVING: '#059669', ORDER: '#6366f1', ADJUST: '#f59e0b', TRANSFER: '#0081ff' };
-            return colors[type] || '#64748b';
-        }
-        window.onload = initLogs;
+        window.onload = fetchLogs;
     </script>
 </body>
 </html>
