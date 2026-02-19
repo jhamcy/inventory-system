@@ -44,6 +44,16 @@
             gap: 8px; flex-shrink: 0;
         }
 
+        /* SEARCH BOX UPPERCASE FIX */
+        #search-box { 
+            padding: 8px; 
+            border-radius: 6px; 
+            border: 1px solid var(--border-gray); 
+            width: 180px; 
+            font-size: 0.7rem;
+            text-transform: uppercase; /* VISUAL UPPERCASE */
+        }
+
         .grid-area { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; position: relative; }
         
         table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 950px; table-layout: fixed; }
@@ -55,7 +65,6 @@
             text-transform: uppercase; color: #475569; text-align: left; z-index: 20;
         }
 
-        /* STICKY LOCATION COLUMN */
         .sticky-col {
             position: sticky !important; left: 0;
             background: #f8fafc !important; z-index: 25 !important;
@@ -96,8 +105,6 @@
             align-items: center; justify-content: center; text-decoration: none; font-size: 0.7rem;
         }
         .btn-update { background: var(--primary); color: white; flex: 2; }
-        
-        /* EXIT BUTTON: UPDATED TO DASHBOARD.HTML */
         .btn-back { background: #64748b; color: white; flex: 1; }
 
         .meta-tag { color: #94a3b8; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; }
@@ -119,7 +126,8 @@
     <div class="adj-container">
         <div class="adj-header">
             <h2 style="font-size:0.65rem; color:var(--warning); margin:0;">STK RECONCILE</h2>
-            <input type="text" id="search-box" style="padding:8px; border-radius:6px; border:1px solid var(--border-gray); width:180px; font-size: 0.7rem;" placeholder="SEARCH LOC/SKU/NAME..." onkeyup="filterRows()">
+            <input type="text" id="search-box" placeholder="SEARCH LOC/SKU/NAME..." 
+                   oninput="this.value = this.value.toUpperCase(); filterRows()">
         </div>
 
         <div class="grid-area">
@@ -306,7 +314,7 @@
             if(logError) console.warn("Logging failed:", logError.message);
 
             alert(`SUCCESS: ${updates.length} ADJUSTMENTS POSTED BY ${activeUser}`); 
-            window.location.href = 'dashboard.html'; // UPDATED SUCCESS REDIRECT
+            window.location.href = 'dashboard.html';
         } catch (err) { 
             alert("ERROR: " + err.message); 
             btn.disabled = false; 
