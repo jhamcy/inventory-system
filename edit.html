@@ -11,6 +11,8 @@
         :root {
             --primary: #0f172a;
             --accent: #0081ff;
+            --success: #10b981;
+            --danger: #ef4444;
             --excel-border: #cbd5e1;
         }
 
@@ -92,7 +94,7 @@
         .btn-page:disabled { opacity: 0.3; cursor: not-allowed; }
 
         .btn-save { background: var(--primary); color: white; flex: 1; font-size: 0.7rem; }
-        .btn-back { background: #ef4444; color: white; width: 55px; font-size: 0.65rem; }
+        .btn-back { background: var(--danger); color: white; width: 55px; font-size: 0.65rem; }
 
         .dictionary-section { background: white; border: 2px solid var(--primary); border-radius: 12px; padding: 12px; margin-bottom: 20px; flex-shrink: 0; }
         .dict-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
@@ -100,14 +102,14 @@
         .dict-box h4 { margin: 0 0 8px 0; font-size: 0.65rem; color: var(--primary); font-weight: 800; display: flex; justify-content: space-between; }
 
         .dict-input-row { display: flex; gap: 6px; margin-bottom: 8px; width: 100%; }
-        .dict-input-row input { flex: 1; height: 38px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--excel-border); font-size: 0.75rem; font-weight: 700; transition: border 0.2s; }
+        .dict-input-row input { flex: 1; height: 38px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--excel-border); font-size: 0.75rem; font-weight: 700; }
         
         .btn-dict-add { width: 60px; flex-shrink: 0; height: 38px; border-radius: 6px; border: none; background: var(--accent); color: white; font-weight: 800; font-size: 0.65rem; cursor: pointer; }
         
         .dict-scroll { height: 110px; overflow-y: auto; border: 1px solid var(--excel-border); border-radius: 6px; background: #f1f5f9; }
         .dict-table { width: 100%; border-collapse: collapse; }
         .dict-table td { padding: 8px; font-size: 0.7rem; font-weight: 700; border-bottom: 1px solid #edf2f7; text-transform: uppercase; }
-        .del-btn { color: #ef4444; cursor: pointer; text-align: right; padding-right: 12px; font-weight: 900; }
+        .del-btn { color: var(--danger); cursor: pointer; text-align: right; padding-right: 12px; font-weight: 900; }
 
         @media (max-width: 600px) { .dict-grid { grid-template-columns: 1fr; } }
     </style>
@@ -153,7 +155,7 @@
         </div>
 
         <div class="bulk-footer">
-            <a href="dashboard.html" class="btn btn-back">EXIT</a>
+            <a href="inventory.html" class="btn btn-back">EXIT</a>
             <button class="btn btn-save" id="save-btn" onclick="saveChanges()" disabled>UPDATE ALL CHANGES</button>
             <button class="btn btn-page" id="prev-btn" onclick="changePage(-1)" disabled>PREV</button>
             <button class="btn btn-page" id="next-btn" onclick="changePage(1)" disabled>NEXT</button>
@@ -185,13 +187,33 @@
 <script>
     const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+    
+    // Declare global variable
+    let _supabase; 
     let searchTimer;
     let currentPage = 0;
     const itemsPerPage = 50;
     let currentUOMs = [];
     let currentLocs = [];
+
+    // Initialize ONLY after window loads
+    async function init() {
+        if (typeof supabase !== 'undefined') {
+            _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } else {
+            alert("Connection Error: Supabase library not loaded.");
+            return;
+        }
+
+        const { data } = await _supabase.from('inventory_categories').select('*').order('name');
+        const filter = document.getElementById('cat-filter');
+        if(data) data.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.name; opt.textContent = c.name.toUpperCase();
+            filter.appendChild(opt);
+        });
+        refreshSystemLists();
+    }
 
     function autoSearch() {
         clearTimeout(searchTimer);
@@ -206,17 +228,6 @@
     function changePage(step) {
         currentPage += step;
         loadInventory();
-    }
-
-    async function init() {
-        const { data } = await _supabase.from('inventory_categories').select('*').order('name');
-        const filter = document.getElementById('cat-filter');
-        if(data) data.forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = c.name; opt.textContent = c.name.toUpperCase();
-            filter.appendChild(opt);
-        });
-        refreshSystemLists();
     }
 
     async function refreshSystemLists() {
@@ -247,10 +258,7 @@
         const b = document.getElementById('bulk-body');
         const countLabel = document.getElementById('count-label');
 
-        if (!category && !searchVal) {
-             b.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:40px; color:#64748b; font-weight:600; font-size:0.8rem;">SELECT A CATEGORY TO LOAD DATA</td></tr>';
-             return;
-        }
+        if (!category && !searchVal) return;
 
         b.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">LOADING...</td></tr>';
         let query = _supabase.from('inventory').select('*', { count: 'exact' });
@@ -291,36 +299,71 @@
 
     async function saveChanges() {
         const btn = document.getElementById('save-btn');
+        const activeUser = (localStorage.getItem('activeAdmin') || 'ADMIN').toUpperCase();
+        
         btn.disabled = true; btn.innerText = "SAVING...";
+        
         const rows = document.querySelectorAll('#bulk-body tr');
-        for (const row of rows) {
-            if(!row.dataset.id) continue;
-            await _supabase.from('inventory').update({
-                item_name: row.querySelector('.row-name').value.trim().toUpperCase(),
-                brand: row.querySelector('.row-brand').value.trim().toUpperCase(),
-                uom: row.querySelector('.row-uom').value.trim().toUpperCase(),
-                location: row.querySelector('.row-loc').value.trim().toUpperCase()
-            }).eq('id', row.dataset.id);
+        const logsToInsert = [];
+        const batchRef = "EDT-" + Date.now().toString().slice(-6);
+
+        try {
+            for (const row of rows) {
+                if(!row.dataset.id) continue;
+
+                const newName = row.querySelector('.row-name').value.trim().toUpperCase();
+                const newBrand = row.querySelector('.row-brand').value.trim().toUpperCase();
+                const newUom = row.querySelector('.row-uom').value.trim().toUpperCase();
+                const newLoc = row.querySelector('.row-loc').value.trim().toUpperCase();
+                const sku = row.cells[1].querySelector('input').value;
+
+                const { error: updateError } = await _supabase.from('inventory').update({
+                    item_name: newName,
+                    brand: newBrand,
+                    uom: newUom,
+                    location: newLoc
+                }).eq('id', row.dataset.id);
+
+                if (updateError) throw updateError;
+
+                logsToInsert.push({
+                    type: 'EDIT',
+                    item_name: newName,
+                    quantity: 0,
+                    reference_id: batchRef,
+                    details: `[BY: ${activeUser}] SKU ${sku} UPDATED (LOC: ${newLoc})`.toUpperCase()
+                });
+            }
+
+            if (logsToInsert.length > 0) {
+                await _supabase.from('activity_logs').insert(logsToInsert);
+            }
+
+            alert(`UPDATE SUCCESSFUL\nBATCH ID: ${batchRef}`);
+            loadInventory();
+        } catch (err) {
+            alert("UPDATE ERROR: " + err.message);
+        } finally {
+            btn.disabled = false; 
+            btn.innerText = "UPDATE ALL CHANGES";
         }
-        alert("UPDATED SUCCESSFULLY"); loadInventory(); btn.disabled = false; btn.innerText = "UPDATE ALL CHANGES";
     }
 
     async function addSystemItem(type) {
         const inp = document.getElementById(type === 'uom' ? 'new-uom' : 'new-loc');
         const val = inp.value.trim().toUpperCase();
-        if(!val) { alert("ENTER A VALUE"); return; }
+        if(!val) return;
 
         const listToCheck = (type === 'uom') ? currentUOMs : currentLocs;
         if (listToCheck.some(item => item.name.toUpperCase() === val)) {
             alert(`"${val}" ALREADY EXISTS`);
-            inp.style.borderColor = "red";
             return;
         }
 
         const tableName = (type === 'uom') ? 'inventory_uom' : 'inventory_locations';
         const { error } = await _supabase.from(tableName).insert([{ name: val }]);
-        if (error) { alert("ERROR: " + error.message); } 
-        else { inp.value = ""; inp.style.borderColor = "var(--excel-border)"; refreshSystemLists(); }
+        if (error) alert(error.message);
+        else { inp.value = ""; refreshSystemLists(); }
     }
 
     async function deleteItem(type, name) {
@@ -330,7 +373,8 @@
         refreshSystemLists();
     }
 
-    init();
+    // Run init on window load
+    window.onload = init;
 </script>
 </body>
 </html>
