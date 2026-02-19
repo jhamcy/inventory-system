@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Min/Max Settings | EasiStock</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        :root {
+            --primary: #0f172a; 
+            --accent: #0081ff;  
+            --success: #10b981;
+            --excel-border: #cbd5e1;
+        }
+        html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%); display: flex; flex-direction: column; }
+        
+        .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 1000; }
+        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; text-decoration: none; cursor: pointer; }
+        
+        .main-content { flex: 1; display: flex; flex-direction: column; padding: 15px; overflow: hidden; }
+        
+        .search-container { margin: 0 auto 15px auto; width: 100%; max-width: 900px; position: relative; flex-shrink: 0; }
+        .search-input { width: 100%; padding: 12px 45px; border-radius: 10px; border: 2px solid var(--primary); font-size: 0.9rem; font-weight: 700; box-sizing: border-box; outline: none; text-transform: uppercase; }
+        .search-icon { position: absolute; left: 15px; top: 12px; color: var(--primary); font-size: 1.1rem; }
+
+        .table-scroll-area { flex: 1; overflow: auto; background: white; border: 2px solid var(--primary); border-radius: 12px 12px 0 0; }
+        table { border-collapse: collapse; width: max-content; min-width: 100%; table-layout: fixed; }
+        thead th { position: sticky; top: 0; z-index: 20; background: #f1f5f9; height: 45px; font-size: 0.7rem; font-weight: 800; border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border); color: var(--primary); text-transform: uppercase; }
+        
+        .sticky-col { position: sticky; left: 0; z-index: 30; background: #f1f5f9 !important; width: 45px !important; border-right: 2px solid var(--primary) !important; }
+        
+        tbody td { height: 48px; padding: 0 8px; border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); font-size: 0.8rem; text-align: center; white-space: nowrap; overflow: hidden; font-weight: 600; color: #334155; text-transform: uppercase; }
+        
+        /* Editable Input Styling */
+        .limit-input { width: 80%; padding: 6px; border: 1px solid var(--excel-border); border-radius: 4px; text-align: center; font-weight: 800; color: var(--accent); }
+        .limit-input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+
+        .pagination-footer { height: 60px; background: white; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--primary); border-top: none; border-radius: 0 0 12px 12px; }
+        .save-btn { background: var(--success); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.75rem; text-transform: uppercase; box-shadow: 0 4px 0 #059669; transition: all 0.1s; }
+        .save-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #059669; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a class="nav-logo-text" onclick="location.href='dashboard.html'">EasiStock</a>
+        <div style="color:white; font-weight:800; font-size:0.7rem; letter-spacing: 1px;">MIN/MAX SETTINGS</div>
+    </div>
+
+    <div class="main-content">
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" class="search-input" placeholder="SEARCH ITEMS TO SET LIMITS..." oninput="fetchItems()">
+        </div>
+
+        <div class="table-scroll-area">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="sticky-col">#</th>
+                        <th style="width:140px;">SKU</th>
+                        <th style="width:250px;">Description</th>
+                        <th style="width:100px;">Min Qty</th>
+                        <th style="width:100px;">Max Qty</th>
+                        <th style="width:120px;">Current</th>
+                    </tr>
+                </thead>
+                <tbody id="par-body">
+                    <tr><td colspan="6" style="padding:40px;">Loading items...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination-footer">
+            <button class="save-btn" onclick="saveAllLimits()">💾 Save All Changes</button>
+            <div id="status-info" style="font-size: 0.7rem; font-weight: 800; color: var(--primary);">Editing Par Levels</div>
+        </div>
+    </div>
+
+    <script>
+        const _supabase = supabase.createClient('https://crruounuhtfzyssyhgcc.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg');
+
+        let itemsData = [];
+
+        async function fetchItems() {
+            const searchTerm = document.getElementById('searchInput').value;
+            let query = _supabase.from('inventory').select('*');
+
+            if (searchTerm) {
+                query = query.or(`item_name.ilike.%${searchTerm}%,sku.ilike.%${searchTerm}%`);
+            }
+
+            const { data, error } = await query.order('sku', { ascending: true });
+
+            if (!error) {
+                itemsData = data;
+                renderTable(data);
+            }
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('par-body');
+            tbody.innerHTML = data.map((item, i) => `
+                <tr data-sku="${item.sku}">
+                    <td class="sticky-col">${i + 1}</td>
+                    <td style="font-family:monospace; font-weight:800;">${item.sku}</td>
+                    <td style="text-align:left; font-weight:700;">${item.item_name}</td>
+                    <td>
+                        <input type="number" class="limit-input min-val" value="${item.min_qty || 0}">
+                    </td>
+                    <td>
+                        <input type="number" class="limit-input max-val" value="${item.max_qty || 0}">
+                    </td>
+                    <td style="font-weight:800; background: #f8fafc;">${item.quantity || 0}</td>
+                </tr>
+            `).join('');
+        }
+
+        async function saveAllLimits() {
+            const rows = document.querySelectorAll('#par-body tr');
+            const updates = [];
+
+            rows.forEach(row => {
+                const sku = row.getAttribute('data-sku');
+                const min = row.querySelector('.min-val').value;
+                const max = row.querySelector('.max-val').value;
+                updates.push({ sku, min_qty: parseInt(min), max_qty: parseInt(max) });
+            });
+
+            // Upsert in Supabase (Assumes SKU is the unique primary key)
+            for (const item of updates) {
+                const { error } = await _supabase
+                    .from('inventory')
+                    .update({ min_qty: item.min_qty, max_qty: item.max_qty })
+                    .eq('sku', item.sku);
+                
+                if (error) console.error("Error updating", item.sku, error);
+            }
+
+            alert("✅ All Min/Max levels updated successfully!");
+            
+            // Log the activity
+            const admin = localStorage.getItem('activeAdmin') || 'Admin';
+            await _supabase.from('activity_logs').insert([{
+                type: 'ADJUST',
+                reference_id: 'PAR-' + Date.now().toString().slice(-6),
+                summary: `Min/Max levels updated by ${admin}`,
+                performed_by: admin
+            }]);
+        }
+
+        window.onload = fetchItems;
+    </script>
+</body>
+</html>

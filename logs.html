@@ -14,13 +14,13 @@
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
+            --reorder: #f97316; /* Matches Dashboard Reorder Orange */
             --excel-border: #cbd5e1;
         }
 
         body {
             margin: 0; font-family: 'Inter', sans-serif;
             background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
-            /* Fix for mobile viewport overlapping */
             height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
             align-items: center;
         }
@@ -45,7 +45,6 @@
             box-sizing: border-box;
         }
 
-        /* FILTERS - Stay at top */
         .filter-grid { 
             display: grid; grid-template-columns: 1fr 1fr; gap: 6px; 
             margin-bottom: 10px; width: 100%; background: white;
@@ -73,7 +72,6 @@
             box-sizing: border-box; flex-shrink: 0;
         }
 
-        /* DATA TABLE - Only this part scrolls */
         .table-area { 
             width: 100%; background: white; border: 2px solid var(--primary); border-top: none; 
             border-radius: 0 0 12px 12px; overflow-y: auto;
@@ -98,13 +96,6 @@
 
         .ref-id { color: var(--accent); font-weight: 800; font-family: monospace; font-size: 0.7rem; }
         .summary-text { font-size: 0.55rem; color: #64748b; font-weight: 500; display: block; margin-top: 2px; text-transform: uppercase; }
-
-        @media (max-width: 480px) {
-            .navbar { height: 50px; }
-            .section-header { padding: 8px 10px; }
-            thead th:nth-child(1), tbody td:nth-child(1) { width: 20%; font-size: 0.5rem; }
-            thead th:nth-child(4), tbody td:nth-child(4) { width: 15%; font-size: 0.5rem; }
-        }
     </style>
 </head>
 <body>
@@ -124,7 +115,7 @@
                 <option value="ORDER">📝 ORDERS</option>
                 <option value="TRANSFER">🔄 TRANSFERS</option>
                 <option value="RETURN">↩️ RETURNS</option>
-                <option value="ADJUST">⚖️ ADJUSTMENTS</option>
+                <option value="REORDER">⚠️ PROCUREMENT</option> <option value="ADJUST">⚖️ ADJUSTMENTS</option>
             </select>
             <div style="display: flex; gap: 4px;">
                 <input type="date" id="dateFrom" class="date-input" onchange="applyFilters()">
@@ -209,6 +200,7 @@
             if (type.includes('ORDER')) return '#6366f1';
             if (type.includes('TRANS')) return '#0081ff';
             if (type.includes('RTN') || type.includes('RETURN')) return '#f59e0b';
+            if (type.includes('REORDER') || type.includes('PROC')) return '#f97316'; // NEW COLOR LOGIC
             return '#475569';
         }
 

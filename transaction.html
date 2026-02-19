@@ -14,6 +14,7 @@
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
+            --reorder: #f97316;
             --excel-border: #cbd5e1;
         }
 
@@ -36,7 +37,6 @@
             display: flex; flex-direction: column; gap: 12px; overflow: hidden; box-sizing: border-box;
         }
 
-        /* HEADER INFO CARD */
         .info-card {
             background: white; border-radius: 12px; padding: 15px;
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;
@@ -46,14 +46,12 @@
         .info-label { font-size: 0.55rem; font-weight: 800; color: #64748b; text-transform: uppercase; }
         .info-value { font-size: 0.8rem; font-weight: 700; color: var(--primary); }
 
-        /* REFINED NOTE SECTION */
         .notes-area {
             grid-column: span 4; background: #f8fafc; border-left: 4px solid var(--accent);
             padding: 12px; border-radius: 4px; margin-top: 5px;
         }
         .notes-text { font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; line-height: 1.4; }
 
-        /* TABLE AREA */
         .table-container {
             background: white; border: 2px solid var(--primary);
             border-radius: 12px; overflow: hidden;
@@ -77,6 +75,7 @@
         .qty-badge { font-weight: 800; padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; min-width: 55px; text-align: center; display: inline-block; }
         .plus { color: var(--success); background: #ecfdf5; border: 1px solid var(--success); }
         .minus { color: var(--danger); background: #fef2f2; border: 1px solid var(--danger); }
+        .reorder-style { color: var(--reorder); background: #fff7ed; border: 1px solid var(--reorder); }
 
         .footer-actions { text-align: center; padding: 15px 0; flex-shrink: 0; }
         .btn-back {
@@ -105,9 +104,9 @@
             <div class="info-item"><span class="info-label">Operator</span><span id="val-user" class="info-value">---</span></div>
             <div class="info-item"><span class="info-label">Date/Time</span><span id="val-date" class="info-value">---</span></div>
             
-            <div class="notes-area">
-                <div class="info-label" style="color: var(--accent); margin-bottom: 4px;">Note</div>
-                <div id="val-notes" class="notes-text">NO ADDITIONAL NOTES PROVIDED.</div>
+            <div class="notes-area" id="notes-box">
+                <div class="info-label" style="color: var(--accent); margin-bottom: 4px;">Summary</div>
+                <div id="val-notes" class="notes-text">NO ADDITIONAL DETAILS PROVIDED.</div>
             </div>
         </div>
 
@@ -115,13 +114,13 @@
             <div class="table-wrapper">
                 <table>
                     <thead>
-                        <tr>
+                        <tr id="table-head-row">
                             <th style="width: 15%;">SKU</th>
                             <th style="width: 30%;">Item Description</th>
                             <th style="width: 15%;">Brand</th>
                             <th style="width: 15%;">Location</th>
                             <th style="width: 10%;">UOM</th>
-                            <th style="width: 15%; text-align: center;">Qty Transacted</th>
+                            <th style="width: 15%; text-align: center;" id="qty-header">Qty Transacted</th>
                         </tr>
                     </thead>
                     <tbody id="inventory-body">
@@ -147,45 +146,72 @@
             if(!ref) return;
 
             try {
-                const [logRes, transRes] = await Promise.all([
-                    sb.from('activity_logs').select('*').eq('reference_id', ref).maybeSingle(),
-                    sb.from('inventory_transactions').select('*').eq('reference_id', ref)
-                ]);
+                const { data: logData, error: logErr } = await sb.from('activity_logs').select('*').eq('reference_id', ref).maybeSingle();
 
-                if (logRes.data) {
+                if (logData) {
                     document.getElementById('val-ref').innerText = ref;
                     document.getElementById('disp-ref-top').innerText = ref;
-                    document.getElementById('val-type').innerText = logRes.data.type || 'N/A';
-                    document.getElementById('val-user').innerText = logRes.data.performed_by || 'ADMIN';
-                    document.getElementById('val-date').innerText = new Date(logRes.data.created_at).toLocaleString('en-GB');
+                    document.getElementById('val-type').innerText = logData.type || 'N/A';
+                    document.getElementById('val-user').innerText = logData.performed_by || 'ADMIN';
+                    document.getElementById('val-date').innerText = new Date(logData.created_at).toLocaleString('en-GB');
+                    document.getElementById('val-notes').innerText = logData.summary || 'PROCUREMENT PLAN GENERATED.';
+                    
+                    // Apply Reorder Theme if applicable
+                    if(logData.type === 'REORDER') {
+                        document.getElementById('disp-ref-top').style.background = 'var(--reorder)';
+                        document.getElementById('qty-header').innerText = 'Suggested Buy';
+                        document.getElementById('notes-box').style.borderLeftColor = 'var(--reorder)';
+                        loadReorderItems(); // Load specific reorder view
+                        return;
+                    }
                 }
 
-                const items = transRes.data || [];
-                if(items.length > 0) {
-                    // Pull Note from the items
-                    if(items[0].notes) {
-                        document.getElementById('val-notes').innerText = items[0].notes;
-                    }
-
-                    document.getElementById('inventory-body').innerHTML = items.map(row => {
-                        const qty = row.qty_change || 0;
-                        const badgeClass = qty > 0 ? 'plus' : (qty < 0 ? 'minus' : 'zero');
-                        const sign = qty > 0 ? '+' : '';
-
-                        return `
-                        <tr>
-                            <td><span class="sku-code">${row.sku || 'N/A'}</span></td>
-                            <td style="font-weight: 700; text-transform: uppercase;">${row.item_name || 'UNKNOWN ITEM'}</td>
-                            <td><span class="brand-tag">${row.brand || '---'}</span></td>
-                            <td style="font-weight: 700;">${row.location || 'MAIN'}</td>
-                            <td><span class="uom-tag">${row.uom || 'PCS'}</span></td>
-                            <td style="text-align: center;">
-                                <span class="qty-badge ${badgeClass}">${sign}${qty}</span>
-                            </td>
-                        </tr>`;
-                    }).join('');
+                // Standard Transaction Loading
+                const { data: items } = await sb.from('inventory_transactions').select('*').eq('reference_id', ref);
+                
+                if(items && items.length > 0) {
+                    renderStandardTable(items);
+                } else {
+                    document.getElementById('inventory-body').innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px;">No specific item lines found for this log.</td></tr>`;
                 }
             } catch (err) { console.error(err); }
+        }
+
+        function renderStandardTable(items) {
+            document.getElementById('inventory-body').innerHTML = items.map(row => {
+                const qty = row.qty_change || 0;
+                const badgeClass = qty > 0 ? 'plus' : (qty < 0 ? 'minus' : '');
+                const sign = qty > 0 ? '+' : '';
+
+                return `
+                <tr>
+                    <td><span class="sku-code">${row.sku || 'N/A'}</span></td>
+                    <td style="font-weight: 700; text-transform: uppercase;">${row.item_name || 'UNKNOWN ITEM'}</td>
+                    <td>${row.brand || '---'}</td>
+                    <td style="font-weight: 700;">${row.location || 'MAIN'}</td>
+                    <td><span class="uom-tag">${row.uom || 'PCS'}</span></td>
+                    <td style="text-align: center;">
+                        <span class="qty-badge ${badgeClass}">${sign}${qty}</span>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function loadReorderItems() {
+            // For REORDER logs, we fetch current items that are low stock (matching reorder logic)
+            const { data: items } = await sb.from('inventory').select('*').lt('quantity', 10);
+            
+            document.getElementById('inventory-body').innerHTML = items.map(row => `
+                <tr>
+                    <td><span class="sku-code">${row.sku || 'N/A'}</span></td>
+                    <td style="font-weight: 700; text-transform: uppercase;">${row.item_name || 'UNKNOWN'}</td>
+                    <td>${row.brand || '---'}</td>
+                    <td style="font-weight: 700;">${row.location || 'MAIN'}</td>
+                    <td><span class="uom-tag">${row.uom || 'PCS'}</span></td>
+                    <td style="text-align: center;">
+                        <span class="qty-badge reorder-style">+50</span>
+                    </td>
+                </tr>`).join('');
         }
 
         window.onload = fetchReport;

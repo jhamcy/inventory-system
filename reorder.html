@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Reorder | EasiStock</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        :root {
+            --primary: #0f172a; 
+            --accent: #0081ff;  
+            --success: #10b981;
+            --excel-border: #cbd5e1;
+            --warning-bg: #fef3c7;
+            --warning-text: #92400e;
+            --danger-bg: #fee2e2;
+            --danger-text: #b91c1c;
+            --reorder-orange: #f97316;
+        }
+        html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%); display: flex; flex-direction: column; }
+        
+        .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 1000; }
+        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; text-decoration: none; cursor: pointer; }
+        
+        .main-content { flex: 1; display: flex; flex-direction: column; padding: 15px; overflow: hidden; }
+        
+        .search-container { margin: 0 auto 15px auto; width: 100%; max-width: 900px; position: relative; flex-shrink: 0; }
+        .search-input { width: 100%; padding: 12px 45px; border-radius: 10px; border: 2px solid var(--primary); font-size: 0.9rem; font-weight: 700; box-sizing: border-box; outline: none; text-transform: uppercase; }
+        .search-icon { position: absolute; left: 15px; top: 12px; color: var(--primary); font-size: 1.1rem; }
+
+        .table-scroll-area { flex: 1; overflow: auto; background: white; border: 2px solid var(--primary); border-radius: 12px 12px 0 0; }
+        table { border-collapse: collapse; width: max-content; min-width: 100%; table-layout: fixed; }
+        thead th { position: sticky; top: 0; z-index: 20; background: #f1f5f9; height: 45px; font-size: 0.7rem; font-weight: 800; border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border); color: var(--primary); text-transform: uppercase; }
+        
+        .sticky-col { position: sticky; left: 0; z-index: 30; background: #f1f5f9 !important; width: 45px !important; border-right: 2px solid var(--primary) !important; }
+        
+        tbody td { height: 48px; padding: 0 8px; border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); font-size: 0.8rem; text-align: center; white-space: nowrap; overflow: hidden; font-weight: 600; color: #334155; text-transform: uppercase; }
+        
+        tr.out-of-stock { background-color: var(--danger-bg) !important; }
+        tr.out-of-stock td { color: var(--danger-text) !important; }
+        tr.low-stock { background-color: var(--warning-bg) !important; }
+        tr.low-stock td { color: var(--warning-text) !important; }
+
+        .badge { padding: 4px 8px; border-radius: 6px; font-weight: 800; color: white; font-size: 0.65rem; }
+        .bg-reorder { background: var(--reorder-orange); }
+
+        .pagination-footer { height: 60px; background: white; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--primary); border-top: none; border-radius: 0 0 12px 12px; }
+        .back-btn { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.7rem; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a class="nav-logo-text" onclick="location.href='dashboard.html'">EasiStock</a>
+        <div style="color:white; font-weight:800; font-size:0.7rem; letter-spacing: 1px;">DYNAMIC REORDER PLAN</div>
+    </div>
+
+    <div class="main-content">
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" class="search-input" placeholder="SEARCH REORDER LIST..." oninput="fetchReorderData()">
+        </div>
+
+        <div class="table-scroll-area">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="sticky-col">#</th>
+                        <th style="width:140px;">Item Code</th>
+                        <th style="width:250px;">Description</th>
+                        <th style="width:100px;">Stock</th>
+                        <th style="width:100px;">Min Level</th>
+                        <th style="width:100px;">Max Goal</th>
+                        <th style="width:100px;">To Order</th>
+                        <th style="width:120px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="reorder-body">
+                    <tr><td colspan="8" style="padding:50px;">Calculating replenishment needs...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination-footer">
+            <button class="back-btn" onclick="location.href='dashboard.html'">Dashboard</button>
+            <div id="status-info" style="font-size: 0.75rem; font-weight: 800; color: var(--primary);">System Ready</div>
+        </div>
+    </div>
+
+    <script>
+        const _supabase = supabase.createClient('https://crruounuhtfzyssyhgcc.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg');
+
+        async function fetchReorderData() {
+            const searchTerm = document.getElementById('searchInput').value;
+            
+            // Logic: Get ALL items to check their specific min_qty
+            let { data, error } = await _supabase.from('inventory').select('*');
+
+            if (!error) {
+                // Filter items where quantity < min_qty (or default 5)
+                let lowStockItems = data.filter(item => {
+                    const min = item.min_qty || 5; 
+                    const matchesSearch = !searchTerm || 
+                                          item.item_name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                          item.sku.toLowerCase().includes(searchTerm.toLowerCase());
+                    return (item.quantity < min) && matchesSearch;
+                });
+
+                renderTable(lowStockItems);
+                document.getElementById('status-info').innerText = `${lowStockItems.length} ITEMS BELOW MINIMUM`;
+            }
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('reorder-body');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="padding:50px; text-align:center; font-weight:800; color:#64748b;">✅ ALL ITEMS ARE ABOVE MINIMUM LEVELS</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map((item, i) => {
+                const qty = item.quantity || 0;
+                const min = item.min_qty || 5;
+                const max = item.max_qty || 20;
+                
+                // Dynamic Order Quantity = Max Goal - Current Stock
+                const toOrder = max - qty;
+
+                let rowClass = (qty <= 0) ? 'out-of-stock' : 'low-stock';
+                let statusLabel = (qty <= 0) ? 'CRITICAL' : 'REORDER';
+
+                return `
+                    <tr class="${rowClass}">
+                        <td class="sticky-col">${i + 1}</td>
+                        <td style="font-family:monospace; font-weight:800;">${item.sku}</td>
+                        <td style="text-align:left; font-weight:700;">${item.item_name}</td>
+                        <td><b style="font-size:1rem;">${qty}</b></td>
+                        <td>${min}</td>
+                        <td>${max}</td>
+                        <td style="color:var(--accent); font-weight:800;">+${toOrder > 0 ? toOrder : 0}</td>
+                        <td><span class="badge bg-reorder">${statusLabel}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        window.onload = fetchReorderData;
+    </script>
+</body>
+</html>
