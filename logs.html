@@ -12,6 +12,7 @@
             --primary: #0f172a;
             --accent: #0081ff;
             --success: #10b981;
+            --warning: #f59e0b;
             --danger: #ef4444;
             --excel-border: #cbd5e1;
         }
@@ -23,13 +24,14 @@
             align-items: center;
         }
 
-        /* NEW CLEAN NAVBAR WITH HOME BUTTON */
         .navbar { 
             width: 100%; height: 60px; background: var(--primary); 
             display: flex; align-items: center; justify-content: space-between; 
             padding: 0 15px; flex-shrink: 0; box-sizing: border-box;
         }
+
         .nav-logo-text { color: white; font-weight: 800; font-size: 1rem; text-transform: uppercase; }
+
         .btn-home {
             background: var(--accent); color: white; border: none; padding: 8px 15px;
             border-radius: 8px; font-weight: 800; font-size: 0.7rem; cursor: pointer;
@@ -41,31 +43,33 @@
             display: flex; flex-direction: column; overflow: hidden;
             box-sizing: border-box;
         }
-        
-        /* FILTERS SECTION */
+
         .filter-grid { 
             display: grid; grid-template-columns: 1fr 1fr; gap: 8px; 
             margin-bottom: 12px; width: 100%; background: white;
             padding: 12px; border-radius: 12px; border: 2px solid var(--primary);
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); box-sizing: border-box; flex-shrink: 0;
         }
+
         .search-wrapper { grid-column: span 2; }
+
         .search-input, .type-select, .date-input { 
             width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;
             font-size: 0.8rem; font-weight: 700; box-sizing: border-box; outline: none; background: #f8fafc;
         }
+
         .btn-reset { 
             grid-column: span 2; background: #64748b; color: white; border: none; 
             padding: 10px; border-radius: 8px; font-weight: 800; font-size: 0.7rem; 
             cursor: pointer; text-transform: uppercase; 
         }
 
-        /* DATA TABLE */
         .section-header { 
             width: 100%; background: var(--primary); color: white; padding: 12px 15px; 
             border-radius: 12px 12px 0 0; font-size: 0.7rem; font-weight: 800; 
             text-transform: uppercase; display: flex; justify-content: space-between; box-sizing: border-box;
         }
+
         .table-area { 
             width: 100%; background: white; border: 2px solid var(--primary); border-top: none; 
             border-radius: 0 0 12px 12px; overflow-y: auto;
@@ -73,20 +77,26 @@
         }
         
         table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+
         thead th { 
             position: sticky; top: 0; z-index: 10; background: #f1f5f9;
             padding: 12px 10px; font-size: 0.6rem; text-transform: uppercase; 
             border-bottom: 2px solid var(--primary); color: var(--primary); font-weight: 800; text-align: left;
         }
+
         tbody td { padding: 12px 10px; border-bottom: 1px solid var(--excel-border); font-size: 0.7rem; font-weight: 600; vertical-align: middle; }
+
         tbody tr:hover { background-color: #f0f9ff; cursor: pointer; }
 
         .badge { 
             padding: 4px 6px; border-radius: 4px; font-weight: 800; font-size: 0.55rem; 
             color: white; text-align: center; display: block; width: 100%; box-sizing: border-box;
         }
+
         .ref-id { color: var(--accent); font-weight: 800; font-family: monospace; font-size: 0.75rem; }
+
         .summary-text { font-size: 0.6rem; color: #64748b; font-weight: 500; display: block; margin-top: 2px; text-transform: uppercase; }
+
     </style>
 </head>
 <body>
@@ -105,6 +115,7 @@
                 <option value="RECEIVING">🚚 RECEIVING</option>
                 <option value="ORDER">📝 ORDERS</option>
                 <option value="TRANSFER">🔄 TRANSFERS</option>
+                <option value="RETURN">↩️ RETURNS</option>
                 <option value="ADJUST">⚖️ ADJUSTMENTS</option>
                 <option value="ADD">➕ ADD ITEM</option>
                 <option value="EDIT">✏️ EDIT ITEM</option>
@@ -143,6 +154,7 @@
         const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         let masterLogData = [];
 
         async function fetchLogs() {
@@ -191,11 +203,12 @@
             if (type.includes('RECV')) return '#059669';
             if (type.includes('ORDER')) return '#6366f1';
             if (type.includes('TRANS')) return '#0081ff';
-            if (type.includes('ADJ')) return '#f59e0b';
+            if (type.includes('RTN') || type.includes('RETURN')) return '#f59e0b'; // New Return Color
+            if (type.includes('ADJ')) return '#64748b';
             if (type.includes('ADD')) return '#10b981';
             if (type.includes('EDIT')) return '#8b5cf6';
             if (type.includes('DEL')) return '#ef4444';
-            return '#64748b';
+            return '#475569';
         }
 
         function applyFilters() {
@@ -207,11 +220,14 @@
             const filtered = masterLogData.filter(item => {
                 const matchesSearch = item.ref.includes(searchVal) || item.summary.toUpperCase().includes(searchVal);
                 const matchesType = (typeVal === "ALL") || (item.type.includes(typeVal));
+                
                 let matchesDate = true;
                 if (fromVal && item.rawDate < fromVal) matchesDate = false;
                 if (toVal && item.rawDate > toVal) matchesDate = false;
+
                 return matchesSearch && matchesType && matchesDate;
             });
+
             renderTable(filtered);
         }
 

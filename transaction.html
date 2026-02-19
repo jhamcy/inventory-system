@@ -12,6 +12,7 @@
             --primary: #0f172a;
             --accent: #0081ff;
             --success: #10b981;
+            --warning: #f59e0b;
             --danger: #ef4444;
             --excel-border: #cbd5e1;
         }
@@ -45,6 +46,13 @@
         .info-label { font-size: 0.55rem; font-weight: 800; color: #64748b; text-transform: uppercase; }
         .info-value { font-size: 0.8rem; font-weight: 700; color: var(--primary); }
 
+        /* REFINED NOTE SECTION */
+        .notes-area {
+            grid-column: span 4; background: #f8fafc; border-left: 4px solid var(--accent);
+            padding: 12px; border-radius: 4px; margin-top: 5px;
+        }
+        .notes-text { font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; line-height: 1.4; }
+
         /* TABLE AREA */
         .table-container {
             background: white; border: 2px solid var(--primary);
@@ -64,24 +72,22 @@
         td { padding: 12px 10px; border-bottom: 1px solid var(--excel-border); font-size: 0.75rem; color: #1e293b; vertical-align: middle; }
 
         .sku-code { font-family: monospace; font-weight: 800; color: var(--accent); }
-        .brand-tag { font-size: 0.65rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
         .uom-tag { font-size: 0.6rem; color: white; background: #64748b; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
         
         .qty-badge { font-weight: 800; padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; min-width: 55px; text-align: center; display: inline-block; }
         .plus { color: var(--success); background: #ecfdf5; border: 1px solid var(--success); }
         .minus { color: var(--danger); background: #fef2f2; border: 1px solid var(--danger); }
-        .zero { color: #64748b; background: #f8fafc; border: 1px solid var(--excel-border); }
 
         .footer-actions { text-align: center; padding: 15px 0; flex-shrink: 0; }
         .btn-back {
             background: var(--primary); color: white; border: none;
             padding: 12px 40px; border-radius: 8px; font-weight: 800;
-            cursor: pointer; text-transform: uppercase; font-size: 0.75rem; transition: 0.2s;
+            cursor: pointer; text-transform: uppercase; font-size: 0.75rem;
         }
-        .btn-back:hover { background: #1e293b; }
 
         @media (max-width: 800px) {
             .info-card { grid-template-columns: 1fr 1fr; }
+            .notes-area { grid-column: span 2; }
         }
     </style>
 </head>
@@ -98,6 +104,11 @@
             <div class="info-item"><span class="info-label">Action</span><span id="val-type" class="info-value">---</span></div>
             <div class="info-item"><span class="info-label">Operator</span><span id="val-user" class="info-value">---</span></div>
             <div class="info-item"><span class="info-label">Date/Time</span><span id="val-date" class="info-value">---</span></div>
+            
+            <div class="notes-area">
+                <div class="info-label" style="color: var(--accent); margin-bottom: 4px;">Note</div>
+                <div id="val-notes" class="notes-text">NO ADDITIONAL NOTES PROVIDED.</div>
+            </div>
         </div>
 
         <div class="table-container">
@@ -114,7 +125,7 @@
                         </tr>
                     </thead>
                     <tbody id="inventory-body">
-                        <tr><td colspan="6" style="text-align: center; padding: 60px; color: #94a3b8; font-weight: 600;">Connecting to cloud database...</td></tr>
+                        <tr><td colspan="6" style="text-align: center; padding: 60px; color: #94a3b8; font-weight: 600;">Connecting...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -133,76 +144,48 @@
         async function fetchReport() {
             const params = new URLSearchParams(window.location.search);
             const ref = params.get('ref');
-            
-            if(!ref) {
-                showEmptyState("No Reference ID found in URL.");
-                return;
-            }
+            if(!ref) return;
 
             try {
-                // Fetch both tables. Use .maybeSingle() to avoid erroring if row is missing
                 const [logRes, transRes] = await Promise.all([
                     sb.from('activity_logs').select('*').eq('reference_id', ref).maybeSingle(),
                     sb.from('inventory_transactions').select('*').eq('reference_id', ref)
                 ]);
 
-                // Update Header info if log exists
                 if (logRes.data) {
                     document.getElementById('val-ref').innerText = ref;
                     document.getElementById('disp-ref-top').innerText = ref;
                     document.getElementById('val-type').innerText = logRes.data.type || 'N/A';
                     document.getElementById('val-user').innerText = logRes.data.performed_by || 'ADMIN';
                     document.getElementById('val-date').innerText = new Date(logRes.data.created_at).toLocaleString('en-GB');
-                } else {
-                    document.getElementById('val-ref').innerText = ref;
-                    document.getElementById('disp-ref-top').innerText = "NOT FOUND";
                 }
 
-                const tbody = document.getElementById('inventory-body');
                 const items = transRes.data || [];
+                if(items.length > 0) {
+                    // Pull Note from the items
+                    if(items[0].notes) {
+                        document.getElementById('val-notes').innerText = items[0].notes;
+                    }
 
-                if(items.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 60px; color: #64748b;">
-                        <div style="font-size: 1.5rem;">📁</div>
-                        <b>No item details found for this reference.</b><br>
-                        <small>The log may be a system message with no inventory movement.</small>
-                    </td></tr>`;
-                    return;
+                    document.getElementById('inventory-body').innerHTML = items.map(row => {
+                        const qty = row.qty_change || 0;
+                        const badgeClass = qty > 0 ? 'plus' : (qty < 0 ? 'minus' : 'zero');
+                        const sign = qty > 0 ? '+' : '';
+
+                        return `
+                        <tr>
+                            <td><span class="sku-code">${row.sku || 'N/A'}</span></td>
+                            <td style="font-weight: 700; text-transform: uppercase;">${row.item_name || 'UNKNOWN ITEM'}</td>
+                            <td><span class="brand-tag">${row.brand || '---'}</span></td>
+                            <td style="font-weight: 700;">${row.location || 'MAIN'}</td>
+                            <td><span class="uom-tag">${row.uom || 'PCS'}</span></td>
+                            <td style="text-align: center;">
+                                <span class="qty-badge ${badgeClass}">${sign}${qty}</span>
+                            </td>
+                        </tr>`;
+                    }).join('');
                 }
-
-                // Map results to Table
-                tbody.innerHTML = items.map(row => {
-                    const qty = row.qty_change || 0;
-                    const badgeClass = qty > 0 ? 'plus' : (qty < 0 ? 'minus' : 'zero');
-                    const sign = qty > 0 ? '+' : '';
-
-                    return `
-                    <tr>
-                        <td><span class="sku-code">${row.sku || 'N/A'}</span></td>
-                        <td style="font-weight: 700; text-transform: uppercase;">${row.item_name || 'UNKNOWN ITEM'}</td>
-                        <td><span class="brand-tag">${row.brand || '---'}</span></td>
-                        <td style="font-weight: 700;">${row.location || 'MAIN'}</td>
-                        <td><span class="uom-tag">${row.uom || 'PCS'}</span></td>
-                        <td style="text-align: center;">
-                            <span class="qty-badge ${badgeClass}">${sign}${qty}</span>
-                        </td>
-                    </tr>`;
-                }).join('');
-
-            } catch (err) {
-                console.error("Fetch Error:", err);
-                showEmptyState("Failed to connect to Supabase. Check your connection.");
-            }
-        }
-
-        function showEmptyState(msg) {
-            document.getElementById('inventory-body').innerHTML = `
-                <tr>
-                    <td colspan="6" style="text-align: center; padding: 60px;">
-                        <div style="font-size: 1.5rem;">⚠️</div>
-                        <b style="color: var(--danger);">${msg}</b>
-                    </td>
-                </tr>`;
+            } catch (err) { console.error(err); }
         }
 
         window.onload = fetchReport;
