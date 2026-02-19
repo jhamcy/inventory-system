@@ -12,7 +12,6 @@
             --primary: #0f172a;
             --accent: #0081ff;
             --danger: #ef4444;
-            --success: #10b981;
             --border-gray: #cbd5e1;
         }
 
@@ -25,9 +24,8 @@
             font-size: 0.75rem;
         }
 
-        .navbar { height: 50px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; flex-shrink: 0; }
+        .navbar { height: 50px; background: var(--primary); display: flex; align-items: center; padding: 0 15px; flex-shrink: 0; }
         .nav-logo-text { color: white; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; }
-        .user-tag { color: var(--danger); font-size: 0.6rem; font-weight: 800; text-transform: uppercase; border: 1px solid var(--danger); padding: 2px 6px; border-radius: 4px; }
 
         .main-content { flex: 1; padding: 8px; display: flex; flex-direction: column; overflow: hidden; }
 
@@ -45,7 +43,7 @@
 
         #search-box { 
             width: 100%; padding: 12px; border-radius: 8px; 
-            border: 2px solid var(--danger); font-size: 0.85rem; 
+            border: 2px solid var(--accent); font-size: 0.85rem; 
             font-weight: 700; outline: none; text-transform: uppercase;
         }
 
@@ -91,10 +89,7 @@
 </head>
 <body>
 
-<header class="navbar">
-    <div class="nav-logo-text">EasiStock Delete</div>
-    <div id="active-user-tag" class="user-tag">UNAUTHORIZED</div>
-</header>
+<header class="navbar"><div class="nav-logo-text">EasiStock Delete</div></header>
 
 <main class="main-content">
     <div class="bulk-container">
@@ -133,21 +128,7 @@
 <script>
     const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
-    
-    let _supabase;
-
-    async function init() {
-        if (typeof supabase !== 'undefined') {
-            _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        } else {
-            alert("Library Error: Supabase failed to load.");
-            return;
-        }
-
-        // Display Active User
-        const activeUser = localStorage.getItem('activeAdmin') || 'STAFF';
-        document.getElementById('active-user-tag').innerText = activeUser.toUpperCase();
-    }
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     async function instantSearch(queryStr) {
         const tbody = document.getElementById('bulk-body');
@@ -215,7 +196,6 @@
 
     async function deleteSelected() {
         const checkedBoxes = document.querySelectorAll('.row-check:checked');
-        const activeUser = (localStorage.getItem('activeAdmin') || 'STAFF').toUpperCase();
         const idsToDelete = Array.from(checkedBoxes).map(cb => cb.value);
         const logs = [];
 
@@ -223,25 +203,21 @@
             const row = cb.closest('tr');
             logs.push({
                 type: 'DELETE',
-                item_name: row.dataset.name.toUpperCase(),
+                item_name: row.dataset.name,
                 reference_id: row.dataset.sku,
-                details: `[BY: ${activeUser}] PERMANENT REMOVAL. LOC: ${row.dataset.loc}`.toUpperCase()
+                details: `Removed via Cleanup. Loc: ${row.dataset.loc}`
             });
         });
 
-        if (!confirm(`CAUTION: PERMANENTLY DELETE ${idsToDelete.length} ITEMS?`)) return;
+        if (!confirm(`Permanently delete ${idsToDelete.length} items?`)) return;
 
         const btn = document.getElementById('delete-btn');
         btn.disabled = true; btn.innerText = "DELETING...";
 
         try {
-            // Delete from inventory
             const { error } = await _supabase.from('inventory').delete().in('id', idsToDelete);
             if (error) throw error;
-
-            // Create Audit Trail
             await _supabase.from('activity_logs').insert(logs);
-
             alert("DELETED SUCCESSFULLY");
             document.getElementById('search-box').value = "";
             instantSearch(""); 
@@ -251,8 +227,6 @@
             btn.innerText = "DELETE PERMANENTLY";
         }
     }
-
-    window.onload = init;
 </script>
 </body>
 </html>
