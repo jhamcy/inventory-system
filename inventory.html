@@ -30,8 +30,9 @@
         .main-content { flex: 1; display: flex; flex-direction: column; padding: 10px; overflow: hidden; }
 
         .action-bar-container { padding: 5px 0 15px 0; display: flex; justify-content: center; flex-shrink: 0; }
-        .toggle-group { display: flex; width: 100%; max-width: 500px; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .toggle-group { display: flex; width: 100%; max-width: 550px; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .btn-toggle { flex: 1; padding: 10px 0; border: none; border-right: 1px solid rgba(255,255,255,0.15); cursor: pointer; color: rgba(255,255,255,0.6); background: var(--primary); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .btn-toggle:last-child { border-right: none; }
         .btn-toggle.active { background: var(--accent) !important; color: white !important; }
 
         .search-container { margin-bottom: 8px; width: 100%; max-width: 900px; margin-left: auto; margin-right: auto; position: relative; flex-shrink: 0; }
@@ -42,42 +43,35 @@
         table { border-collapse: collapse; width: max-content; min-width: 100%; table-layout: fixed; }
         
         thead th { position: sticky; top: 0; z-index: 20; background: #f1f5f9; height: 45px; font-size: 0.7rem; font-weight: 800; border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border); color: var(--primary); text-transform: uppercase; position: relative; user-select: none; }
-        .resizer { position: absolute; right: 0; top: 0; width: 6px; height: 100%; cursor: col-resize; z-index: 30; }
+        
+        /* IMPROVED RESIZER HIT AREA */
+        .resizer { position: absolute; right: 0; top: 0; width: 12px; height: 100%; cursor: col-resize; z-index: 30; }
+        .resizer:hover { background: rgba(0, 129, 255, 0.3); }
 
         .sticky-col { position: sticky; left: 0; z-index: 30; background: #f1f5f9 !important; width: 45px !important; border-right: 2px solid var(--primary) !important; }
 
-        /* SELECTION STYLES RESTORED */
+        tbody td { height: 48px; padding: 0 8px; border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); font-size: 0.8rem; text-align: center; white-space: nowrap; overflow: hidden; font-weight: 600; color: #334155; text-transform: uppercase; }
         tbody tr:hover { background-color: #f0f9ff; cursor: pointer; }
         tbody tr.selected-row { background-color: var(--accent) !important; }
         tbody tr.selected-row td { color: white !important; border-right-color: rgba(255,255,255,0.2) !important; }
-        tbody tr.selected-row .sticky-col { background: #0066cc !important; }
-
-        tbody td { height: 48px; padding: 0 8px; border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); font-size: 0.8rem; text-align: center; white-space: nowrap; overflow: hidden; font-weight: 600; color: #334155; text-transform: uppercase; }
-        .hidden { display: none !important; }
-
-        #context-menu { position: fixed; display: none; background: white; border: 1px solid var(--primary); box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 5000; border-radius: 8px; padding: 5px 0; min-width: 140px; }
-        #context-menu div { padding: 10px 15px; cursor: pointer; font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; }
+        
+        .qty-badge { padding: 4px 8px; border-radius: 6px; font-weight: 800; background: var(--success); color: white; }
+        .qty-low { background: #ef4444; }
 
         .pagination-footer { height: 60px; background: white; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--primary); border-top: none; border-radius: 0 0 12px 12px; }
         .nav-btns { width: 80px; height: 38px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.7rem; }
         .nav-btns:disabled { background: #94a3b8; cursor: not-allowed; }
-        .qty-badge { padding: 4px 8px; border-radius: 6px; font-weight: 800; background: var(--success); color: white; }
-        .qty-low { background: #ef4444; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-
-    <div id="context-menu">
-        <div onclick="hideCurrentCol()">Hide Column</div>
-        <div onclick="unhideAllCols()">Unhide All</div>
-    </div>
 
     <div class="navbar">
         <a id="nav-logo" class="nav-logo-text" onclick="goHome()">EasiStock</a>
         <div style="display:flex; align-items:center;">
             <div class="user-info" onclick="location.href='profile.html'">
-                <span class="user-label" id="user-role-label">Inventory Admin</span>
-                <span class="user-name"><div class="online-dot"></div><span id="active-user">ADMIN_MASTER</span></span>
+                <span class="user-label" id="user-role-label">Loading...</span>
+                <span class="user-name"><div class="online-dot"></div><span id="active-user">---</span></span>
             </div>
             <button style="background:none; border:none; color:#ef4444; font-weight:800; cursor:pointer;" onclick="handleLogout()">LOGOUT ⏻</button>
         </div>
@@ -86,11 +80,11 @@
     <div class="main-content">
         <div class="action-bar-container">
             <div class="toggle-group" id="perm-nav">
-                <button class="btn-toggle active" data-page="inventory.html" onclick="location.href='inventory.html'"><span>📋</span><span>Inv</span></button>
-                <button class="btn-toggle" data-page="receiving.html" onclick="location.href='receiving.html'"><span>🚚</span><span>Recv</span></button>
-                <button class="btn-toggle" data-page="orders.html" onclick="location.href='orders.html'"><span>📝</span><span>Order</span></button>
-                <button class="btn-toggle" data-page="transfer.html" onclick="location.href='transfer.html'"><span>🔄</span><span>Trans</span></button>
-                <button class="btn-toggle" data-page="logs.html" onclick="location.href='logs.html'"><span>📜</span><span>Logs</span></button>
+                <button class="btn-toggle active" onclick="location.href='inventory.html'"><span>📋</span><span>Inv</span></button>
+                <button class="btn-toggle" onclick="location.href='receiving.html'"><span>🚚</span><span>Recv</span></button>
+                <button class="btn-toggle" onclick="location.href='orders.html'"><span>📝</span><span>Order</span></button>
+                <button class="btn-toggle" onclick="location.href='transfer.html'"><span>🔄</span><span>Trans</span></button>
+                <button class="btn-toggle" onclick="location.href='return.html'"><span>↩️</span><span>Return</span></button>
             </div>
         </div>
 
@@ -129,60 +123,62 @@
     <script>
         const _supabase = supabase.createClient('https://crruounuhtfzyssyhgcc.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg');
         
-        let currentPage = 1, currentSearchQuery = "", rightClickedIdx = null;
-
-        // --- AUTH & PERMISSIONS ---
+        let currentPage = 1, currentSearchQuery = "";
         const activeUser = localStorage.getItem('activeAdmin');
         const userRole = localStorage.getItem('userRole');
-        let userPermissions = [];
-        try { userPermissions = JSON.parse(localStorage.getItem('userPermissions')) || []; } catch(e) { userPermissions = []; }
+
+        // --- RESIZE LOGIC WITH SCROLL LOCK ---
+        document.querySelectorAll('th').forEach(th => {
+            const resizer = th.querySelector('.resizer');
+            if (!resizer) return;
+
+            const startResize = (e) => {
+                e.preventDefault();
+                const startX = e.pageX || e.touches[0].pageX;
+                const startWidth = th.offsetWidth;
+                const scrollArea = document.querySelector('.table-scroll-area');
+
+                // LOCK SCROLLING
+                scrollArea.style.overflow = 'hidden';
+                document.body.style.cursor = 'col-resize';
+
+                const onMove = (mv) => {
+                    const currentX = mv.pageX || (mv.touches ? mv.touches[0].pageX : 0);
+                    const newWidth = startWidth + (currentX - startX);
+                    if (newWidth > 40) th.style.width = newWidth + 'px';
+                };
+
+                const endResize = () => {
+                    // RESTORE SCROLLING
+                    scrollArea.style.overflow = 'auto';
+                    document.body.style.cursor = 'default';
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('touchmove', onMove);
+                    document.removeEventListener('mouseup', endResize);
+                    document.removeEventListener('touchend', endResize);
+                };
+
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('touchmove', onMove, { passive: false });
+                document.addEventListener('mouseup', endResize);
+                document.addEventListener('touchend', endResize);
+            };
+
+            resizer.addEventListener('mousedown', startResize);
+            resizer.addEventListener('touchstart', startResize, { passive: false });
+        });
 
         function applyPermissions() {
             if (!activeUser) { location.href = 'index.html'; return; }
             document.getElementById('active-user').innerText = activeUser;
             document.getElementById('user-role-label').innerText = userRole === 'admin' ? 'System Admin' : 'Staff Member';
-
-            if (userRole !== 'admin') {
-                document.querySelectorAll('.btn-toggle').forEach(btn => {
-                    const page = btn.getAttribute('data-page');
-                    if (page !== 'inventory.html' && !userPermissions.includes(page)) { btn.style.display = 'none'; }
-                });
-            }
-        }
-        function goHome() { window.location.href = (userRole === 'admin') ? 'dashboard.html' : 'inventory.html'; }
-
-        // --- EXCEL LOGIC (RESIZE & HIDE) ---
-        document.querySelectorAll('th').forEach(th => {
-            const resizer = th.querySelector('.resizer');
-            if (!resizer) return;
-            const startResize = (e) => {
-                const startX = e.pageX || e.touches[0].pageX;
-                const startWidth = th.offsetWidth;
-                const onMove = (mv) => { th.style.width = (startWidth + ((mv.pageX || mv.touches[0].pageX) - startX)) + 'px'; };
-                const endResize = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('touchmove', onMove); };
-                document.addEventListener('mousemove', onMove); document.addEventListener('touchmove', onMove);
-                document.addEventListener('mouseup', endResize); document.addEventListener('touchend', endResize);
-            };
-            resizer.addEventListener('mousedown', startResize); resizer.addEventListener('touchstart', startResize);
-        });
-
-        const menu = document.getElementById('context-menu');
-        document.querySelector('thead').oncontextmenu = (e) => {
-            const th = e.target.closest('th');
-            if (th?.dataset.idx) { e.preventDefault(); rightClickedIdx = th.dataset.idx; menu.style.display = 'block'; menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px'; }
-        };
-        window.onclick = () => menu.style.display = 'none';
-
-        function hideCurrentCol() { document.querySelectorAll(`[data-idx="${rightClickedIdx}"], td:nth-child(${rightClickedIdx})`).forEach(el => el.classList.add('hidden')); }
-        function unhideAllCols() { document.querySelectorAll('.hidden').forEach(el => el.classList.remove('hidden')); }
-
-        // --- ROW HIGHLIGHT ---
-        function selectRow(el) {
-            document.querySelectorAll('#inventory-body tr').forEach(r => r.classList.remove('selected-row'));
-            el.classList.add('selected-row');
         }
 
-        // --- DATA FETCHING ---
+        function goHome() { 
+            if (userRole === 'admin') window.location.href = 'dashboard.html';
+            else window.location.href = 'inventory.html';
+        }
+
         async function fetchInventory() {
             let query = _supabase.from('inventory').select('*', { count: 'exact' });
             if (currentSearchQuery) query = query.or(`item_name.ilike.%${currentSearchQuery}%,sku.ilike.%${currentSearchQuery}%`);
@@ -211,17 +207,16 @@
             document.getElementById('page-info').innerText = `Page ${currentPage}/${totalPages} (${total} SKUs)`;
             document.getElementById('prevBtn').disabled = (currentPage === 1);
             document.getElementById('nextBtn').disabled = (currentPage >= totalPages);
-
-            // Maintain hidden columns during re-render
-            const hiddenIdxs = Array.from(document.querySelectorAll('th.hidden')).map(th => th.dataset.idx);
-            hiddenIdxs.forEach(idx => { document.querySelectorAll(`td:nth-child(${idx})`).forEach(td => td.classList.add('hidden')); });
         }
 
         function handleSearch() { currentSearchQuery = document.getElementById('searchInput').value; currentPage = 1; fetchInventory(); }
-        function changePage(p) { if(p > 0) { currentPage = p; fetchInventory(); document.querySelector('.table-scroll-area').scrollTop = 0; } }
+        function changePage(p) { if(p > 0) { currentPage = p; fetchInventory(); } }
         function handleLogout() { localStorage.clear(); location.href = 'index.html'; }
+        function selectRow(el) {
+            document.querySelectorAll('#inventory-body tr').forEach(r => r.classList.remove('selected-row'));
+            el.classList.add('selected-row');
+        }
 
-        // INIT
         applyPermissions();
         fetchInventory();
     </script>
