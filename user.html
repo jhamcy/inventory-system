@@ -52,16 +52,17 @@
         input:focus { border-color: var(--accent); }
 
         .permission-box { 
-            display: flex; flex-wrap: wrap; gap: 8px; 
-            background: #f8fafc; padding: 12px; border-radius: 10px; 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
+            gap: 8px; background: #f8fafc; padding: 12px; border-radius: 10px; 
             border: 1px dashed var(--primary);
         }
 
         .perm-item { 
             display: flex; align-items: center; gap: 6px; 
-            font-size: 0.65rem; font-weight: 800; color: var(--primary);
-            background: white; padding: 6px 10px; border-radius: 6px; 
-            border: 1px solid var(--excel-border);
+            font-size: 0.6rem; font-weight: 800; color: var(--primary);
+            background: white; padding: 6px 8px; border-radius: 6px; 
+            border: 1px solid var(--excel-border); cursor: pointer;
         }
 
         .btn-group { display: flex; gap: 10px; width: 100%; }
@@ -116,14 +117,18 @@
                 </div>
                 
                 <div class="permission-box" id="perm-list">
-                    <div style="width: 100%; font-size: 0.6rem; font-weight: 800; color: #64748b; margin-bottom: 5px;">ALLOWED BUTTONS (PERMISSIONS):</div>
+                    <div style="grid-column: 1 / -1; font-size: 0.6rem; font-weight: 800; color: #64748b; margin-bottom: 5px;">ALLOWED BUTTONS (PERMISSIONS):</div>
                     <label class="perm-item"><input type="checkbox" value="add.html"> ADD</label>
                     <label class="perm-item"><input type="checkbox" value="edit.html"> EDIT</label>
-                    <label class="perm-item"><input type="checkbox" value="adj.html"> ADJUST</label>
-                    <label class="perm-item"><input type="checkbox" value="delete.html"> DELETE</label>
-                    <label class="perm-item"><input type="checkbox" value="logs.html"> LOGS</label>
+                    <label class="perm-item"><input type="checkbox" value="adj.html"> ADJ</label>
+                    <label class="perm-item"><input type="checkbox" value="transfer.html"> TRANS</label>
                     <label class="perm-item"><input type="checkbox" value="receiving.html"> RECV</label>
                     <label class="perm-item"><input type="checkbox" value="orders.html"> ORDER</label>
+                    <label class="perm-item"><input type="checkbox" value="return.html"> RTN</label>
+                    <label class="perm-item"><input type="checkbox" value="delete.html"> DEL</label>
+                    <label class="perm-item"><input type="checkbox" value="logs.html"> LOGS</label>
+                    <label class="perm-item"><input type="checkbox" value="inventory.html"> STOCK</label>
+                    <label class="perm-item"><input type="checkbox" value="user.html"> USER</label>
                 </div>
                 
                 <div class="btn-group">
@@ -166,7 +171,7 @@
 
             data.forEach(u => {
                 const tr = document.createElement('tr');
-                tr.onclick = () => activateEditMode(u); // Direct object binding
+                tr.onclick = () => activateEditMode(u);
                 
                 tr.innerHTML = `
                     <td style="color:var(--primary); font-weight:800;">${u.username}</td>
@@ -183,29 +188,21 @@
 
         function activateEditMode(user) {
             editingUser = user.username;
-            
-            // UI Feedback
             document.getElementById('input-card').style.borderColor = 'var(--accent)';
             document.getElementById('form-header').innerText = "Updating User: " + user.username;
-            
-            // Populate Fields
             document.getElementById('user-in').value = user.username;
             document.getElementById('user-in').disabled = true;
             document.getElementById('pass-in').value = user.password;
             document.getElementById('role-in').value = user.role;
 
-            // Set Checkboxes
             const userPerms = user.permissions || [];
             document.querySelectorAll('#perm-list input').forEach(cb => {
                 cb.checked = userPerms.includes(cb.value);
             });
 
-            // Toggle Buttons
             document.getElementById('btn-save').style.display = 'none';
             document.getElementById('btn-update').style.display = 'block';
             document.getElementById('btn-cancel').style.display = 'block';
-
-            // Scroll up to the form
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -218,7 +215,6 @@
             document.getElementById('pass-in').value = "";
             document.getElementById('role-in').value = "staff";
             document.querySelectorAll('#perm-list input').forEach(cb => cb.checked = false);
-
             document.getElementById('btn-save').style.display = 'block';
             document.getElementById('btn-update').style.display = 'none';
             document.getElementById('btn-cancel').style.display = 'none';
@@ -237,7 +233,7 @@
 
             if(error) alert("Error: " + error.message);
             else {
-                alert("User [" + editingUser + "] Updated!");
+                alert("User updated successfully!");
                 resetForm();
                 loadTable();
             }
@@ -255,7 +251,7 @@
                 username, password, role, permissions: perms 
             }]);
 
-            if(error) alert("User already exists");
+            if(error) alert("User already exists or database error");
             else {
                 alert("Account Created!");
                 resetForm();
@@ -264,9 +260,10 @@
         }
 
         async function delUser(name) {
-            if(!confirm("Permenantly delete " + name + "?")) return;
-            await _supabase.from('staff_accounts').delete().eq('username', name);
-            loadTable();
+            if(!confirm("Permanently delete " + name + "?")) return;
+            const { error } = await _supabase.from('staff_accounts').delete().eq('username', name);
+            if(error) alert("Delete failed");
+            else loadTable();
         }
 
         loadTable();
