@@ -98,6 +98,8 @@
         .btn-import { background: var(--success); color: white; padding: 0 12px; }
         .btn-add { background: #f1f5f9; color: var(--primary); border: 1px solid var(--excel-border); width: 100px; }
         .btn-save { background: var(--primary); color: white; flex: 1; font-size: 0.75rem; }
+        
+        /* EXIT BUTTON: UPDATED TO DASHBOARD.HTML */
         .btn-back { background: var(--danger); color: white; width: 55px; }
         
         #excel-upload { display: none; }
@@ -139,7 +141,7 @@
         </div>
 
         <div class="bulk-footer">
-            <a href="inventory.html" class="btn btn-back">EXIT</a>
+            <a href="dashboard.html" class="btn btn-back">EXIT</a>
             <button class="btn btn-save" id="save-btn" onclick="saveAllItems()">Register All Items</button>
             <button class="btn btn-add" onclick="addNewRow()">+ Add Row</button>
         </div>
@@ -335,7 +337,7 @@
             if (logError) console.warn("Log tracking failed.");
 
             alert(`SUCCESS: ${itemsToInsert.length} ITEMS REGISTERED BY ${activeUser}`);
-            window.location.href = 'inventory.html';
+            window.location.href = 'dashboard.html'; // UPDATED REDIRECT
         } catch (err) {
             alert("ERROR: " + err.message);
             btn.disabled = false; btn.innerText = "REGISTER ALL ITEMS";

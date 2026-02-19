@@ -86,7 +86,9 @@
             text-transform: uppercase; cursor: pointer; border: none; font-size: 0.7rem;
         }
         .btn-delete { background: var(--danger); color: white; flex: 2; }
-        .btn-back { background: #64748b; color: white; width: 70px; display: flex; align-items: center; justify-content: center; }
+        
+        /* EXIT BUTTON POINTING TO DASHBOARD */
+        .btn-back { background: #64748b; color: white; width: 70px; display: flex; align-items: center; justify-content: center; text-decoration: none; }
         
         #selected-count { font-size: 0.6rem; font-weight: 800; color: var(--danger); width: 70px; text-align: center; }
         .sku-tag { font-family: monospace; font-weight: 800; color: var(--accent); }
@@ -124,7 +126,7 @@
         </div>
 
         <div class="bulk-footer">
-            <button class="btn btn-back" onclick="window.location.href='inventory.html'">EXIT</button>
+            <button class="btn btn-back" onclick="window.location.href='dashboard.html'">EXIT</button>
             <div id="selected-count">0 SELECTED</div>
             <button class="btn btn-delete" id="delete-btn" onclick="deleteSelected()" disabled>DELETE PERMANENTLY</button>
         </div>
@@ -163,7 +165,7 @@
                     tr.dataset.id = item.id;
                     tr.dataset.name = item.item_name;
                     tr.dataset.sku = item.sku;
-                    tr.dataset.loc = item.field || item.location || 'MAIN';
+                    tr.dataset.loc = item.location || 'MAIN';
                     
                     tr.innerHTML = `
                         <td class="sticky-col loc-tag">${tr.dataset.loc}</td>
@@ -227,15 +229,15 @@
             });
         });
 
-        // BLOCKING LOGIC: Do not proceed if stock > 0
+        // STRICT BLOCK: IF STOCK > 0, STOP DELETION
         if (itemsWithStock.length > 0) {
-            alert(`❌ CANNOT DELETE: ${itemsWithStock.length} item(s) still have quantity in stock.\n\n` +
-                  `Please use the "Adjust Stock" page to set these to 0 before deleting:\n` + 
+            alert(`❌ ACTION BLOCKED: ${itemsWithStock.length} item(s) currently have stock.\n\n` +
+                  `You must adjust these items to 0 quantity before deleting them from the system:\n` + 
                   itemsWithStock.slice(0, 5).join(', ') + (itemsWithStock.length > 5 ? '...' : ''));
             return; 
         }
 
-        if (!confirm(`Are you sure you want to permanently delete ${idsToDelete.length} items? This action cannot be undone.`)) return;
+        if (!confirm(`Permanently delete ${idsToDelete.length} items? This cannot be undone.`)) return;
 
         const btn = document.getElementById('delete-btn');
         btn.disabled = true; btn.innerText = "DELETING...";
@@ -244,14 +246,13 @@
             const { error } = await _supabase.from('inventory').delete().in('id', idsToDelete);
             if (error) throw error;
             
-            const { error: logErr } = await _supabase.from('activity_logs').insert(logs);
-            if(logErr) console.warn("Log failed:", logErr);
+            await _supabase.from('activity_logs').insert(logs);
 
-            alert("SUCCESS: ITEMS REMOVED FROM DATABASE.");
+            alert("SUCCESS: ITEMS REMOVED.");
             document.getElementById('search-box').value = "";
             instantSearch(""); 
         } catch (err) {
-            alert("DATABASE ERROR: " + err.message);
+            alert("ERROR: " + err.message);
             btn.disabled = false;
             btn.innerText = "DELETE PERMANENTLY";
         }
