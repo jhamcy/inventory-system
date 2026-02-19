@@ -7,107 +7,91 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
         :root {
             --primary: #0f172a;
             --accent: #0081ff;
             --success: #10b981;
             --danger: #ef4444;
-            --border-main: #94a3b8;
-            --excel-border: #cbd5e1; /* Subtle gray for internal lines */
+            --warning: #f59e0b;
+            --excel-border: #cbd5e1;
         }
-
         body {
             margin: 0; font-family: 'Inter', sans-serif;
             background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
             height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            align-items: center;
         }
+        /* NAVBAR */
+        .navbar { width: 100%; height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* NAVBAR & USER INFO */
-        .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 1000; }
-        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
-        
-        .user-info { display: flex; flex-direction: column; align-items: flex-end; }
-        .user-label { font-size: 0.55rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: -2px; }
-        .user-name { font-size: 0.75rem; color: white; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
-        .online-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
-
-        /* TOGGLE GROUP */
-        .toggle-container { padding: 15px; display: flex; justify-content: center; flex-shrink: 0; }
+        /* NAVIGATION BUTTONS */
+        .toggle-container { width: 100%; padding: 10px; display: flex; justify-content: center; flex-shrink: 0; box-sizing: border-box; }
         .toggle-group { 
             display: flex; width: 100%; max-width: 500px; 
-            border-radius: 12px; overflow: hidden; 
-            border: 2px solid var(--primary); background: var(--primary); 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         .btn-toggle { 
-            flex: 1; padding: 10px 0; border: none; 
-            border-right: 1px solid rgba(255,255,255,0.1); cursor: pointer; 
+            flex: 1; padding: 10px 0; border: none; cursor: pointer; 
             color: rgba(255,255,255,0.6); background: var(--primary); 
-            font-size: 0.65rem; font-weight: 800; text-transform: uppercase; 
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            font-size: 0.6rem; font-weight: 800; text-transform: uppercase; 
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            border-right: 1px solid rgba(255,255,255,0.1);
         }
-        .btn-toggle span:first-child { font-size: 1.2rem; }
+        .btn-toggle:last-child { border-right: none; }
+        .btn-toggle span:first-child { font-size: 1.1rem; }
         .btn-toggle.active { background: var(--accent) !important; color: white !important; }
 
         /* MAIN CONTENT AREA */
-        .main-content { flex: 1; padding: 10px; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
-        .table-container { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 10px; flex: 1; overflow: hidden; }
+        .main-content { width: 100%; max-width: 600px; flex: 1; padding: 10px; display: flex; flex-direction: column; align-items: center; overflow: hidden; box-sizing: border-box; }
         
-        .search-wrapper { position: relative; width: 100%; }
-        .search-input { 
-            width: 100%; padding: 12px 15px 12px 40px; border-radius: 10px; 
-            border: 2px solid var(--primary); font-size: 0.8rem; font-weight: 700; 
-            box-sizing: border-box; outline: none; text-transform: uppercase;
+        /* FILTERS */
+        .filter-grid { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; 
+            margin-bottom: 12px; width: 100%; background: white;
+            padding: 15px; border-radius: 12px; border: 2px solid var(--primary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); box-sizing: border-box;
         }
-        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--primary); }
+        .search-wrapper { position: relative; grid-column: span 2; }
+        .search-input, .type-select, .date-input { 
+            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;
+            font-size: 0.8rem; font-weight: 700; box-sizing: border-box; outline: none; background: #f8fafc;
+        }
+        .date-label { font-size: 0.6rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 4px; display: block; }
+        .btn-reset { grid-column: span 2; background: var(--primary); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 800; font-size: 0.7rem; cursor: pointer; text-transform: uppercase; margin-top: 5px; }
 
-        /* EXCEL STYLE TABLE AREA */
-        .table-area { background: white; border: 2px solid var(--primary); border-radius: 12px; overflow: auto; flex: 1; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        /* SCROLLABLE TABLE AREA WITH STICKY HEADERS */
+        .section-header { 
+            width: 100%; background: var(--primary); color: white; padding: 12px 15px; 
+            border-radius: 12px 12px 0 0; font-size: 0.7rem; font-weight: 800; 
+            text-transform: uppercase; display: flex; justify-content: space-between; box-sizing: border-box;
+        }
+        .table-area { 
+            width: 100%; background: white; border: 2px solid var(--primary); border-top: none; 
+            border-radius: 0 0 12px 12px; overflow-y: auto; overflow-x: auto; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px;
+            flex: 1; /* Allows table to fill remaining space and scroll internally */
+        }
         
-        table { border-collapse: collapse; width: 100%; text-align: left; }
+        table { border-collapse: collapse; width: 100%; min-width: 400px; table-layout: fixed; }
         
-        /* Vertical and Horizontal lines */
+        /* STICKY THEAD LOGIC */
+        thead { position: sticky; top: 0; z-index: 10; }
         thead th { 
-            position: sticky; top: 0; background: #f1f5f9; padding: 12px; 
-            font-size: 0.65rem; text-transform: uppercase; 
-            border-bottom: 2px solid var(--primary); 
-            border-right: 1px solid var(--excel-border); /* Vertical line */
-            color: var(--primary); z-index: 10; font-weight: 800; 
+            background: #f1f5f9; padding: 12px 10px; font-size: 0.6rem; 
+            text-transform: uppercase; border-bottom: 2px solid var(--primary); 
+            color: var(--primary); font-weight: 800; text-align: left;
         }
         
-        tbody td { 
-            padding: 12px; 
-            border-bottom: 1px solid var(--excel-border); /* Horizontal line */
-            border-right: 1px solid var(--excel-border);  /* Vertical line */
-            font-size: 0.75rem; font-weight: 600; 
-        }
-
-        /* Remove right border on the last column */
-        thead th:last-child, tbody td:last-child { border-right: none; }
-
-        /* Row hover effect for readability */
-        tbody tr:hover { background-color: #f8fafc; }
-
-        .ref-link { color: var(--accent); font-weight: 800; cursor: pointer; text-decoration: none; font-family: monospace; }
-        .badge { padding: 3px 6px; border-radius: 4px; font-weight: 800; font-size: 0.6rem; color: white; display: inline-block; }
-
-        /* MODAL */
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); align-items: center; justify-content: center; padding: 10px; }
-        .modal-content { background: white; width: 100%; max-width: 500px; border-radius: 12px; border: 2px solid var(--primary); overflow: hidden; }
-        .modal-header { padding: 15px; background: #f8fafc; border-bottom: 2px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
-        .modal-body { padding: 15px; max-height: 400px; overflow-y: auto; }
-        .line-item { padding: 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; }
+        tbody td { padding: 12px 10px; border-bottom: 1px solid var(--excel-border); font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ref-link { color: var(--accent); font-weight: 800; cursor: pointer; text-decoration: underline; font-family: monospace; }
+        .badge { padding: 4px 8px; border-radius: 6px; font-weight: 800; font-size: 0.55rem; color: white; text-align: center; min-width: 65px; display: inline-block;}
     </style>
 </head>
 <body>
-
     <header class="navbar">
-        <div class="nav-logo-text">EasiStock</div>
-        <div class="user-info">
-            <span class="user-label">Systems Admin</span>
-            <span class="user-name"><div class="online-dot"></div><span id="active-user">ADMIN_MASTER</span></span>
-        </div>
+        <div class="nav-logo-text">Audit Master Log</div>
     </header>
 
     <div class="toggle-container">
@@ -121,127 +105,148 @@
     </div>
 
     <main class="main-content">
-        <div class="table-container">
+        <div class="filter-grid">
             <div class="search-wrapper">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="logSearch" class="search-input" placeholder="SEARCH LOGS..." onkeyup="filterTable()">
+                <input type="text" id="mainSearch" class="search-input" placeholder="🔍 SEARCH REFERENCE ID..." onkeyup="applyFilters()">
             </div>
+            <div style="grid-column: span 2;">
+                <span class="date-label">Category Filter</span>
+                <select id="typeFilter" class="type-select" onchange="applyFilters()">
+                    <option value="ALL">ALL CATEGORIES</option>
+                    <option value="RECEIVING">🚚 RECEIVING</option>
+                    <option value="ORDER">📝 ORDERS</option>
+                    <option value="TRANSFER">🔄 TRANSFER</option>
+                    <option value="ADD">➕ NEW ITEMS</option>
+                    <option value="ADJUST">⚖️ ADJUSTMENTS</option>
+                </select>
+            </div>
+            <div>
+                <span class="date-label">From Date</span>
+                <input type="date" id="dateFrom" class="date-input" onchange="applyFilters()">
+            </div>
+            <div>
+                <span class="date-label">To Date</span>
+                <input type="date" id="dateTo" class="date-input" onchange="applyFilters()">
+            </div>
+            <button class="btn-reset" onclick="resetFilters()">Reset All Filters</button>
+        </div>
 
-            <div class="table-area">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Type</th>
-                            <th>Ref ID</th>
-                            <th style="text-align: right;">Qty</th>
-                        </tr>
-                    </thead>
-                    <tbody id="logs-summary-body"></tbody>
-                </table>
-            </div>
+        <div class="section-header">
+            <span>📑 System Audit</span>
+            <span id="log-count">0 RECORDS</span>
+        </div>
+        
+        <div class="table-area">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">Date</th>
+                        <th style="width: 25%;">Type</th>
+                        <th style="width: 35%;">Ref ID</th>
+                        <th style="width: 15%; text-align: right;">Qty</th>
+                    </tr>
+                </thead>
+                <tbody id="logs-master-body">
+                    <tr><td colspan="4" style="text-align:center; padding:30px;">Syncing with database...</td></tr>
+                </tbody>
+            </table>
         </div>
     </main>
-
-    <div id="detailsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span id="modal-title" style="font-weight:800; font-size: 0.8rem; color: var(--primary);">BATCH DETAILS</span>
-                <button onclick="closeModal()" style="background:var(--danger); border:none; color:white; border-radius: 4px; padding: 2px 8px; cursor:pointer; font-weight: 800;">✕</button>
-            </div>
-            <div class="modal-body" id="modal-items-list"></div>
-        </div>
-    </div>
 
     <script>
         const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let _supabase, masterLogData = [];
 
-        let cachedSummary = [];
-
-        function initLogs() {
-            const savedUser = localStorage.getItem('activeAdmin');
-            if (savedUser) document.getElementById('active-user').innerText = savedUser.toUpperCase();
-            fetchLogs();
+        async function initLogs() {
+            if (typeof supabase !== 'undefined') {
+                _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                fetchLogs();
+            }
         }
 
         async function fetchLogs() {
             const { data, error } = await _supabase.from('activity_logs').select('*').order('created_at', { ascending: false });
-            if (error) return console.error(error);
+            if (error) return;
 
             const grouped = data.reduce((acc, log) => {
-                const ref = log.reference_id || 'ADJ';
+                const ref = log.reference_id || 'GENERAL';
+                const d = new Date(log.created_at);
+                const dateOnly = d.toISOString().split('T')[0];
                 if (!acc[ref]) {
                     acc[ref] = {
-                        date: new Date(log.created_at).toLocaleDateString(),
-                        type: log.type,
+                        rawDate: dateOnly,
+                        displayDate: d.toLocaleDateString('en-GB'),
+                        type: (log.type || 'INFO').toUpperCase(),
                         ref: ref,
                         totalQty: 0
                     };
                 }
-                acc[ref].totalQty += (log.quantity || 0);
+                acc[ref].totalQty += (parseInt(log.quantity) || 0);
                 return acc;
             }, {});
 
-            cachedSummary = Object.values(grouped);
-            renderSummary(cachedSummary);
+            masterLogData = Object.values(grouped);
+            renderTable(masterLogData);
         }
 
-        function renderSummary(dataList) {
-            const body = document.getElementById('logs-summary-body');
-            body.innerHTML = dataList.map(row => `
+        function applyFilters() {
+            const searchVal = document.getElementById('mainSearch').value.toLowerCase();
+            const typeVal = document.getElementById('typeFilter').value;
+            const fromVal = document.getElementById('dateFrom').value;
+            const toVal = document.getElementById('dateTo').value;
+
+            const filtered = masterLogData.filter(item => {
+                const matchesSearch = item.ref.toLowerCase().includes(searchVal);
+                const matchesType = (typeVal === "ALL") || (item.type === typeVal);
+                let matchesDate = true;
+                if (fromVal && item.rawDate < fromVal) matchesDate = false;
+                if (toVal && item.rawDate > toVal) matchesDate = false;
+                return matchesSearch && matchesType && matchesDate;
+            });
+            renderTable(filtered);
+        }
+
+        function resetFilters() {
+            document.getElementById('mainSearch').value = '';
+            document.getElementById('typeFilter').value = 'ALL';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            renderTable(masterLogData);
+        }
+
+        function renderTable(list) {
+            const tbody = document.getElementById('logs-master-body');
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px; color:#64748b;">No results found.</td></tr>';
+                document.getElementById('log-count').innerText = "0 RECORDS";
+                return;
+            }
+
+            tbody.innerHTML = list.map(row => {
+                let displayRef = row.ref;
+                if (row.type === 'RECEIVING') displayRef = "DR-" + row.ref.split('-').pop();
+                else if (row.type === 'ORDER') displayRef = "OR-" + row.ref.split('-').pop();
+                else if (['ADD', 'EDIT', 'ADJUST', 'DELETE'].includes(row.type)) displayRef = "MNT-" + row.ref.split('-').pop();
+
+                return `
                 <tr>
-                    <td style="color:#64748b; font-size: 0.65rem;">${row.date}</td>
-                    <td><span class="badge" style="background:${getTypeColor(row.type)}">${row.type.substring(0,4)}</span></td>
-                    <td><span class="ref-link" onclick="viewDetails('${row.ref}')">${row.ref}</span></td>
-                    <td style="text-align: right; font-weight: 800; color: ${row.totalQty < 0 ? 'var(--danger)' : 'var(--success)'}">${row.totalQty > 0 ? '+' : ''}${row.totalQty}</td>
-                </tr>
-            `).join('');
-        }
-
-        function filterTable() {
-            const val = document.getElementById('logSearch').value.toLowerCase();
-            const filtered = cachedSummary.filter(item => 
-                item.ref.toLowerCase().includes(val) || 
-                item.type.toLowerCase().includes(val)
-            );
-            renderSummary(filtered);
+                    <td>${row.displayDate}</td>
+                    <td><span class="badge" style="background:${getTypeColor(row.type)}">${row.type}</span></td>
+                    <td><span class="ref-link" onclick="location.href='transaction.html?ref=${encodeURIComponent(row.ref)}'">${displayRef} 🔍</span></td>
+                    <td style="text-align:right; font-weight:800; color:${row.totalQty < 0 ? 'var(--danger)' : (row.totalQty > 0 ? 'var(--success)' : '#64748b')}">
+                        ${row.totalQty > 0 ? '+' : ''}${row.totalQty}
+                    </td>
+                </tr>`;
+            }).join('');
+            document.getElementById('log-count').innerText = `${list.length} RECORDS`;
         }
 
         function getTypeColor(type) {
-            if (type === 'RECEIVING') return '#10b981';
-            if (type === 'ORDER') return '#ef4444';
-            if (type === 'TRANSFER') return '#0081ff';
-            return '#64748b';
+            const colors = { RECEIVING: '#059669', ORDER: '#6366f1', ADJUST: '#f59e0b', TRANSFER: '#0081ff', ADD: '#10b981', DELETE: '#ef4444' };
+            return colors[type] || '#64748b';
         }
-
-        async function viewDetails(refId) {
-            const listDiv = document.getElementById('modal-items-list');
-            document.getElementById('modal-title').innerText = `REFERENCE: ${refId}`;
-            listDiv.innerHTML = "<p style='text-align:center; font-size:0.7rem;'>Loading...</p>";
-            document.getElementById('detailsModal').style.display = 'flex';
-
-            const { data } = await _supabase.from('activity_logs').select('*').eq('reference_id', refId);
-            if (data) {
-                listDiv.innerHTML = data.map(item => `
-                    <div class="line-item">
-                        <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:5px;">
-                            <span style="font-weight:800; font-size:0.75rem; color:var(--primary);">${item.item_name}</span>
-                            <span style="font-weight:800; color:var(--accent); font-size:0.75rem;">QTY: ${item.quantity}</span>
-                        </div>
-                        <div style="font-size:0.6rem; color:#64748b; text-transform:uppercase; font-weight:700;">
-                            ${item.details || 'No additional details'}
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        function closeModal() { document.getElementById('detailsModal').style.display = 'none'; }
-        window.onclick = (e) => { if(e.target == document.getElementById('detailsModal')) closeModal(); }
-
-        initLogs();
+        window.onload = initLogs;
     </script>
 </body>
 </html>

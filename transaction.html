@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Transaction Report | EasiStock</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --primary: #0f172a;
+            --accent: #0081ff;
+            --success: #10b981;
+            --danger: #ef4444;
+            --excel-border: #cbd5e1;
+        }
+
+        body {
+            margin: 0; font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            align-items: center;
+        }
+
+        .navbar { 
+            width: 100%; height: 60px; background: var(--primary); 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 0 20px; flex-shrink: 0; box-sizing: border-box;
+        }
+        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
+
+        .main-content {
+            width: 100%; max-width: 700px; flex: 1; padding: 15px;
+            display: flex; flex-direction: column; gap: 12px; overflow: hidden; box-sizing: border-box;
+        }
+
+        /* HEADER INFO CARD */
+        .info-card {
+            background: white; border-radius: 12px; padding: 15px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+            border: 2px solid var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .info-item { display: flex; flex-direction: column; }
+        .info-label { font-size: 0.55rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+        .info-value { font-size: 0.8rem; font-weight: 700; color: var(--primary); }
+
+        /* TABLE AREA */
+        .table-container {
+            background: white; border: 2px solid var(--primary);
+            border-radius: 12px; overflow: hidden;
+            display: flex; flex-direction: column; flex: 1;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .table-wrapper { flex: 1; overflow: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        
+        thead { position: sticky; top: 0; background: #f1f5f9; z-index: 10; }
+        th { 
+            padding: 12px; font-size: 0.6rem; text-transform: uppercase; 
+            border-bottom: 2px solid var(--primary); color: var(--primary); 
+            font-weight: 800; text-align: left; 
+        }
+        td { padding: 10px 12px; border-bottom: 1px solid var(--excel-border); font-size: 0.75rem; color: #1e293b; vertical-align: middle; }
+
+        .sku-code {
+            font-family: 'Courier New', monospace; background: #f1f5f9;
+            padding: 2px 6px; border-radius: 4px; font-weight: 700; color: var(--accent); font-size: 0.7rem;
+        }
+
+        .qty-badge { font-weight: 800; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; display: inline-block; min-width: 40px; text-align: center; }
+        .plus { color: var(--success); background: #ecfdf5; }
+        .minus { color: var(--danger); background: #fef2f2; }
+
+        .footer-actions { text-align: center; padding: 10px 0 20px 0; flex-shrink: 0; }
+        .btn-back {
+            background: var(--primary); color: white; border: none;
+            padding: 12px 30px; border-radius: 8px; font-weight: 800;
+            cursor: pointer; text-transform: uppercase; font-size: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn-back:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="nav-logo-text">Transaction Report</div>
+        <div id="disp-ref-top" style="color: white; font-weight: 700; font-size: 0.75rem; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px;">---</div>
+    </header>
+
+    <main class="main-content">
+        <div class="info-card">
+            <div class="info-item"><span class="info-label">Reference Number</span><span id="val-ref" class="info-value">---</span></div>
+            <div class="info-item"><span class="info-label">Action Type</span><span id="val-type" class="info-value">---</span></div>
+            <div class="info-item"><span class="info-label">Processed By</span><span id="val-user" class="info-value">---</span></div>
+            <div class="info-item"><span class="info-label">Transaction Date</span><span id="val-date" class="info-value">---</span></div>
+        </div>
+
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">SKU/Code</th>
+                            <th style="width: 40%;">Item Description</th>
+                            <th style="width: 15%;">Location</th>
+                            <th style="width: 10%;">UOM</th>
+                            <th style="width: 15%; text-align: center;">Qty</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-body">
+                        <tr><td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">Fetching transaction details...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="footer-actions">
+            <button class="btn-back" onclick="location.href='logs.html'">← Return to Logs</button>
+        </div>
+    </main>
+
+    <script>
+        const _URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
+        const _KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
+        const sb = supabase.createClient(_URL, _KEY);
+
+        async function init() {
+            const params = new URLSearchParams(window.location.search);
+            const ref = params.get('ref');
+            if(!ref) {
+                alert("No reference ID found.");
+                location.href = 'logs.html';
+                return;
+            }
+
+            const { data, error } = await sb.from('activity_logs').select('*').eq('reference_id', ref);
+            
+            if(error || !data.length) {
+                document.getElementById('inventory-body').innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 40px;">No transaction records found for ${ref}</td></tr>`;
+                return;
+            }
+
+            const first = data[0];
+            
+            // Ref ID Prefixing Logic
+            let prefix = "TRN-";
+            if(first.type.includes("RECEIV")) prefix = "DR-";
+            else if(first.type.includes("ORDER")) prefix = "OR-";
+            else if(["ADD","EDIT","ADJUST","DELETE"].includes(first.type)) prefix = "MNT-";
+            
+            const shortID = ref.includes('-') ? ref.split('-').pop() : ref.substring(0,6);
+            const fullDisplayID = prefix + shortID.toUpperCase();
+
+            document.getElementById('val-ref').innerText = fullDisplayID;
+            document.getElementById('disp-ref-top').innerText = fullDisplayID;
+            document.getElementById('val-type').innerText = first.type.toUpperCase();
+            document.getElementById('val-date').innerText = new Date(first.created_at).toLocaleString('en-GB');
+            
+            // Operator Extraction
+            let user = first.user_name || "ADMIN";
+            if(first.details && first.details.includes("[BY:")) {
+                const userMatch = first.details.match(/\[BY:\s*(.*?)\]/);
+                if(userMatch) user = userMatch[1];
+            }
+            document.getElementById('val-user').innerText = user.toUpperCase();
+
+            document.getElementById('inventory-body').innerHTML = data.map(item => {
+                // SKU Extraction
+                let displaySku = item.sku || "---";
+                if(displaySku === "---" && item.details && item.details.includes("SKU:")) {
+                    const match = item.details.match(/SKU:\s*([^\s,\]]+)/);
+                    if(match) displaySku = match[1];
+                }
+
+                return `
+                <tr>
+                    <td><span class="sku-code">${displaySku}</span></td>
+                    <td>
+                        <div style="font-weight:800; color:var(--primary);">${item.item_name}</div>
+                        <div style="font-size:0.6rem; color:#64748b; margin-top:2px;">${item.brand || ''}</div>
+                    </td>
+                    <td>${item.field || first.field || 'MAIN'}</td>
+                    <td>${item.uom || 'PCS'}</td>
+                    <td style="text-align: center;">
+                        <span class="qty-badge ${item.quantity >= 0 ? 'plus' : 'minus'}">
+                            ${item.quantity >= 0 ? '+' : ''}${item.quantity}
+                        </span>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
