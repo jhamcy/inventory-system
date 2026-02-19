@@ -49,7 +49,7 @@
 
         .grid-area { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; }
         
-        table { border-collapse: separate; border-spacing: 0; width: 100%; table-layout: fixed; }
+        table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 850px; table-layout: fixed; }
         
         thead th { 
             position: sticky; top: 0; background: #f8fafc; 
@@ -58,11 +58,16 @@
             text-transform: uppercase; color: #475569; text-align: left; z-index: 20;
         }
 
+        /* STICKY LOCATION COLUMN */
         .sticky-col {
-            position: sticky !important; left: 0; background: #f8fafc !important;
-            z-index: 25 !important; border-right: 2px solid var(--primary) !important;
-            width: 90px;
+            position: sticky !important; left: 0; 
+            background: #f1f5f9 !important;
+            z-index: 25 !important; 
+            border-right: 2px solid var(--primary) !important;
+            width: 110px;
         }
+
+        thead th.sticky-col { z-index: 30 !important; background: #f8fafc !important; }
         
         tbody td { 
             padding: 8px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; 
@@ -77,14 +82,15 @@
         .bulk-footer { padding: 10px; border-top: 2px solid var(--primary); display: flex; gap: 6px; background: white; align-items: center; }
         
         .btn { 
-            height: 40px; padding: 0 12px; border-radius: 8px; font-weight: 800; 
-            text-transform: uppercase; cursor: pointer; border: none; font-size: 0.65rem;
+            height: 44px; padding: 0 12px; border-radius: 8px; font-weight: 800; 
+            text-transform: uppercase; cursor: pointer; border: none; font-size: 0.7rem;
         }
         .btn-delete { background: var(--danger); color: white; flex: 2; }
-        .btn-back { background: #64748b; color: white; flex: 1; text-align: center; text-decoration: none; line-height: 40px; }
+        .btn-back { background: #64748b; color: white; width: 70px; display: flex; align-items: center; justify-content: center; }
         
         #selected-count { font-size: 0.6rem; font-weight: 800; color: var(--danger); width: 70px; text-align: center; }
         .sku-tag { font-family: monospace; font-weight: 800; color: var(--accent); }
+        .loc-tag { font-weight: 800; color: var(--primary); }
     </style>
 </head>
 <body>
@@ -101,13 +107,13 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 40px; text-align: center;"><input type="checkbox" onclick="toggleAll(this)"></th>
-                        <th class="sticky-col">SKU</th>
-                        <th style="width: 180px;">DESCRIPTION</th>
-                        <th style="width: 80px;">LOC</th>
-                        <th style="width: 80px;">BRAND</th>
-                        <th style="width: 60px;">UOM</th>
-                        <th style="width: 60px;">STK</th>
+                        <th class="sticky-col">LOCATION</th>
+                        <th style="width: 110px;">SKU</th>
+                        <th style="width: 200px;">DESCRIPTION</th>
+                        <th style="width: 90px;">BRAND</th>
+                        <th style="width: 65px;">UOM</th>
+                        <th style="width: 65px; text-align: center;">STK</th>
+                        <th style="width: 50px; text-align: center;"><input type="checkbox" onclick="toggleAll(this)"></th>
                         <th style="width: 45px; text-align: center;">🗑️</th>
                     </tr>
                 </thead>
@@ -118,7 +124,7 @@
         </div>
 
         <div class="bulk-footer">
-            <a href="inventory.html" class="btn btn-back">EXIT</a>
+            <button class="btn btn-back" onclick="window.location.href='inventory.html'">EXIT</button>
             <div id="selected-count">0 SELECTED</div>
             <button class="btn btn-delete" id="delete-btn" onclick="deleteSelected()" disabled>DELETE PERMANENTLY</button>
         </div>
@@ -157,16 +163,16 @@
                     tr.dataset.id = item.id;
                     tr.dataset.name = item.item_name;
                     tr.dataset.sku = item.sku;
-                    tr.dataset.loc = item.location || '';
+                    tr.dataset.loc = item.field || item.location || 'MAIN';
                     
                     tr.innerHTML = `
-                        <td style="text-align:center;"><input type="checkbox" class="row-check" value="${item.id}" onchange="updateCount()"></td>
-                        <td class="sticky-col sku-tag">${item.sku}</td>
+                        <td class="sticky-col loc-tag">${tr.dataset.loc}</td>
+                        <td class="sku-tag">${item.sku}</td>
                         <td style="text-transform: uppercase;">${item.item_name}</td>
-                        <td style="font-size:0.6rem; color:#64748b;">${item.location || '-'}</td>
                         <td style="color:#94a3b8; font-size:0.55rem;">${item.brand || '-'}</td>
                         <td style="text-align:center;">${item.uom || '-'}</td>
                         <td style="font-weight:800; text-align:center;">${item.quantity}</td>
+                        <td style="text-align:center;"><input type="checkbox" class="row-check" value="${item.id}" onchange="updateCount()"></td>
                         <td style="text-align:center;"><button class="btn-remove-row" onclick="removeRow(this)">✕</button></td>
                     `;
                     tbody.appendChild(tr);
@@ -197,19 +203,39 @@
     async function deleteSelected() {
         const checkedBoxes = document.querySelectorAll('.row-check:checked');
         const idsToDelete = Array.from(checkedBoxes).map(cb => cb.value);
+        const activeUser = (localStorage.getItem('activeAdmin') || 'STAFF').toUpperCase();
+        
+        let itemsWithStock = [];
         const logs = [];
 
         checkedBoxes.forEach(cb => {
             const row = cb.closest('tr');
+            const qty = parseInt(row.cells[5].innerText) || 0;
+            
+            if (qty > 0) {
+                itemsWithStock.push(`${row.dataset.sku}`);
+            }
+
             logs.push({
                 type: 'DELETE',
-                item_name: row.dataset.name,
+                item_name: row.dataset.name.toUpperCase(),
+                sku: row.dataset.sku,
+                quantity: 0,
                 reference_id: row.dataset.sku,
-                details: `Removed via Cleanup. Loc: ${row.dataset.loc}`
+                field: row.dataset.loc,
+                details: `[BY: ${activeUser}] PERMANENT REMOVAL`.toUpperCase()
             });
         });
 
-        if (!confirm(`Permanently delete ${idsToDelete.length} items?`)) return;
+        // BLOCKING LOGIC: Do not proceed if stock > 0
+        if (itemsWithStock.length > 0) {
+            alert(`❌ CANNOT DELETE: ${itemsWithStock.length} item(s) still have quantity in stock.\n\n` +
+                  `Please use the "Adjust Stock" page to set these to 0 before deleting:\n` + 
+                  itemsWithStock.slice(0, 5).join(', ') + (itemsWithStock.length > 5 ? '...' : ''));
+            return; 
+        }
+
+        if (!confirm(`Are you sure you want to permanently delete ${idsToDelete.length} items? This action cannot be undone.`)) return;
 
         const btn = document.getElementById('delete-btn');
         btn.disabled = true; btn.innerText = "DELETING...";
@@ -217,12 +243,15 @@
         try {
             const { error } = await _supabase.from('inventory').delete().in('id', idsToDelete);
             if (error) throw error;
-            await _supabase.from('activity_logs').insert(logs);
-            alert("DELETED SUCCESSFULLY");
+            
+            const { error: logErr } = await _supabase.from('activity_logs').insert(logs);
+            if(logErr) console.warn("Log failed:", logErr);
+
+            alert("SUCCESS: ITEMS REMOVED FROM DATABASE.");
             document.getElementById('search-box').value = "";
             instantSearch(""); 
         } catch (err) {
-            alert("ERROR: " + err.message);
+            alert("DATABASE ERROR: " + err.message);
             btn.disabled = false;
             btn.innerText = "DELETE PERMANENTLY";
         }

@@ -94,7 +94,9 @@
         .btn-page:disabled { opacity: 0.3; cursor: not-allowed; }
 
         .btn-save { background: var(--primary); color: white; flex: 1; font-size: 0.7rem; }
-        .btn-back { background: var(--danger); color: white; width: 55px; font-size: 0.65rem; }
+        
+        /* UPDATED EXIT BUTTON STYLE */
+        .btn-back { background: var(--danger); color: white; width: 70px; font-size: 0.65rem; }
 
         .dictionary-section { background: white; border: 2px solid var(--primary); border-radius: 12px; padding: 12px; margin-bottom: 20px; flex-shrink: 0; }
         .dict-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
@@ -155,7 +157,7 @@
         </div>
 
         <div class="bulk-footer">
-            <a href="inventory.html" class="btn btn-back">EXIT</a>
+            <button class="btn btn-back" onclick="window.location.href='inventory.html'">EXIT</button>
             <button class="btn btn-save" id="save-btn" onclick="saveChanges()" disabled>UPDATE ALL CHANGES</button>
             <button class="btn btn-page" id="prev-btn" onclick="changePage(-1)" disabled>PREV</button>
             <button class="btn btn-page" id="next-btn" onclick="changePage(1)" disabled>NEXT</button>
@@ -188,7 +190,6 @@
     const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
     
-    // Declare global variable
     let _supabase; 
     let searchTimer;
     let currentPage = 0;
@@ -196,7 +197,6 @@
     let currentUOMs = [];
     let currentLocs = [];
 
-    // Initialize ONLY after window loads
     async function init() {
         if (typeof supabase !== 'undefined') {
             _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -373,7 +373,6 @@
         refreshSystemLists();
     }
 
-    // Run init on window load
     window.onload = init;
 </script>
 </body>
