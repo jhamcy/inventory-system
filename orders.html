@@ -22,87 +22,91 @@
             height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        .navbar { height: 50px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; flex-shrink: 0; }
-        .nav-logo-text { color: white; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; }
-        .user-info { display: flex; align-items: center; gap: 8px; color: white; font-size: 0.65rem; font-weight: 700; }
-        .online-dot { width: 7px; height: 7px; background: var(--success); border-radius: 50%; }
+        /* NAVBAR LOGIC matching Inventory/Receiving */
+        .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; flex-shrink: 0; }
+        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; cursor: pointer; }
+        .user-info { display: flex; flex-direction: column; align-items: flex-end; color: white; }
+        .user-label { font-size: 0.55rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; }
+        .user-name { font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+        .online-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
 
-        .main-content { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+        .main-content { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+
+        /* TOGGLE GROUP - Logs replaced with Return */
+        .action-bar-container { display: flex; justify-content: center; flex-shrink: 0; margin-bottom: 5px; }
+        .toggle-group { display: flex; width: 100%; max-width: 550px; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-toggle { flex: 1; padding: 10px 0; border: none; border-right: 1px solid rgba(255,255,255,0.15); cursor: pointer; color: rgba(255,255,255,0.6); background: var(--primary); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .btn-toggle.active { background: var(--accent) !important; color: white !important; }
+        .btn-toggle:last-child { border-right: none; }
 
         .input-card { background: white; border-radius: 12px; border: 2px solid var(--primary); padding: 12px; flex-shrink: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 10px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .form-group { margin-bottom: 8px; }
+        .full-width { grid-column: span 2; }
+        
         label { display: block; font-size: 0.55rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 3px; }
         input { width: 100%; padding: 10px; border: 1.5px solid var(--border-main); border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; outline: none; box-sizing: border-box; }
-        input:focus { border-color: var(--accent); }
         input[readonly] { background-color: #f1f5f9; color: #475569; border-style: dashed; }
 
         .table-container { flex: 1; background: white; border-radius: 12px; border: 2px solid var(--primary); display: flex; flex-direction: column; overflow: hidden; }
-        .table-header { background: #f8fafc; padding: 8px; border-bottom: 2px solid var(--primary); font-weight: 800; font-size: 0.6rem; color: var(--danger); text-align: center; }
+        .table-header { background: var(--danger); padding: 8px; font-weight: 800; font-size: 0.6rem; color: white; text-align: center; text-transform: uppercase; }
         
-        .scroll-area { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 600px; }
+        .scroll-area { flex: 1; overflow: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        thead th { position: sticky; top: 0; background: #f1f5f9; padding: 10px; font-size: 0.55rem; font-weight: 800; text-transform: uppercase; border-bottom: 2px solid var(--primary); text-align: left; z-index: 20; }
+        tbody td { padding: 10px; border-bottom: 1px solid var(--border-main); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+
+        .summary-bar { background: #f8fafc; padding: 10px 15px; border-top: 2px solid var(--primary); display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 800; color: var(--primary); }
+        .footer-actions { display: flex; gap: 8px; }
+        .btn { border: none; border-radius: 8px; padding: 14px; font-weight: 800; font-size: 0.75rem; cursor: pointer; text-transform: uppercase; }
+        .btn-add { background: var(--primary); color: white; width: 100%; margin-top: 5px; }
+        .btn-submit { background: var(--success); color: white; flex: 1; box-shadow: 0 4px 0 #059669; }
         
-        thead th { 
-            position: sticky; top: 0; background: #f1f5f9; 
-            padding: 10px 8px; font-size: 0.55rem; font-weight: 800; 
-            text-transform: uppercase; border-bottom: 2px solid var(--primary); 
-            border-right: 1px solid var(--border-main);
-            text-align: left; z-index: 20; 
-        }
-
-        .sticky-col { position: sticky; left: 0; background: white; z-index: 10; border-right: 2px solid var(--primary) !important; }
-        thead th.sticky-col { z-index: 30; background: #f1f5f9; }
-
-        tbody td { padding: 10px 8px; border-bottom: 1px solid var(--border-main); border-right: 1px solid var(--border-main); font-size: 0.65rem; font-weight: 600; white-space: nowrap; }
-
-        .summary-bar { background: #f8fafc; padding: 8px 12px; border-top: 2px solid var(--primary); display: flex; justify-content: space-between; font-size: 0.65rem; font-weight: 800; color: var(--primary); }
-        .footer-actions { display: flex; gap: 8px; padding-top: 5px; }
-        .btn { border: none; border-radius: 8px; padding: 12px; font-weight: 800; font-size: 0.7rem; cursor: pointer; text-transform: uppercase; }
-        .btn-add { background: var(--primary); color: white; width: 100%; height: 45px; }
-        .btn-submit { background: var(--success); color: white; flex: 2; box-shadow: 0 4px 0 #059669; }
-        .btn-exit { background: #64748b; color: white; flex: 1; text-decoration: none; text-align: center; line-height: 15px; }
-        .qty-badge { background: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 4px; font-weight: 800; border: 1px solid #fecaca; }
-        .btn-del-row { color: var(--danger); background: #fee2e2; border: 1px solid var(--danger); border-radius: 4px; padding: 2px 6px; font-weight: 900; cursor: pointer; }
-
-        #toast { visibility: hidden; min-width: 250px; background-color: var(--danger); color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 2000; bottom: 30px; font-weight: 800; left: 50%; transform: translateX(-50%); }
-        #toast.show { visibility: visible; }
+        .qty-badge { background: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 4px; font-weight: 800; }
     </style>
 </head>
 <body>
 
 <header class="navbar">
-    <div class="nav-logo-text">EasiStock Issuance</div>
+    <div class="nav-logo-text" onclick="goHome()">EasiStock Issuance</div>
     <div class="user-info">
-        <div class="online-dot"></div>
-        <span id="active-user">ADMIN</span>
+        <span class="user-label" id="user-role-label">Staff Member</span>
+        <span class="user-name"><div class="online-dot"></div><span id="active-user">---</span></span>
     </div>
 </header>
 
 <main class="main-content">
+    <div class="action-bar-container">
+        <div class="toggle-group">
+            <button class="btn-toggle" onclick="location.href='inventory.html'"><span>📋</span><span>Inv</span></button>
+            <button class="btn-toggle" onclick="location.href='receiving.html'"><span>🚚</span><span>Recv</span></button>
+            <button class="btn-toggle active" onclick="location.href='orders.html'"><span>📝</span><span>Order</span></button>
+            <button class="btn-toggle" onclick="location.href='transfer.html'"><span>🔄</span><span>Trans</span></button>
+            <button class="btn-toggle" onclick="location.href='return.html'"><span>↩️</span><span>Return</span></button>
+        </div>
+    </div>
+
     <div class="input-card">
-        <div class="form-group">
-            <label>Transaction Date</label>
-            <input type="date" id="trans-date" onchange="generateSO()">
-        </div>
-
-        <div class="form-group">
-            <label>Auto-Generated SO #</label>
-            <input type="text" id="so-number" readonly>
-        </div>
-        
-        <div class="form-group">
-            <label>Recipient / Customer / Dept</label>
-            <input type="text" id="customer-name" placeholder="WHO IS RECEIVING?">
-        </div>
-
-        <div style="border-top: 1px dashed #cbd5e1; margin: 8px 0; padding-top: 8px;">
+        <div class="form-grid">
             <div class="form-group">
-                <label>Find Item (Check Available Stock)</label>
-                <input list="items-list" id="item-search" placeholder="SEARCH ITEM..." onchange="handleSelection()">
+                <label>Date</label>
+                <input type="date" id="trans-date" onchange="generateSO()">
+            </div>
+            <div class="form-group">
+                <label>SO Number</label>
+                <input type="text" id="so-number" readonly>
+            </div>
+            <div class="form-group full-width">
+                <label>Recipient / Customer / Dept</label>
+                <input type="text" id="customer-name" placeholder="WHO IS RECEIVING?">
+            </div>
+            <div class="form-group">
+                <label>Find Item</label>
+                <input list="items-list" id="item-search" placeholder="SKU/NAME" onchange="handleSelection()">
                 <datalist id="items-list"></datalist>
             </div>
             <div class="form-group">
-                <label>Quantity to Release</label>
+                <label>Qty to Release</label>
                 <input type="number" id="release-qty" placeholder="0" inputmode="numeric">
             </div>
         </div>
@@ -110,62 +114,61 @@
     </div>
 
     <div class="table-container">
-        <div class="table-header">OUTGOING STOCK PREVIEW</div>
+        <div class="table-header">Outgoing Stock Preview</div>
         <div class="scroll-area">
             <table>
                 <thead>
                     <tr>
-                        <th class="sticky-col" style="width: 90px;">SKU</th>
-                        <th style="min-width: 200px;">DESCRIPTION</th>
-                        <th style="width: 60px;">UOM</th>
-                        <th style="width: 100px;">LOC</th>
-                        <th style="width: 70px; text-align: center;">QTY</th>
-                        <th style="width: 50px; text-align: center;">🗑️</th>
+                        <th>SKU</th>
+                        <th>Item</th>
+                        <th style="text-align: center;">Qty</th>
+                        <th style="text-align: center;">Action</th>
                     </tr>
                 </thead>
                 <tbody id="batch-body"></tbody>
             </table>
         </div>
         <div class="summary-bar">
-            <span>ITEMS: <span id="total-items">0</span></span>
-            <span style="color: var(--danger);">TOTAL PIECES: <span id="total-qty">0</span></span>
+            <span>SKUs: <span id="total-items">0</span></span>
+            <span>TOTAL QTY: <span id="total-qty">0</span></span>
         </div>
     </div>
 
     <div class="footer-actions">
-        <a href="inventory.html" class="btn btn-exit">EXIT</a>
         <button class="btn btn-submit" id="save-btn" onclick="processOrder()">Confirm & Post Release</button>
     </div>
 </main>
 
-<div id="toast">⚠️ PLEASE FILL ALL FIELDS</div>
-
 <script>
-    const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const _supabase = supabase.createClient('https://crruounuhtfzyssyhgcc.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg');
 
     let masterInventory = [];
     let selectedItem = null;
     let batchItems = [];
 
+    const activeUser = localStorage.getItem('activeAdmin');
+    const userRole = localStorage.getItem('userRole');
+
     function init() {
-        // Set default date to today
+        if (!activeUser) { location.href = 'index.html'; return; }
+        document.getElementById('active-user').innerText = activeUser;
+        document.getElementById('user-role-label').innerText = userRole === 'admin' ? 'System Admin' : 'Staff Member';
+        
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('trans-date').value = today;
-        
         generateSO();
-
-        const user = localStorage.getItem('activeAdmin') || 'STAFF';
-        document.getElementById('active-user').innerText = user.toUpperCase();
         loadInventory();
+    }
+
+    function goHome() { 
+        if (userRole === 'admin') window.location.href = 'dashboard.html';
+        else window.location.href = 'inventory.html';
     }
 
     function generateSO() {
         const dateInput = document.getElementById('trans-date').value;
-        const datePart = dateInput.replace(/-/g, "").slice(2); // YYMMDD
-        const randomPart = Math.floor(100 + Math.random() * 899);
-        document.getElementById('so-number').value = `SO-${datePart}-${randomPart}`;
+        const datePart = dateInput.replace(/-/g, "").slice(2);
+        document.getElementById('so-number').value = `SO-${datePart}-${Math.floor(100 + Math.random() * 899)}`;
     }
 
     async function loadInventory() {
@@ -182,27 +185,18 @@
     }
 
     function addToBatch() {
-        const qtyInput = document.getElementById('release-qty');
-        const qty = parseInt(qtyInput.value);
+        const qty = parseInt(document.getElementById('release-qty').value);
+        if (!selectedItem || !qty || qty <= 0) return alert("Select item and valid quantity!");
         
-        if (!selectedItem || !qty || qty <= 0) {
-            alert("Select item and valid quantity!");
-            return;
-        }
-        
-        const systemStock = selectedItem.quantity || 0;
-        if (qty > systemStock) {
-            const gap = qty - systemStock;
-            alert(`🛑 TRANSACTION BLOCKED\n\nRequested: ${qty}\nSystem Stock: ${systemStock}\nShortage: ${gap}\n\nACTION REQUIRED: Please request an INVENTORY ADJUSTMENT from the Admin.`);
-            qtyInput.style.borderColor = "var(--danger)";
+        if (qty > (selectedItem.quantity || 0)) {
+            alert(`🛑 SHORTAGE: Only ${selectedItem.quantity || 0} available.`);
             return;
         }
 
         batchItems.push({ ...selectedItem, releaseQty: qty });
         renderTable();
         document.getElementById('item-search').value = "";
-        qtyInput.value = "";
-        qtyInput.style.borderColor = "var(--border-main)";
+        document.getElementById('release-qty').value = "";
         selectedItem = null;
     }
 
@@ -210,20 +204,14 @@
         const tbody = document.getElementById('batch-body');
         tbody.innerHTML = batchItems.map((item, idx) => `
             <tr>
-                <td class="sticky-col" style="color:var(--accent); font-family:monospace; font-size:0.65rem;">${item.sku || 'N/A'}</td>
-                <td style="text-transform:uppercase;">${item.item_name}</td>
-                <td>${item.uom || 'PCS'}</td>
-                <td style="color:#64748b;">${item.location || 'N/A'}</td>
+                <td style="font-family:monospace; color:var(--accent);">${item.sku || 'N/A'}</td>
+                <td>${item.item_name}</td>
                 <td style="text-align:center;"><span class="qty-badge">-${item.releaseQty}</span></td>
-                <td style="text-align:center;"><button class="btn-del-row" onclick="removeItem(${idx})">✕</button></td>
+                <td style="text-align:center;"><button style="color:red; background:none; border:none; font-weight:800;" onclick="removeItem(${idx})">REMOVE</button></td>
             </tr>
         `).reverse().join('');
-        updateSummary();
-    }
-
-    function updateSummary() {
         document.getElementById('total-items').innerText = batchItems.length;
-        document.getElementById('total-qty').innerText = batchItems.reduce((sum, item) => sum + item.releaseQty, 0);
+        document.getElementById('total-qty').innerText = batchItems.reduce((sum, i) => sum + i.releaseQty, 0);
     }
 
     function removeItem(idx) {
@@ -234,41 +222,32 @@
     async function processOrder() {
         const so = document.getElementById('so-number').value.trim().toUpperCase();
         const cust = document.getElementById('customer-name').value.trim().toUpperCase();
-        const user = document.getElementById('active-user').innerText;
-        const date = document.getElementById('trans-date').value;
-        
-        if (!cust || batchItems.length === 0) {
-            const t = document.getElementById('toast');
-            t.textContent = "⚠️ RECIPIENT NAME IS REQUIRED";
-            t.className = "show"; setTimeout(() => t.className = "", 3000);
-            return;
-        }
+        if (!cust || batchItems.length === 0) return alert("Fill recipient and add items.");
 
         const btn = document.getElementById('save-btn');
         btn.disabled = true; btn.innerText = "POSTING RELEASE...";
 
         try {
             for (const item of batchItems) {
-                const { data: current } = await _supabase.from('inventory').select('quantity').eq('id', item.id).single();
-                const newQty = (current.quantity || 0) - item.releaseQty;
+                const { data: cur } = await _supabase.from('inventory').select('quantity').eq('id', item.id).single();
+                await _supabase.from('inventory').update({ quantity: (cur.quantity || 0) - item.releaseQty }).eq('id', item.id);
                 
-                await _supabase.from('inventory').update({ quantity: newQty }).eq('id', item.id);
-                
-                await _supabase.from('activity_logs').insert([{
-                    created_at: date + "T12:00:00Z", // Ensures log matches the chosen date
-                    type: 'ORDER',
-                    reference_id: so,
-                    item_name: item.item_name,
-                    quantity: -item.releaseQty,
-                    details: `[BY: ${user}] CUST: ${cust} | DATE: ${date} | SO# ${so}`.toUpperCase()
+                await _supabase.from('inventory_transactions').insert([{
+                    reference_id: so, sku: item.sku, item_name: item.item_name,
+                    qty_change: -item.releaseQty, location: item.location, uom: item.uom, notes: `ISSUED TO: ${cust}`
                 }]);
             }
+
+            await _supabase.from('activity_logs').insert([{
+                type: 'ORDER', reference_id: so, performed_by: activeUser,
+                summary: `${batchItems.length} ITEMS ISSUED TO ${cust}`
+            }]);
+
             alert("STOCK ISSUED SUCCESSFULLY");
-            location.reload();
+            window.location.reload();
         } catch (e) { 
             alert("Error: " + e.message); 
-            btn.disabled = false; 
-            btn.innerText = "Confirm & Post Release";
+            btn.disabled = false; btn.innerText = "Confirm & Post Release";
         }
     }
 
