@@ -96,7 +96,8 @@
             align-items: center; justify-content: center; text-decoration: none; font-size: 0.7rem;
         }
         .btn-update { background: var(--primary); color: white; flex: 2; }
-        /* FIXED EXIT BUTTON STYLE */
+        
+        /* EXIT BUTTON: UPDATED TO DASHBOARD.HTML */
         .btn-back { background: #64748b; color: white; flex: 1; }
 
         .meta-tag { color: #94a3b8; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; }
@@ -141,7 +142,7 @@
         </div>
 
         <div class="bulk-footer">
-            <button class="btn btn-back" onclick="window.location.href='inventory.html'">EXIT</button>
+            <button class="btn btn-back" onclick="window.location.href='dashboard.html'">EXIT</button>
             <button class="btn btn-update" id="save-btn" onclick="applyAdjustments()">POST CHANGES</button>
         </div>
     </div>
@@ -305,7 +306,7 @@
             if(logError) console.warn("Logging failed:", logError.message);
 
             alert(`SUCCESS: ${updates.length} ADJUSTMENTS POSTED BY ${activeUser}`); 
-            window.location.href = 'inventory.html';
+            window.location.href = 'dashboard.html'; // UPDATED SUCCESS REDIRECT
         } catch (err) { 
             alert("ERROR: " + err.message); 
             btn.disabled = false; 

@@ -157,7 +157,7 @@
         </div>
 
         <div class="bulk-footer">
-            <button class="btn btn-back" onclick="window.location.href='inventory.html'">EXIT</button>
+            <button class="btn btn-back" onclick="window.location.href='dashboard.html'">EXIT</button>
             <button class="btn btn-save" id="save-btn" onclick="saveChanges()" disabled>UPDATE ALL CHANGES</button>
             <button class="btn btn-page" id="prev-btn" onclick="changePage(-1)" disabled>PREV</button>
             <button class="btn btn-page" id="next-btn" onclick="changePage(1)" disabled>NEXT</button>
@@ -340,7 +340,7 @@
             }
 
             alert(`UPDATE SUCCESSFUL\nBATCH ID: ${batchRef}`);
-            loadInventory();
+            window.location.href = 'dashboard.html'; // UPDATED REDIRECT AFTER SUCCESS
         } catch (err) {
             alert("UPDATE ERROR: " + err.message);
         } finally {
