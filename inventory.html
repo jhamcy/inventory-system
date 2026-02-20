@@ -12,6 +12,8 @@
             --primary: #0f172a; 
             --accent: #0081ff;  
             --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
             --excel-border: #cbd5e1;
         }
 
@@ -44,7 +46,6 @@
         
         thead th { position: sticky; top: 0; z-index: 20; background: #f1f5f9; height: 45px; font-size: 0.7rem; font-weight: 800; border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border); color: var(--primary); text-transform: uppercase; position: relative; user-select: none; }
         
-        /* IMPROVED RESIZER HIT AREA */
         .resizer { position: absolute; right: 0; top: 0; width: 12px; height: 100%; cursor: col-resize; z-index: 30; }
         .resizer:hover { background: rgba(0, 129, 255, 0.3); }
 
@@ -55,13 +56,17 @@
         tbody tr.selected-row { background-color: var(--accent) !important; }
         tbody tr.selected-row td { color: white !important; border-right-color: rgba(255,255,255,0.2) !important; }
         
-        .qty-badge { padding: 4px 8px; border-radius: 6px; font-weight: 800; background: var(--success); color: white; }
-        .qty-low { background: #ef4444; }
+        .status-badge { padding: 4px 8px; border-radius: 6px; font-weight: 800; font-size: 0.65rem; color: white; min-width: 60px; display: inline-block; }
+        .bg-healthy { background: var(--success); }
+        .bg-low { background: var(--warning); }
+        .bg-out { background: var(--danger); }
+        .bg-over { background: var(--accent); }
+
+        .qty-badge { font-weight: 800; font-size: 0.9rem; }
 
         .pagination-footer { height: 60px; background: white; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--primary); border-top: none; border-radius: 0 0 12px 12px; }
         .nav-btns { width: 80px; height: 38px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.7rem; }
         .nav-btns:disabled { background: #94a3b8; cursor: not-allowed; }
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -98,13 +103,14 @@
                 <thead>
                     <tr>
                         <th class="sticky-col">#</th>
-                        <th style="width:80px;" data-idx="2">Loc<div class="resizer"></div></th>
-                        <th style="width:140px;" data-idx="3">Item Code<div class="resizer"></div></th>
-                        <th style="width:250px;" data-idx="4">Item Description<div class="resizer"></div></th>
-                        <th style="width:120px;" data-idx="5">Category<div class="resizer"></div></th>
-                        <th style="width:120px;" data-idx="6">Brand<div class="resizer"></div></th>
-                        <th style="width:70px;" data-idx="7">Stock<div class="resizer"></div></th>
-                        <th style="width:70px;" data-idx="8">Uom<div class="resizer"></div></th>
+                        <th style="width:100px;">Status<div class="resizer"></div></th>
+                        <th style="width:110px;">Location<div class="resizer"></div></th>
+                        <th style="width:130px;">Item Code<div class="resizer"></div></th>
+                        <th style="width:250px;">Item Description<div class="resizer"></div></th>
+                        <th style="width:120px;">Category<div class="resizer"></div></th>
+                        <th style="width:120px;">Brand<div class="resizer"></div></th>
+                        <th style="width:70px;">Stock<div class="resizer"></div></th>
+                        <th style="width:70px;">Uom<div class="resizer"></div></th>
                     </tr>
                 </thead>
                 <tbody id="inventory-body"></tbody>
@@ -127,45 +133,38 @@
         const activeUser = localStorage.getItem('activeAdmin');
         const userRole = localStorage.getItem('userRole');
 
-        // --- RESIZE LOGIC WITH SCROLL LOCK ---
+        // Resizer Logic
         document.querySelectorAll('th').forEach(th => {
             const resizer = th.querySelector('.resizer');
             if (!resizer) return;
+            resizer.addEventListener('mousedown', startResize);
+            resizer.addEventListener('touchstart', startResize, { passive: false });
 
-            const startResize = (e) => {
+            function startResize(e) {
                 e.preventDefault();
                 const startX = e.pageX || e.touches[0].pageX;
                 const startWidth = th.offsetWidth;
                 const scrollArea = document.querySelector('.table-scroll-area');
-
-                // LOCK SCROLLING
                 scrollArea.style.overflow = 'hidden';
-                document.body.style.cursor = 'col-resize';
 
                 const onMove = (mv) => {
                     const currentX = mv.pageX || (mv.touches ? mv.touches[0].pageX : 0);
-                    const newWidth = startWidth + (currentX - startX);
-                    if (newWidth > 40) th.style.width = newWidth + 'px';
+                    th.style.width = (startWidth + (currentX - startX)) + 'px';
                 };
 
                 const endResize = () => {
-                    // RESTORE SCROLLING
                     scrollArea.style.overflow = 'auto';
-                    document.body.style.cursor = 'default';
                     document.removeEventListener('mousemove', onMove);
-                    document.removeEventListener('touchmove', onMove);
                     document.removeEventListener('mouseup', endResize);
+                    document.removeEventListener('touchmove', onMove);
                     document.removeEventListener('touchend', endResize);
                 };
 
                 document.addEventListener('mousemove', onMove);
-                document.addEventListener('touchmove', onMove, { passive: false });
                 document.addEventListener('mouseup', endResize);
+                document.addEventListener('touchmove', onMove, { passive: false });
                 document.addEventListener('touchend', endResize);
-            };
-
-            resizer.addEventListener('mousedown', startResize);
-            resizer.addEventListener('touchstart', startResize, { passive: false });
+            }
         });
 
         function applyPermissions() {
@@ -175,13 +174,14 @@
         }
 
         function goHome() { 
-            if (userRole === 'admin') window.location.href = 'dashboard.html';
-            else window.location.href = 'inventory.html';
+            window.location.href = (userRole === 'admin') ? 'dashboard.html' : 'inventory.html';
         }
 
         async function fetchInventory() {
             let query = _supabase.from('inventory').select('*', { count: 'exact' });
-            if (currentSearchQuery) query = query.or(`item_name.ilike.%${currentSearchQuery}%,sku.ilike.%${currentSearchQuery}%`);
+            if (currentSearchQuery) {
+                query = query.or(`item_name.ilike.%${currentSearchQuery}%,sku.ilike.%${currentSearchQuery}%,brand.ilike.%${currentSearchQuery}%,location.ilike.%${currentSearchQuery}%`);
+            }
             const from = (currentPage - 1) * 25;
             const to = from + 24;
             const { data, count, error } = await query.order('location').range(from, to);
@@ -190,18 +190,31 @@
 
         function renderTable(data, total) {
             const tbody = document.getElementById('inventory-body');
-            tbody.innerHTML = data.map((item, i) => `
+            tbody.innerHTML = data.map((item, i) => {
+                const qty = item.quantity || 0;
+                const min = item.min_qty || 5;
+                const max = item.max_qty || 9999;
+
+                let statusBadge = '';
+                if (qty <= 0) statusBadge = '<span class="status-badge bg-out">OUT</span>';
+                else if (qty < min) statusBadge = '<span class="status-badge bg-low">LOW</span>';
+                else if (qty > max) statusBadge = '<span class="status-badge bg-over">OVER</span>';
+                else statusBadge = '<span class="status-badge bg-healthy">HEALTHY</span>';
+
+                return `
                 <tr onclick="selectRow(this)">
                     <td class="sticky-col">${((currentPage-1)*25)+i+1}</td>
+                    <td>${statusBadge}</td>
                     <td>${item.location || '-'}</td>
-                    <td style="font-family:monospace; font-weight:800;">${item.sku || '-'}</td>
+                    <td style="font-family:monospace; font-weight:800; color:var(--accent);">${item.sku || '-'}</td>
                     <td style="text-align:left; font-weight:700;">${item.item_name || '-'}</td>
                     <td>${item.category || '-'}</td>
                     <td>${item.brand || '-'}</td>
-                    <td><span class="qty-badge ${(item.quantity||0)<5?'qty-low':''}">${item.quantity || 0}</span></td>
+                    <td class="qty-badge">${qty}</td>
                     <td>${item.uom || '-'}</td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
 
             const totalPages = Math.ceil(total / 25) || 1;
             document.getElementById('page-info').innerText = `Page ${currentPage}/${totalPages} (${total} SKUs)`;
