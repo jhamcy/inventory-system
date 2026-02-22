@@ -15,6 +15,7 @@
             --warning: #f59e0b;
             --danger: #ef4444;
             --excel-border: #cbd5e1;
+            --sidebar-width: 80px;
         }
 
         html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; }
@@ -47,8 +48,6 @@
         thead th { position: sticky; top: 0; z-index: 20; background: #f1f5f9; height: 45px; font-size: 0.7rem; font-weight: 800; border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border); color: var(--primary); text-transform: uppercase; position: relative; user-select: none; }
         
         .resizer { position: absolute; right: 0; top: 0; width: 12px; height: 100%; cursor: col-resize; z-index: 30; }
-        .resizer:hover { background: rgba(0, 129, 255, 0.3); }
-
         .sticky-col { position: sticky; left: 0; z-index: 30; background: #f1f5f9 !important; width: 45px !important; border-right: 2px solid var(--primary) !important; }
 
         tbody td { height: 48px; padding: 0 8px; border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); font-size: 0.8rem; text-align: center; white-space: nowrap; overflow: hidden; font-weight: 600; color: #334155; text-transform: uppercase; }
@@ -66,7 +65,14 @@
 
         .pagination-footer { height: 60px; background: white; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--primary); border-top: none; border-radius: 0 0 12px 12px; }
         .nav-btns { width: 80px; height: 38px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.7rem; }
-        .nav-btns:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        @media (min-width: 1024px) {
+            .main-content { flex-direction: row; padding: 0; }
+            .action-bar-container { width: var(--sidebar-width); height: 100%; background: var(--primary); padding: 0; flex-direction: column; justify-content: flex-start; border-top: 1px solid rgba(255,255,255,0.1); }
+            .toggle-group { flex-direction: column; height: 100%; max-width: none; border: none; border-radius: 0; }
+            .btn-toggle { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 25px 0; width: 100%; border-radius: 0; }
+            .right-panel { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow: hidden; }
+        }
     </style>
 </head>
 <body>
@@ -87,41 +93,44 @@
             <div class="toggle-group" id="perm-nav">
                 <button class="btn-toggle active" onclick="location.href='inventory.html'"><span>📋</span><span>Inv</span></button>
                 <button class="btn-toggle" onclick="location.href='receiving.html'"><span>🚚</span><span>Recv</span></button>
-                <button class="btn-toggle" onclick="location.href='orders.html'"><span>📝</span><span>Order</span></button>
+                <button class="btn-toggle" onclick="location.href='orders.html'"><span>💰</span><span>Sales</span></button>
                 <button class="btn-toggle" onclick="location.href='transfer.html'"><span>🔄</span><span>Trans</span></button>
                 <button class="btn-toggle" onclick="location.href='return.html'"><span>↩️</span><span>Return</span></button>
             </div>
         </div>
 
-        <div class="search-container">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" class="search-input" placeholder="SEARCH (SKU, DESCRIPTION, LOCATION...)" oninput="handleSearch()">
-        </div>
+        <div class="right-panel">
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="SEARCH (SKU, DESCRIPTION, LOCATION...)" oninput="handleSearch()">
+            </div>
 
-        <div class="table-scroll-area">
-            <table>
-                <thead>
-                    <tr>
-                        <th class="sticky-col">#</th>
-                        <th style="width:100px;">Status<div class="resizer"></div></th>
-                        <th style="width:110px;">Location<div class="resizer"></div></th>
-                        <th style="width:130px;">Item Code<div class="resizer"></div></th>
-                        <th style="width:250px;">Item Description<div class="resizer"></div></th>
-                        <th style="width:120px;">Category<div class="resizer"></div></th>
-                        <th style="width:120px;">Brand<div class="resizer"></div></th>
-                        <th style="width:70px;">Stock<div class="resizer"></div></th>
-                        <th style="width:70px;">Uom<div class="resizer"></div></th>
-                    </tr>
-                </thead>
-                <tbody id="inventory-body"></tbody>
-            </table>
-        </div>
+            <div class="table-scroll-area">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="sticky-col">#</th>
+                            <th style="width:100px;">Status<div class="resizer"></div></th>
+                            <th style="width:120px;">Category<div class="resizer"></div></th>
+                            <th style="width:110px;">Location<div class="resizer"></div></th>
+                            <th style="width:130px;">Item Code<div class="resizer"></div></th>
+                            <th style="width:250px;">Item Description<div class="resizer"></div></th>
+                            <th style="width:120px;">Brand<div class="resizer"></div></th>
+                            <th style="width:80px;">Stocks<div class="resizer"></div></th>
+                            <th style="width:70px;">Uom<div class="resizer"></div></th>
+                            <th style="width:110px;">Unit Price<div class="resizer"></div></th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-body"></tbody>
+                </table>
+            </div>
 
-        <div class="pagination-footer">
-            <div id="page-info" style="font-size: 0.75rem; font-weight: 800; color: var(--primary);">Loading...</div>
-            <div style="display:flex; gap:10px;">
-                <button class="nav-btns" id="prevBtn" onclick="changePage(currentPage - 1)">PREV</button>
-                <button class="nav-btns" id="nextBtn" onclick="changePage(currentPage + 1)">NEXT</button>
+            <div class="pagination-footer">
+                <div id="page-info" style="font-size: 0.75rem; font-weight: 800; color: var(--primary);">Loading...</div>
+                <div style="display:flex; gap:10px;">
+                    <button class="nav-btns" id="prevBtn" onclick="changePage(currentPage - 1)">PREV</button>
+                    <button class="nav-btns" id="nextBtn" onclick="changePage(currentPage + 1)">NEXT</button>
+                </div>
             </div>
         </div>
     </div>
@@ -132,40 +141,6 @@
         let currentPage = 1, currentSearchQuery = "";
         const activeUser = localStorage.getItem('activeAdmin');
         const userRole = localStorage.getItem('userRole');
-
-        // Resizer Logic
-        document.querySelectorAll('th').forEach(th => {
-            const resizer = th.querySelector('.resizer');
-            if (!resizer) return;
-            resizer.addEventListener('mousedown', startResize);
-            resizer.addEventListener('touchstart', startResize, { passive: false });
-
-            function startResize(e) {
-                e.preventDefault();
-                const startX = e.pageX || e.touches[0].pageX;
-                const startWidth = th.offsetWidth;
-                const scrollArea = document.querySelector('.table-scroll-area');
-                scrollArea.style.overflow = 'hidden';
-
-                const onMove = (mv) => {
-                    const currentX = mv.pageX || (mv.touches ? mv.touches[0].pageX : 0);
-                    th.style.width = (startWidth + (currentX - startX)) + 'px';
-                };
-
-                const endResize = () => {
-                    scrollArea.style.overflow = 'auto';
-                    document.removeEventListener('mousemove', onMove);
-                    document.removeEventListener('mouseup', endResize);
-                    document.removeEventListener('touchmove', onMove);
-                    document.removeEventListener('touchend', endResize);
-                };
-
-                document.addEventListener('mousemove', onMove);
-                document.addEventListener('mouseup', endResize);
-                document.addEventListener('touchmove', onMove, { passive: false });
-                document.addEventListener('touchend', endResize);
-            }
-        });
 
         function applyPermissions() {
             if (!activeUser) { location.href = 'index.html'; return; }
@@ -194,6 +169,11 @@
                 const qty = item.quantity || 0;
                 const min = item.min_qty || 5;
                 const max = item.max_qty || 9999;
+                const price = item.unit_price ? 
+                    parseFloat(item.unit_price).toLocaleString('en-PH', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }) : '0.00';
 
                 let statusBadge = '';
                 if (qty <= 0) statusBadge = '<span class="status-badge bg-out">OUT</span>';
@@ -205,13 +185,14 @@
                 <tr onclick="selectRow(this)">
                     <td class="sticky-col">${((currentPage-1)*25)+i+1}</td>
                     <td>${statusBadge}</td>
+                    <td>${item.category || '-'}</td>
                     <td>${item.location || '-'}</td>
                     <td style="font-family:monospace; font-weight:800; color:var(--accent);">${item.sku || '-'}</td>
                     <td style="text-align:left; font-weight:700;">${item.item_name || '-'}</td>
-                    <td>${item.category || '-'}</td>
                     <td>${item.brand || '-'}</td>
                     <td class="qty-badge">${qty}</td>
                     <td>${item.uom || '-'}</td>
+                    <td style="color:var(--success); font-weight:800;">₱${price}</td>
                 </tr>
                 `;
             }).join('');
@@ -225,6 +206,7 @@
         function handleSearch() { currentSearchQuery = document.getElementById('searchInput').value; currentPage = 1; fetchInventory(); }
         function changePage(p) { if(p > 0) { currentPage = p; fetchInventory(); } }
         function handleLogout() { localStorage.clear(); location.href = 'index.html'; }
+        
         function selectRow(el) {
             document.querySelectorAll('#inventory-body tr').forEach(r => r.classList.remove('selected-row'));
             el.classList.add('selected-row');

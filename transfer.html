@@ -77,7 +77,7 @@
         <div class="toggle-group">
             <button class="btn-toggle" onclick="location.href='inventory.html'"><span>📋</span><span>Inv</span></button>
             <button class="btn-toggle" onclick="location.href='receiving.html'"><span>🚚</span><span>Recv</span></button>
-            <button class="btn-toggle" onclick="location.href='orders.html'"><span>📝</span><span>Order</span></button>
+            <button class="btn-toggle" onclick="location.href='orders.html'"><span>💰</span><span>Sales</span></button>
             <button class="btn-toggle active" onclick="location.href='transfer.html'"><span>🔄</span><span>Trans</span></button>
             <button class="btn-toggle" onclick="location.href='return.html'"><span>↩️</span><span>Return</span></button>
         </div>
@@ -243,7 +243,7 @@
                 // Add/Update Destination
                 const { data: dest } = await _supabase.from('inventory').select('id, quantity').eq('item_name', item.item_name).eq('location', item.nextLoc).maybeSingle();
                 if (dest) await _supabase.from('inventory').update({ quantity: (dest.quantity || 0) + item.moveQty }).eq('id', dest.id);
-                else await _supabase.from('inventory').insert([{ item_name: item.item_name, location: item.nextLoc, quantity: item.moveQty, uom: item.uom, sku: item.sku, category: item.category }]);
+                else await _supabase.from('inventory').insert([{ item_name: item.item_name, location: item.nextLoc, quantity: item.moveQty, uom: item.uom, sku: item.sku, category: item.category, unit_price: item.unit_price }]);
 
                 await _supabase.from('inventory_transactions').insert([{
                     reference_id: ref, sku: item.sku, item_name: item.item_name,

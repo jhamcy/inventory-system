@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Stock Issuance | EasiStock</title>
+    <title>Sales Order | EasiStock</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -22,7 +22,6 @@
             height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* NAVBAR LOGIC matching Inventory/Receiving */
         .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; flex-shrink: 0; }
         .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; cursor: pointer; }
         .user-info { display: flex; flex-direction: column; align-items: flex-end; color: white; }
@@ -32,12 +31,10 @@
 
         .main-content { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
 
-        /* TOGGLE GROUP - Logs replaced with Return */
         .action-bar-container { display: flex; justify-content: center; flex-shrink: 0; margin-bottom: 5px; }
         .toggle-group { display: flex; width: 100%; max-width: 550px; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .btn-toggle { flex: 1; padding: 10px 0; border: none; border-right: 1px solid rgba(255,255,255,0.15); cursor: pointer; color: rgba(255,255,255,0.6); background: var(--primary); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .btn-toggle.active { background: var(--accent) !important; color: white !important; }
-        .btn-toggle:last-child { border-right: none; }
 
         .input-card { background: white; border-radius: 12px; border: 2px solid var(--primary); padding: 12px; flex-shrink: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -45,30 +42,32 @@
         .full-width { grid-column: span 2; }
         
         label { display: block; font-size: 0.55rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 3px; }
-        input { width: 100%; padding: 10px; border: 1.5px solid var(--border-main); border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; outline: none; box-sizing: border-box; }
+        input { width: 100%; padding: 10px; border: 1.5px solid var(--border-main); border-radius: 6px; font-size: 0.8rem; font-weight: 700; outline: none; box-sizing: border-box; }
         input[readonly] { background-color: #f1f5f9; color: #475569; border-style: dashed; }
 
         .table-container { flex: 1; background: white; border-radius: 12px; border: 2px solid var(--primary); display: flex; flex-direction: column; overflow: hidden; }
-        .table-header { background: var(--danger); padding: 8px; font-weight: 800; font-size: 0.6rem; color: white; text-align: center; text-transform: uppercase; }
+        .table-header { background: var(--primary); padding: 8px; font-weight: 800; font-size: 0.6rem; color: white; text-align: center; text-transform: uppercase; }
         
         .scroll-area { flex: 1; overflow: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 500px; }
-        thead th { position: sticky; top: 0; background: #f1f5f9; padding: 10px; font-size: 0.55rem; font-weight: 800; text-transform: uppercase; border-bottom: 2px solid var(--primary); text-align: left; z-index: 20; }
-        tbody td { padding: 10px; border-bottom: 1px solid var(--border-main); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; min-width: 550px; }
+        thead th { position: sticky; top: 0; background: #f1f5f9; padding: 10px; font-size: 0.55rem; font-weight: 800; text-transform: uppercase; border-bottom: 2px solid var(--primary); text-align: left; }
+        tbody td { padding: 10px; border-bottom: 1px solid var(--border-main); font-size: 0.7rem; font-weight: 600; }
 
-        .summary-bar { background: #f8fafc; padding: 10px 15px; border-top: 2px solid var(--primary); display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 800; color: var(--primary); }
+        .summary-bar { background: #f8fafc; padding: 10px 15px; border-top: 2px solid var(--primary); display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; font-weight: 800; color: var(--primary); }
+        .grand-total-box { color: var(--success); font-size: 1rem; }
+
         .footer-actions { display: flex; gap: 8px; }
         .btn { border: none; border-radius: 8px; padding: 14px; font-weight: 800; font-size: 0.75rem; cursor: pointer; text-transform: uppercase; }
         .btn-add { background: var(--primary); color: white; width: 100%; margin-top: 5px; }
         .btn-submit { background: var(--success); color: white; flex: 1; box-shadow: 0 4px 0 #059669; }
         
-        .qty-badge { background: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 4px; font-weight: 800; }
+        .qty-badge { background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 4px; font-weight: 800; }
     </style>
 </head>
 <body>
 
 <header class="navbar">
-    <div class="nav-logo-text" onclick="goHome()">EasiStock Issuance</div>
+    <div class="nav-logo-text" onclick="goHome()">EasiStock Sales Order</div>
     <div class="user-info">
         <span class="user-label" id="user-role-label">Staff Member</span>
         <span class="user-name"><div class="online-dot"></div><span id="active-user">---</span></span>
@@ -79,10 +78,9 @@
     <div class="action-bar-container">
         <div class="toggle-group">
             <button class="btn-toggle" onclick="location.href='inventory.html'"><span>📋</span><span>Inv</span></button>
+            <button class="btn-toggle active" onclick="location.href='orders.html'"><span>💰</span><span>Sales</span></button>
             <button class="btn-toggle" onclick="location.href='receiving.html'"><span>🚚</span><span>Recv</span></button>
-            <button class="btn-toggle active" onclick="location.href='orders.html'"><span>📝</span><span>Order</span></button>
             <button class="btn-toggle" onclick="location.href='transfer.html'"><span>🔄</span><span>Trans</span></button>
-            <button class="btn-toggle" onclick="location.href='return.html'"><span>↩️</span><span>Return</span></button>
         </div>
     </div>
 
@@ -97,31 +95,36 @@
                 <input type="text" id="so-number" readonly>
             </div>
             <div class="form-group full-width">
-                <label>Recipient / Customer / Dept</label>
-                <input type="text" id="customer-name" placeholder="WHO IS RECEIVING?">
+                <label>Customer Name</label>
+                <input type="text" id="customer-name" placeholder="ENTER CLIENT NAME" style="text-transform: uppercase;">
             </div>
-            <div class="form-group">
-                <label>Find Item</label>
-                <input list="items-list" id="item-search" placeholder="SKU/NAME" onchange="handleSelection()">
+            <div class="form-group full-width">
+                <label>Search Product</label>
+                <input list="items-list" id="item-search" placeholder="SEARCH ITEM NAME OR SKU..." onchange="handleSelection()">
                 <datalist id="items-list"></datalist>
             </div>
             <div class="form-group">
-                <label>Qty to Release</label>
+                <label>Unit Price (₱)</label>
+                <input type="number" id="unit-price" placeholder="0.00" step="0.01">
+            </div>
+            <div class="form-group">
+                <label>Qty to Sell</label>
                 <input type="number" id="release-qty" placeholder="0" inputmode="numeric">
             </div>
         </div>
-        <button class="btn btn-add" onclick="addToBatch()">Add to Issuance Table ↓</button>
+        <button class="btn btn-add" onclick="addToBatch()">Add to Order ↓</button>
     </div>
 
     <div class="table-container">
-        <div class="table-header">Outgoing Stock Preview</div>
+        <div class="table-header">Items in Sales Order</div>
         <div class="scroll-area">
             <table>
                 <thead>
                     <tr>
-                        <th>SKU</th>
-                        <th>Item</th>
-                        <th style="text-align: center;">Qty</th>
+                        <th>Description</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Total</th>
                         <th style="text-align: center;">Action</th>
                     </tr>
                 </thead>
@@ -129,13 +132,13 @@
             </table>
         </div>
         <div class="summary-bar">
-            <span>SKUs: <span id="total-items">0</span></span>
-            <span>TOTAL QTY: <span id="total-qty">0</span></span>
+            <span>ITEMS: <span id="total-items">0</span> | QTY: <span id="total-qty">0</span></span>
+            <span class="grand-total-box">TOTAL: ₱<span id="grand-total">0.00</span></span>
         </div>
     </div>
 
     <div class="footer-actions">
-        <button class="btn btn-submit" id="save-btn" onclick="processOrder()">Confirm & Post Release</button>
+        <button class="btn btn-submit" id="save-btn" onclick="processOrder()">Confirm & Post Sale</button>
     </div>
 </main>
 
@@ -152,7 +155,7 @@
     function init() {
         if (!activeUser) { location.href = 'index.html'; return; }
         document.getElementById('active-user').innerText = activeUser;
-        document.getElementById('user-role-label').innerText = userRole === 'admin' ? 'System Admin' : 'Staff Member';
+        document.getElementById('user-role-label').innerText = userRole === 'admin' ? 'Admin' : 'Staff';
         
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('trans-date').value = today;
@@ -161,42 +164,57 @@
     }
 
     function goHome() { 
-        if (userRole === 'admin') window.location.href = 'dashboard.html';
-        else window.location.href = 'inventory.html';
+        window.location.href = (userRole === 'admin') ? 'dashboard.html' : 'inventory.html';
     }
 
     function generateSO() {
         const dateInput = document.getElementById('trans-date').value;
         const datePart = dateInput.replace(/-/g, "").slice(2);
-        document.getElementById('so-number').value = `SO-${datePart}-${Math.floor(100 + Math.random() * 899)}`;
+        document.getElementById('so-number').value = `SO-${datePart}-${Math.floor(1000 + Math.random() * 8999)}`;
     }
 
     async function loadInventory() {
         const { data } = await _supabase.from('inventory').select('*').order('item_name');
         masterInventory = data || [];
         document.getElementById('items-list').innerHTML = masterInventory.map(i => 
-            `<option value="${i.item_name} [Avail: ${i.quantity || 0}]">`
+            `<option value="${i.item_name} (Stock: ${i.quantity || 0})">`
         ).join('');
     }
 
     function handleSelection() {
         const val = document.getElementById('item-search').value;
-        selectedItem = masterInventory.find(i => `${i.item_name} [Avail: ${i.quantity || 0}]` === val);
+        selectedItem = masterInventory.find(i => `${i.item_name} (Stock: ${i.quantity || 0})` === val);
+        
+        if (selectedItem) {
+            // AUTO-FILL PRICE from the database
+            document.getElementById('unit-price').value = selectedItem.unit_price || 0;
+            document.getElementById('release-qty').focus();
+        }
     }
 
     function addToBatch() {
         const qty = parseInt(document.getElementById('release-qty').value);
-        if (!selectedItem || !qty || qty <= 0) return alert("Select item and valid quantity!");
+        const price = parseFloat(document.getElementById('unit-price').value);
+
+        if (!selectedItem || isNaN(qty) || qty <= 0 || isNaN(price)) {
+            return alert("Select product, enter quantity and price!");
+        }
         
         if (qty > (selectedItem.quantity || 0)) {
-            alert(`🛑 SHORTAGE: Only ${selectedItem.quantity || 0} available.`);
-            return;
+            return alert(`Stock shortage! Available: ${selectedItem.quantity}`);
         }
 
-        batchItems.push({ ...selectedItem, releaseQty: qty });
+        batchItems.push({ 
+            ...selectedItem, 
+            sellQty: qty, 
+            sellPrice: price,
+            lineTotal: qty * price
+        });
+
         renderTable();
         document.getElementById('item-search').value = "";
         document.getElementById('release-qty').value = "";
+        document.getElementById('unit-price').value = "";
         selectedItem = null;
     }
 
@@ -204,14 +222,18 @@
         const tbody = document.getElementById('batch-body');
         tbody.innerHTML = batchItems.map((item, idx) => `
             <tr>
-                <td style="font-family:monospace; color:var(--accent);">${item.sku || 'N/A'}</td>
-                <td>${item.item_name}</td>
-                <td style="text-align:center;"><span class="qty-badge">-${item.releaseQty}</span></td>
-                <td style="text-align:center;"><button style="color:red; background:none; border:none; font-weight:800;" onclick="removeItem(${idx})">REMOVE</button></td>
+                <td><strong>${item.sku || 'N/A'}</strong><br><small>${item.item_name}</small></td>
+                <td><span class="qty-badge">${item.sellQty}</span></td>
+                <td>₱${item.sellPrice.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                <td style="color:var(--success)">₱${item.lineTotal.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                <td style="text-align:center;"><button style="color:red; background:none; border:none; font-weight:800; cursor:pointer" onclick="removeItem(${idx})">REMOVE</button></td>
             </tr>
         `).reverse().join('');
+
+        const grandTotal = batchItems.reduce((sum, i) => sum + i.lineTotal, 0);
         document.getElementById('total-items').innerText = batchItems.length;
-        document.getElementById('total-qty').innerText = batchItems.reduce((sum, i) => sum + i.releaseQty, 0);
+        document.getElementById('total-qty').innerText = batchItems.reduce((sum, i) => sum + i.sellQty, 0);
+        document.getElementById('grand-total').innerText = grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
     }
 
     function removeItem(idx) {
@@ -220,34 +242,37 @@
     }
 
     async function processOrder() {
-        const so = document.getElementById('so-number').value.trim().toUpperCase();
+        const so = document.getElementById('so-number').value;
         const cust = document.getElementById('customer-name').value.trim().toUpperCase();
-        if (!cust || batchItems.length === 0) return alert("Fill recipient and add items.");
+        if (!cust || batchItems.length === 0) return alert("Enter Customer and add items.");
 
         const btn = document.getElementById('save-btn');
-        btn.disabled = true; btn.innerText = "POSTING RELEASE...";
+        btn.disabled = true; btn.innerText = "POSTING SALE...";
 
         try {
             for (const item of batchItems) {
+                // Deduct Inventory
                 const { data: cur } = await _supabase.from('inventory').select('quantity').eq('id', item.id).single();
-                await _supabase.from('inventory').update({ quantity: (cur.quantity || 0) - item.releaseQty }).eq('id', item.id);
+                await _supabase.from('inventory').update({ quantity: (cur.quantity || 0) - item.sellQty }).eq('id', item.id);
                 
+                // Log Transaction
                 await _supabase.from('inventory_transactions').insert([{
                     reference_id: so, sku: item.sku, item_name: item.item_name,
-                    qty_change: -item.releaseQty, location: item.location, uom: item.uom, notes: `ISSUED TO: ${cust}`
+                    qty_change: -item.sellQty, notes: `SALE TO: ${cust} (₱${item.sellPrice}/pc)`
                 }]);
             }
 
+            // Log Activity
             await _supabase.from('activity_logs').insert([{
-                type: 'ORDER', reference_id: so, performed_by: activeUser,
-                summary: `${batchItems.length} ITEMS ISSUED TO ${cust}`
+                type: 'SALES', reference_id: so, performed_by: activeUser,
+                summary: `SO Created for ${cust}: Total ₱${document.getElementById('grand-total').innerText}`
             }]);
 
-            alert("STOCK ISSUED SUCCESSFULLY");
+            alert("SALES ORDER COMPLETED!");
             window.location.reload();
         } catch (e) { 
             alert("Error: " + e.message); 
-            btn.disabled = false; btn.innerText = "Confirm & Post Release";
+            btn.disabled = false; btn.innerText = "Confirm & Post Sale";
         }
     }
 
