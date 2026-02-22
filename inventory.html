@@ -22,7 +22,24 @@
         body { font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%); display: flex; flex-direction: column; }
 
         .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 1000; }
-        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; text-decoration: none; cursor: pointer; }
+        
+        /* UPDATED: EasiStock Brand as a Button */
+        .nav-logo-btn { 
+            background: var(--accent); 
+            color: white; 
+            font-weight: 800; 
+            font-size: 0.9rem; 
+            text-transform: uppercase; 
+            text-decoration: none; 
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer; 
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 0px #0056aa;
+        }
+        .nav-logo-btn:hover { background: #1a8eff; transform: translateY(-1px); }
+        .nav-logo-btn:active { transform: translateY(2px); box-shadow: 0 0px 0px transparent; }
         
         .user-info { display: flex; flex-direction: column; align-items: flex-end; margin-right: 15px; cursor: pointer; padding: 5px; border-radius: 8px; }
         .user-info:hover { background: rgba(255,255,255,0.1); }
@@ -47,7 +64,6 @@
         
         thead th { position: sticky; top: 0; z-index: 20; background: #f1f5f9; height: 45px; font-size: 0.7rem; font-weight: 800; border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border); color: var(--primary); text-transform: uppercase; position: relative; user-select: none; }
         
-        .resizer { position: absolute; right: 0; top: 0; width: 12px; height: 100%; cursor: col-resize; z-index: 30; }
         .sticky-col { position: sticky; left: 0; z-index: 30; background: #f1f5f9 !important; width: 45px !important; border-right: 2px solid var(--primary) !important; }
 
         tbody td { height: 48px; padding: 0 8px; border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); font-size: 0.8rem; text-align: center; white-space: nowrap; overflow: hidden; font-weight: 600; color: #334155; text-transform: uppercase; }
@@ -60,8 +76,6 @@
         .bg-low { background: var(--warning); }
         .bg-out { background: var(--danger); }
         .bg-over { background: var(--accent); }
-
-        .qty-badge { font-weight: 800; font-size: 0.9rem; }
 
         .pagination-footer { height: 60px; background: white; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--primary); border-top: none; border-radius: 0 0 12px 12px; }
         .nav-btns { width: 80px; height: 38px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.7rem; }
@@ -78,7 +92,7 @@
 <body>
 
     <div class="navbar">
-        <a id="nav-logo" class="nav-logo-text" onclick="goHome()">EasiStock</a>
+        <button id="nav-logo" class="nav-logo-btn" onclick="goHome()">EasiStock</button>
         <div style="display:flex; align-items:center;">
             <div class="user-info" onclick="location.href='profile.html'">
                 <span class="user-label" id="user-role-label">Loading...</span>
@@ -110,15 +124,15 @@
                     <thead>
                         <tr>
                             <th class="sticky-col">#</th>
-                            <th style="width:100px;">Status<div class="resizer"></div></th>
-                            <th style="width:120px;">Category<div class="resizer"></div></th>
-                            <th style="width:110px;">Location<div class="resizer"></div></th>
-                            <th style="width:130px;">Item Code<div class="resizer"></div></th>
-                            <th style="width:250px;">Item Description<div class="resizer"></div></th>
-                            <th style="width:120px;">Brand<div class="resizer"></div></th>
-                            <th style="width:80px;">Stocks<div class="resizer"></div></th>
-                            <th style="width:70px;">Uom<div class="resizer"></div></th>
-                            <th style="width:110px;">Unit Price<div class="resizer"></div></th>
+                            <th style="width:100px;">Status</th>
+                            <th style="width:120px;">Category</th>
+                            <th style="width:110px;">Location</th>
+                            <th style="width:130px;">Item Code</th>
+                            <th style="width:250px;">Item Description</th>
+                            <th style="width:120px;">Brand</th>
+                            <th style="width:80px;">Stocks</th>
+                            <th style="width:70px;">Uom</th>
+                            <th style="width:110px;">Unit Price</th>
                         </tr>
                     </thead>
                     <tbody id="inventory-body"></tbody>
@@ -148,8 +162,16 @@
             document.getElementById('user-role-label').innerText = userRole === 'admin' ? 'System Admin' : 'Staff Member';
         }
 
+        /* UPDATED SECURITY LOGIC: 
+           Checks userRole before allowing navigation to dashboard.
+        */
         function goHome() { 
-            window.location.href = (userRole === 'admin') ? 'dashboard.html' : 'inventory.html';
+            if (userRole === 'admin') {
+                window.location.href = 'dashboard.html';
+            } else {
+                // If staff, just refresh/reset inventory view
+                window.location.href = 'inventory.html';
+            }
         }
 
         async function fetchInventory() {
@@ -167,19 +189,13 @@
             const tbody = document.getElementById('inventory-body');
             tbody.innerHTML = data.map((item, i) => {
                 const qty = item.quantity || 0;
-                const min = item.min_qty || 5;
-                const max = item.max_qty || 9999;
-                const price = item.unit_price ? 
-                    parseFloat(item.unit_price).toLocaleString('en-PH', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    }) : '0.00';
+                const min = item.min_qty || 10;
+                const price = item.unit_price ? parseFloat(item.unit_price).toFixed(2) : '0.00';
 
                 let statusBadge = '';
                 if (qty <= 0) statusBadge = '<span class="status-badge bg-out">OUT</span>';
                 else if (qty < min) statusBadge = '<span class="status-badge bg-low">LOW</span>';
-                else if (qty > max) statusBadge = '<span class="status-badge bg-over">OVER</span>';
-                else statusBadge = '<span class="status-badge bg-healthy">HEALTHY</span>';
+                else statusBadge = '<span class="status-badge bg-healthy">GOOD</span>';
 
                 return `
                 <tr onclick="selectRow(this)">
@@ -190,8 +206,8 @@
                     <td style="font-family:monospace; font-weight:800; color:var(--accent);">${item.sku || '-'}</td>
                     <td style="text-align:left; font-weight:700;">${item.item_name || '-'}</td>
                     <td>${item.brand || '-'}</td>
-                    <td class="qty-badge">${qty}</td>
-                    <td>${item.uom || '-'}</td>
+                    <td style="font-weight:800;">${qty}</td>
+                    <td><span style="font-size:0.6rem; background:#64748b; color:white; padding:2px 4px; border-radius:3px;">${item.uom || 'PCS'}</span></td>
                     <td style="color:var(--success); font-weight:800;">₱${price}</td>
                 </tr>
                 `;
