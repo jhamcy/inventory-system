@@ -23,8 +23,27 @@
         }
 
         .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; flex-shrink: 0; }
-        .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; cursor: pointer; }
-        .user-info { display: flex; flex-direction: column; align-items: flex-end; color: white; }
+        
+        /* BRAND BUTTON STYLE */
+        .nav-logo-btn { 
+            background: var(--accent); 
+            color: white; 
+            font-weight: 800; 
+            font-size: 0.9rem; 
+            text-transform: uppercase; 
+            text-decoration: none; 
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer; 
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 0px #0056aa;
+        }
+        .nav-logo-btn:hover { background: #1a8eff; transform: translateY(-1px); }
+        .nav-logo-btn:active { transform: translateY(2px); box-shadow: 0 0px 0px transparent; }
+
+        .user-info { display: flex; flex-direction: column; align-items: flex-end; color: white; cursor: pointer; padding: 5px; border-radius: 8px; }
+        .user-info:hover { background: rgba(255,255,255,0.1); }
         .user-label { font-size: 0.55rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; }
         .user-name { font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 5px; }
         .online-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
@@ -50,16 +69,18 @@
         
         .scroll-area { flex: 1; overflow: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 550px; }
-        thead th { position: sticky; top: 0; background: #f1f5f9; padding: 10px; font-size: 0.55rem; font-weight: 800; text-transform: uppercase; border-bottom: 2px solid var(--primary); text-align: left; }
+        thead th { position: sticky; top: 0; background: #f1f5f9; padding: 10px; font-size: 0.55rem; font-weight: 800; text-transform: uppercase; border-bottom: 2px solid var(--primary); text-align: left; z-index: 10; }
         tbody td { padding: 10px; border-bottom: 1px solid var(--border-main); font-size: 0.7rem; font-weight: 600; }
 
         .summary-bar { background: #f8fafc; padding: 10px 15px; border-top: 2px solid var(--primary); display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; font-weight: 800; color: var(--primary); }
         .grand-total-box { color: var(--success); font-size: 1rem; }
 
-        .footer-actions { display: flex; gap: 8px; }
-        .btn { border: none; border-radius: 8px; padding: 14px; font-weight: 800; font-size: 0.75rem; cursor: pointer; text-transform: uppercase; }
+        .footer-actions { display: flex; gap: 8px; padding-top: 5px; }
+        .btn { border: none; border-radius: 8px; padding: 14px; font-weight: 800; font-size: 0.75rem; cursor: pointer; text-transform: uppercase; transition: transform 0.1s; }
+        .btn:active { transform: translateY(2px); }
         .btn-add { background: var(--primary); color: white; width: 100%; margin-top: 5px; }
         .btn-submit { background: var(--success); color: white; flex: 1; box-shadow: 0 4px 0 #059669; }
+        .btn-submit:active { box-shadow: none; }
         
         .qty-badge { background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 4px; font-weight: 800; }
     </style>
@@ -67,8 +88,8 @@
 <body>
 
 <header class="navbar">
-    <div class="nav-logo-text" onclick="goHome()">EasiStock Sales Order</div>
-    <div class="user-info">
+    <button class="nav-logo-btn" onclick="goHome()">EasiStock</button>
+    <div class="user-info" onclick="location.href='profile.html'">
         <span class="user-label" id="user-role-label">Staff Member</span>
         <span class="user-name"><div class="online-dot"></div><span id="active-user">---</span></span>
     </div>
@@ -155,7 +176,7 @@
     function init() {
         if (!activeUser) { location.href = 'index.html'; return; }
         document.getElementById('active-user').innerText = activeUser;
-        document.getElementById('user-role-label').innerText = userRole === 'admin' ? 'Admin' : 'Staff';
+        document.getElementById('user-role-label').innerText = userRole === 'admin' ? 'System Admin' : 'Staff Member';
         
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('trans-date').value = today;
@@ -163,8 +184,10 @@
         loadInventory();
     }
 
+    /* SECURITY LOCK LOGIC */
     function goHome() { 
-        window.location.href = (userRole === 'admin') ? 'dashboard.html' : 'inventory.html';
+        if (userRole === 'admin') window.location.href = 'dashboard.html';
+        else window.location.href = 'inventory.html';
     }
 
     function generateSO() {
@@ -186,7 +209,6 @@
         selectedItem = masterInventory.find(i => `${i.item_name} (Stock: ${i.quantity || 0})` === val);
         
         if (selectedItem) {
-            // AUTO-FILL PRICE from the database
             document.getElementById('unit-price').value = selectedItem.unit_price || 0;
             document.getElementById('release-qty').focus();
         }
@@ -251,18 +273,15 @@
 
         try {
             for (const item of batchItems) {
-                // Deduct Inventory
                 const { data: cur } = await _supabase.from('inventory').select('quantity').eq('id', item.id).single();
                 await _supabase.from('inventory').update({ quantity: (cur.quantity || 0) - item.sellQty }).eq('id', item.id);
                 
-                // Log Transaction
                 await _supabase.from('inventory_transactions').insert([{
                     reference_id: so, sku: item.sku, item_name: item.item_name,
                     qty_change: -item.sellQty, notes: `SALE TO: ${cust} (₱${item.sellPrice}/pc)`
                 }]);
             }
 
-            // Log Activity
             await _supabase.from('activity_logs').insert([{
                 type: 'SALES', reference_id: so, performed_by: activeUser,
                 summary: `SO Created for ${cust}: Total ₱${document.getElementById('grand-total').innerText}`
