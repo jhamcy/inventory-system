@@ -14,7 +14,7 @@
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --reorder: #f97316; /* Matches Dashboard Reorder Orange */
+            --reorder: #f97316;
             --excel-border: #cbd5e1;
         }
 
@@ -87,11 +87,15 @@
             border-bottom: 2px solid var(--primary); color: var(--primary); font-weight: 800; text-align: left;
         }
 
+        tbody tr { cursor: pointer; }
+        tbody tr:hover { background-color: #f8fafc; }
+
         tbody td { padding: 10px; border-bottom: 1px solid var(--excel-border); font-size: 0.7rem; font-weight: 600; vertical-align: middle; word-wrap: break-word; }
 
         .badge { 
             padding: 4px 2px; border-radius: 4px; font-weight: 800; font-size: 0.5rem; 
             color: white; text-align: center; display: block; width: 100%; box-sizing: border-box;
+            text-transform: uppercase;
         }
 
         .ref-id { color: var(--accent); font-weight: 800; font-family: monospace; font-size: 0.7rem; }
@@ -112,10 +116,12 @@
             <select id="typeFilter" class="type-select" onchange="applyFilters()">
                 <option value="ALL">ALL ACTIVITIES</option>
                 <option value="RECEIVING">🚚 RECEIVING</option>
-                <option value="ORDER">📝 ORDERS</option>
+                <option value="SALES">💰 SALES</option>
                 <option value="TRANSFER">🔄 TRANSFERS</option>
                 <option value="RETURN">↩️ RETURNS</option>
-                <option value="REORDER">⚠️ PROCUREMENT</option> <option value="ADJUST">⚖️ ADJUSTMENTS</option>
+                <option value="REORDER">⚠️ PROCUREMENT</option> 
+                <option value="EDIT">✏️ EDITS</option>
+                <option value="ADJUST">⚖️ ADJUSTMENTS</option>
             </select>
             <div style="display: flex; gap: 4px;">
                 <input type="date" id="dateFrom" class="date-input" onchange="applyFilters()">
@@ -164,7 +170,7 @@
             masterLogData = data.map(log => ({
                 rawDate: log.created_at.split('T')[0],
                 displayDate: new Date(log.created_at).toLocaleDateString('en-GB'),
-                type: (log.type || 'INFO').toUpperCase(),
+                type: (log.type === 'ORDER' ? 'SALES' : (log.type || 'INFO')).toUpperCase(),
                 ref: log.reference_id || '---',
                 summary: log.summary || '',
                 user: (log.performed_by || 'STAFF').toUpperCase()
@@ -196,12 +202,13 @@
         }
 
         function getTypeColor(type) {
-            if (type.includes('RECV')) return '#059669';
-            if (type.includes('ORDER')) return '#6366f1';
-            if (type.includes('TRANS')) return '#0081ff';
-            if (type.includes('RTN') || type.includes('RETURN')) return '#f59e0b';
-            if (type.includes('REORDER') || type.includes('PROC')) return '#f97316'; // NEW COLOR LOGIC
-            return '#475569';
+            if (type.includes('RECV') || type.includes('RECEIVING')) return '#059669'; // Green
+            if (type.includes('SALES') || type.includes('ORDER')) return '#6366f1'; // Indigo
+            if (type.includes('TRANS')) return '#0081ff'; // Blue
+            if (type.includes('RTN') || type.includes('RETURN')) return '#f59e0b'; // Amber
+            if (type.includes('REORDER') || type.includes('PROC')) return '#f97316'; // Orange
+            if (type.includes('EDIT')) return '#8b5cf6'; // Purple
+            return '#475569'; // Gray
         }
 
         function applyFilters() {
@@ -212,7 +219,17 @@
 
             const filtered = masterLogData.filter(item => {
                 const matchesSearch = item.ref.includes(searchVal) || item.summary.toUpperCase().includes(searchVal);
-                const matchesType = (typeVal === "ALL") || (item.type.includes(typeVal));
+                
+                // Special handling for Sales/Order filtering
+                let matchesType = (typeVal === "ALL");
+                if (!matchesType) {
+                    if (typeVal === "SALES") {
+                        matchesType = (item.type === "SALES" || item.type === "ORDER");
+                    } else {
+                        matchesType = item.type.includes(typeVal);
+                    }
+                }
+
                 let matchesDate = true;
                 if (fromVal && item.rawDate < fromVal) matchesDate = false;
                 if (toVal && item.rawDate > toVal) matchesDate = false;

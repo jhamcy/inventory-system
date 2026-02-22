@@ -21,22 +21,19 @@
         body {
             margin: 0; font-family: 'Inter', sans-serif;
             background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
-            /* Using dvh (dynamic viewport height) to account for mobile browser bars */
-            height: 100dvh; 
-            display: flex; flex-direction: column; overflow: hidden;
+            height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
             align-items: center;
         }
 
         .navbar { 
             width: 100%; height: 60px; background: var(--primary); 
             display: flex; align-items: center; justify-content: space-between; 
-            padding: 0 20px; flex-shrink: 0; box-sizing: border-box;
-            z-index: 100;
+            padding: 0 20px; flex-shrink: 0; box-sizing: border-box; z-index: 100;
         }
         .nav-logo-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; }
 
         .main-content {
-            width: 100%; max-width: 1000px; flex: 1; padding: 10px 15px;
+            width: 100%; max-width: 1100px; flex: 1; padding: 10px 15px;
             display: flex; flex-direction: column; gap: 10px; overflow: hidden; box-sizing: border-box;
         }
 
@@ -64,45 +61,35 @@
             margin-bottom: 5px;
         }
         .table-wrapper { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; table-layout: fixed; }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; table-layout: fixed; }
         
         thead { position: sticky; top: 0; background: #f1f5f9; z-index: 10; }
         th { 
-            padding: 10px; font-size: 0.6rem; text-transform: uppercase; 
+            padding: 10px; font-size: 0.55rem; text-transform: uppercase; 
             border-bottom: 2px solid var(--primary); color: var(--primary); 
             font-weight: 800; text-align: left; 
         }
-        td { padding: 10px; border-bottom: 1px solid var(--excel-border); font-size: 0.75rem; color: #1e293b; vertical-align: middle; }
+        td { padding: 10px; border-bottom: 1px solid var(--excel-border); font-size: 0.7rem; color: #1e293b; vertical-align: middle; }
 
         .sku-code { font-family: monospace; font-weight: 800; color: var(--accent); }
         .uom-tag { font-size: 0.6rem; color: white; background: #64748b; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
         
-        .qty-badge { font-weight: 800; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; min-width: 50px; text-align: center; display: inline-block; }
+        .qty-badge { font-weight: 800; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; min-width: 45px; text-align: center; display: inline-block; }
         .plus { color: var(--success); background: #ecfdf5; border: 1px solid var(--success); }
         .minus { color: var(--danger); background: #fef2f2; border: 1px solid var(--danger); }
         .reorder-style { color: var(--reorder); background: #fff7ed; border: 1px solid var(--reorder); }
 
-        /* FOOTER FIX FOR MOBILE */
-        .footer-actions { 
-            width: 100%;
-            text-align: center; 
-            padding: 10px 0 25px 0; /* Extra bottom padding for home indicators */
-            flex-shrink: 0; 
-            background: transparent;
-        }
+        .footer-actions { width: 100%; text-align: center; padding: 10px 0 25px 0; flex-shrink: 0; }
         .btn-back {
             background: var(--primary); color: white; border: none;
             padding: 14px 45px; border-radius: 10px; font-weight: 800;
             cursor: pointer; text-transform: uppercase; font-size: 0.8rem;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            transition: transform 0.1s;
         }
-        .btn-back:active { transform: scale(0.95); }
 
         @media (max-width: 800px) {
             .info-card { grid-template-columns: 1fr 1fr; }
             .notes-area { grid-column: span 2; }
-            .main-content { padding: 8px; }
         }
     </style>
 </head>
@@ -130,17 +117,19 @@
             <div class="table-wrapper">
                 <table>
                     <thead>
-                        <tr id="table-head-row">
-                            <th style="width: 15%;">SKU</th>
-                            <th style="width: 30%;">Description</th>
-                            <th style="width: 15%;">Brand</th>
-                            <th style="width: 15%;">Loc</th>
-                            <th style="width: 10%;">UOM</th>
-                            <th style="width: 15%; text-align: center;" id="qty-header">Qty</th>
+                        <tr>
+                            <th style="width: 120px;">SKU</th>
+                            <th style="width: 120px;">Category</th>
+                            <th style="width: 100px;">Location</th>
+                            <th style="width: 200px;">Description</th>
+                            <th style="width: 100px;">Brand</th>
+                            <th style="width: 70px;">UOM</th>
+                            <th style="width: 100px;">Unit Price</th>
+                            <th style="width: 80px; text-align: center;" id="qty-header">Qty</th>
                         </tr>
                     </thead>
                     <tbody id="inventory-body">
-                        <tr><td colspan="6" style="text-align: center; padding: 60px; color: #94a3b8; font-weight: 600;">Connecting...</td></tr>
+                        <tr><td colspan="8" style="text-align: center; padding: 60px; color: #94a3b8; font-weight: 600;">Connecting...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -162,12 +151,12 @@
             if(!ref) return;
 
             try {
-                const { data: logData, error: logErr } = await sb.from('activity_logs').select('*').eq('reference_id', ref).maybeSingle();
+                const { data: logData } = await sb.from('activity_logs').select('*').eq('reference_id', ref).maybeSingle();
 
                 if (logData) {
                     document.getElementById('val-ref').innerText = ref;
                     document.getElementById('disp-ref-top').innerText = ref;
-                    document.getElementById('val-type').innerText = logData.type || 'N/A';
+                    document.getElementById('val-type').innerText = (logData.type === 'ORDER' ? 'SALES' : logData.type).toUpperCase();
                     document.getElementById('val-user').innerText = logData.performed_by || 'ADMIN';
                     document.getElementById('val-date').innerText = new Date(logData.created_at).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' });
                     document.getElementById('val-notes').innerText = logData.summary || 'TRANSACTION COMPLETED.';
@@ -186,7 +175,7 @@
                 if(items && items.length > 0) {
                     renderStandardTable(items);
                 } else {
-                    document.getElementById('inventory-body').innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px;">No records found.</td></tr>`;
+                    document.getElementById('inventory-body').innerHTML = `<tr><td colspan="8" style="text-align:center; padding:40px;">No items found in this transaction.</td></tr>`;
                 }
             } catch (err) { console.error(err); }
         }
@@ -200,10 +189,12 @@
                 return `
                 <tr>
                     <td><span class="sku-code">${row.sku || 'N/A'}</span></td>
+                    <td style="font-weight: 700; text-transform: uppercase; font-size: 0.6rem;">${row.category || '---'}</td>
+                    <td style="font-weight: 700;">${row.location || 'MAIN'}</td>
                     <td style="font-weight: 700; text-transform: uppercase; font-size: 0.65rem;">${row.item_name || 'UNKNOWN'}</td>
                     <td>${row.brand || '---'}</td>
-                    <td style="font-weight: 700;">${row.location || 'MAIN'}</td>
                     <td><span class="uom-tag">${row.uom || 'PCS'}</span></td>
+                    <td style="font-weight: 700;">${row.unit_price ? row.unit_price.toFixed(2) : '0.00'}</td>
                     <td style="text-align: center;">
                         <span class="qty-badge ${badgeClass}">${sign}${qty}</span>
                     </td>
@@ -212,14 +203,17 @@
         }
 
         async function loadReorderItems() {
+            // Reorder shows current low stock items
             const { data: items } = await sb.from('inventory').select('*').lt('quantity', 10);
             document.getElementById('inventory-body').innerHTML = items.map(row => `
                 <tr>
                     <td><span class="sku-code">${row.sku || 'N/A'}</span></td>
+                    <td style="font-weight: 700; text-transform: uppercase; font-size: 0.6rem;">${row.category || '---'}</td>
+                    <td style="font-weight: 700;">${row.location || 'MAIN'}</td>
                     <td style="font-weight: 700; text-transform: uppercase; font-size: 0.65rem;">${row.item_name || 'UNKNOWN'}</td>
                     <td>${row.brand || '---'}</td>
-                    <td style="font-weight: 700;">${row.location || 'MAIN'}</td>
                     <td><span class="uom-tag">${row.uom || 'PCS'}</span></td>
+                    <td style="font-weight: 700;">${row.unit_price ? row.unit_price.toFixed(2) : '0.00'}</td>
                     <td style="text-align: center;">
                         <span class="qty-badge reorder-style">+50</span>
                     </td>

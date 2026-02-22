@@ -49,14 +49,13 @@
             width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--excel-border); 
             font-size: 0.75rem; font-weight: 600; outline: none; background: white;
         }
-        .result-count { font-size: 0.6rem; font-weight: 800; color: var(--accent); margin-top: 2px; }
         .grid-area { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; }
 
-        table { border-collapse: collapse; width: 100%; min-width: 900px; table-layout: fixed; }
+        table { border-collapse: collapse; width: 100%; min-width: 1300px; table-layout: fixed; }
         
         thead th { 
             position: sticky; top: 0; background: #f1f5f9; 
-            font-size: 0.65rem; font-weight: 800; 
+            font-size: 0.6rem; font-weight: 800; 
             border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border);
             text-transform: uppercase; color: #475569; z-index: 20; height: 45px;
         }
@@ -66,37 +65,15 @@
             border-right: 2px solid var(--primary) !important; text-align: center;
         }
         tbody td { border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); height: 48px; }
-        tbody td input { width: 100%; height: 100%; padding: 0 8px; border: none; outline: none; font-size: 0.75rem; font-weight: 700; background: transparent; }
+        tbody td input, tbody td select { width: 100%; height: 100%; padding: 0 8px; border: none; outline: none; font-size: 0.7rem; font-weight: 700; background: transparent; font-family: inherit; }
         
-        /* Highlight edited rows visually */
         .row-dirty { background-color: #fffbeb !important; }
+        .status-pill { font-size: 0.6rem; padding: 4px 8px; border-radius: 4px; font-weight: 800; }
 
-        .bulk-footer { 
-            padding: 10px; border-top: 2px solid var(--primary); 
-            display: flex; align-items: center; gap: 6px; background: white; 
-        }
-        .btn { 
-            height: 44px; border-radius: 8px; font-weight: 800; text-transform: uppercase; 
-            cursor: pointer; border: none; display: flex; 
-            align-items: center; justify-content: center; text-decoration: none;
-        }
-        .btn-page { background: #f1f5f9; color: var(--primary); border: 1px solid var(--excel-border); width: 55px; font-size: 0.6rem; }
-        .btn-page:disabled { opacity: 0.3; cursor: not-allowed; }
+        .bulk-footer { padding: 10px; border-top: 2px solid var(--primary); display: flex; align-items: center; gap: 6px; background: white; }
+        .btn { height: 44px; border-radius: 8px; font-weight: 800; text-transform: uppercase; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; text-decoration: none; }
         .btn-save { background: var(--primary); color: white; flex: 1; font-size: 0.7rem; }
         .btn-back { background: #64748b; color: white; width: 150px; font-size: 0.65rem; }
-
-        .dictionary-section { background: white; border: 2px solid var(--primary); border-radius: 12px; padding: 12px; margin-bottom: 20px; flex-shrink: 0; }
-        .dict-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .dict-box { min-width: 0; display: flex; flex-direction: column; }
-        .dict-box h4 { margin: 0 0 8px 0; font-size: 0.65rem; color: var(--primary); font-weight: 800; display: flex; justify-content: space-between; }
-        .dict-input-row { display: flex; gap: 6px; margin-bottom: 8px; width: 100%; }
-        .dict-input-row input { flex: 1; height: 38px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--excel-border); font-size: 0.75rem; font-weight: 700; }
-        .btn-dict-add { width: 60px; flex-shrink: 0; height: 38px; border-radius: 6px; border: none; background: var(--accent); color: white; font-weight: 800; font-size: 0.65rem; cursor: pointer; }
-        .dict-scroll { height: 110px; overflow-y: auto; border: 1px solid var(--excel-border); border-radius: 6px; background: #f1f5f9; }
-        .dict-table { width: 100%; border-collapse: collapse; }
-        .dict-table td { padding: 8px; font-size: 0.7rem; font-weight: 700; border-bottom: 1px solid #edf2f7; text-transform: uppercase; }
-        .del-btn { color: var(--danger); cursor: pointer; text-align: right; padding-right: 12px; font-weight: 900; }
-        @media (max-width: 600px) { .dict-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 
@@ -108,16 +85,14 @@
         <div class="bulk-header">
             <div class="header-top">
                 <h2>BATCH EDITOR</h2>
-                <div class="top-actions">
-                    <select id="cat-filter" class="cat-select" onchange="resetAndLoad()">
-                        <option value="" disabled selected>CHOOSE CATEGORY</option>
-                        <option value="ALL">ALL CATEGORY</option>
-                    </select>
-                </div>
+                <select id="cat-filter" class="cat-select" onchange="resetAndLoad()">
+                    <option value="" disabled selected>CHOOSE CATEGORY</option>
+                    <option value="ALL">ALL CATEGORY</option>
+                </select>
             </div>
             <div class="search-row">
-                <input type="text" id="table-search" class="search-input" placeholder="SEARCH SKU OR NAME..." oninput="autoSearch()">
-                <div id="count-label" class="result-count"></div>
+                <input type="text" id="table-search" class="search-input" placeholder="SEARCH ITEM CODE OR DESCRIPTION..." oninput="autoSearch()">
+                <div id="count-label" class="result-count" style="font-size: 0.6rem; font-weight: 800; color: var(--accent); margin-top: 4px;"></div>
             </div>
         </div>
         <div class="grid-area">
@@ -125,44 +100,27 @@
                 <thead>
                     <tr>
                         <th class="sticky-col">#</th>
-                        <th style="width: 160px;">SKU (LOCKED)</th>
-                        <th>DESCRIPTION</th>
-                        <th style="width: 130px;">BRAND</th>
-                        <th style="width: 80px;">UOM</th>
+                        <th style="width: 100px;">STATUS</th>
+                        <th style="width: 140px;">CATEGORY</th>
                         <th style="width: 120px;">LOCATION</th>
+                        <th style="width: 130px;">ITEM CODE</th>
+                        <th style="width: 250px;">ITEM DESCRIPTION</th>
+                        <th style="width: 120px;">BRAND</th>
+                        <th style="width: 90px;">STOCKS</th>
+                        <th style="width: 80px;">UOM</th>
+                        <th style="width: 110px;">UNIT PRICE</th>
                     </tr>
                 </thead>
                 <tbody id="bulk-body">
-                    <tr><td colspan="6" style="text-align:center; padding:40px; color:#64748b; font-weight:600; font-size:0.8rem;">SELECT A CATEGORY TO LOAD DATA</td></tr>
+                    <tr><td colspan="10" style="text-align:center; padding:40px; color:#64748b; font-weight:600; font-size:0.8rem;">SELECT A CATEGORY TO LOAD DATA</td></tr>
                 </tbody>
             </table>
         </div>
         <div class="bulk-footer">
-            <a href="dashboard.html" class="btn btn-back">EXIT TO DASHBOARD</a>
+            <a href="dashboard.html" class="btn btn-back">EXIT</a>
             <button class="btn btn-save" id="save-btn" onclick="saveChanges()" disabled>UPDATE ALL CHANGES</button>
-            <button class="btn btn-page" id="prev-btn" onclick="changePage(-1)" disabled>PREV</button>
-            <button class="btn btn-page" id="next-btn" onclick="changePage(1)" disabled>NEXT</button>
-        </div>
-    </div>
-
-    <div class="dictionary-section">
-        <div class="dict-grid">
-            <div class="dict-box">
-                <h4>UOM MASTER <span id="uom-count" style="color:var(--accent)">0</span></h4>
-                <div class="dict-input-row">
-                    <input type="text" id="new-uom" placeholder="NEW UOM">
-                    <button class="btn-dict-add" onclick="addSystemItem('uom')">ADD</button>
-                </div>
-                <div class="dict-scroll"><table class="dict-table" id="uom-table-list"></table></div>
-            </div>
-            <div class="dict-box">
-                <h4>LOCATION MASTER <span id="loc-count" style="color:var(--accent)">0</span></h4>
-                <div class="dict-input-row">
-                    <input type="text" id="new-loc" placeholder="NEW LOC">
-                    <button class="btn-dict-add" onclick="addSystemItem('loc')">ADD</button>
-                </div>
-                <div class="dict-scroll"><table class="dict-table" id="loc-table-list"></table></div>
-            </div>
+            <button class="btn btn-page" id="prev-btn" style="width:60px" onclick="changePage(-1)" disabled>PREV</button>
+            <button class="btn btn-page" id="next-btn" style="width:60px" onclick="changePage(1)" disabled>NEXT</button>
         </div>
     </div>
 </main>
@@ -170,13 +128,11 @@
 <script>
     const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
-    
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
     let searchTimer;
     let currentPage = 0;
     const itemsPerPage = 50;
-    let currentUOMs = [];
-    let currentLocs = [];
 
     async function init() {
         const { data } = await _supabase.from('inventory_categories').select('*').order('name');
@@ -186,7 +142,6 @@
             opt.value = c.name; opt.textContent = c.name.toUpperCase();
             filter.appendChild(opt);
         });
-        refreshSystemLists();
     }
 
     function autoSearch() {
@@ -194,37 +149,8 @@
         searchTimer = setTimeout(() => { resetAndLoad(); }, 300);
     }
 
-    function resetAndLoad() {
-        currentPage = 0;
-        loadInventory();
-    }
-
-    function changePage(step) {
-        currentPage += step;
-        loadInventory();
-    }
-
-    async function refreshSystemLists() {
-        const { data: u } = await _supabase.from('inventory_uom').select('name').order('name');
-        const { data: l } = await _supabase.from('inventory_locations').select('name').order('name');
-        currentUOMs = u || [];
-        currentLocs = l || [];
-        renderDict('uom-table-list', currentUOMs, 'uom');
-        renderDict('loc-table-list', currentLocs, 'loc');
-    }
-
-    function renderDict(id, list, type) {
-        const table = document.getElementById(id);
-        const countSpan = document.getElementById(type + '-count');
-        countSpan.innerText = list.length;
-        if (list.length === 0) {
-            table.innerHTML = '<tr><td style="color:#94a3b8; text-align:center; padding:10px;">EMPTY</td></tr>';
-            return;
-        }
-        table.innerHTML = list.map(i => `
-            <tr><td>${i.name}</td><td class="del-btn" onclick="deleteItem('${type}','${i.name}')">✕</td></tr>
-        `).join('');
-    }
+    function resetAndLoad() { currentPage = 0; loadInventory(); }
+    function changePage(step) { currentPage += step; loadInventory(); }
 
     async function loadInventory() {
         const category = document.getElementById('cat-filter').value;
@@ -233,7 +159,7 @@
         const countLabel = document.getElementById('count-label');
 
         if (!category && !searchVal) return;
-        b.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">LOADING...</td></tr>';
+        b.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;">LOADING...</td></tr>';
 
         let query = _supabase.from('inventory').select('*', { count: 'exact' });
         if(category && category !== "ALL") query = query.eq('category', category);
@@ -241,9 +167,7 @@
 
         const from = currentPage * itemsPerPage;
         const to = from + itemsPerPage - 1;
-        query = query.order('item_name').range(from, to);
-
-        const { data, count } = await query;
+        const { data, count } = await query.order('item_name').range(from, to);
 
         if(data && data.length > 0) {
             b.innerHTML = '';
@@ -251,95 +175,53 @@
             data.forEach((item, i) => {
                 const tr = document.createElement('tr');
                 tr.dataset.id = item.id;
-                // Store original values to detect changes
-                tr.dataset.origName = item.item_name;
-                tr.dataset.origBrand = item.brand || '';
-                tr.dataset.origUom = item.uom;
-                tr.dataset.origLoc = item.location;
+                const status = (item.quantity || 0) <= 0 ? 'OUT' : ((item.quantity || 0) <= 10 ? 'LOW' : 'GOOD');
+                const statusColor = status === 'OUT' ? '#ef4444' : (status === 'LOW' ? '#f59e0b' : '#10b981');
 
-                tr.innerHTML = `<td class="sticky-col" style="color:#94a3b8; font-weight:800; font-size:0.6rem;">${from + i + 1}</td>
-                    <td><input type="text" value="${item.sku}" readonly style="background:#f8fafc; color:#64748b;"></td>
-                    <td><input type="text" class="row-name" value="${item.item_name}" oninput="markDirty(this)"></td>
+                tr.innerHTML = `
+                    <td class="sticky-col" style="color:#94a3b8; font-size:0.6rem;">${from + i + 1}</td>
+                    <td style="text-align:center;"><span class="status-pill" style="background:${statusColor}; color:white;">${status}</span></td>
+                    <td><input type="text" class="row-cat" value="${item.category || ''}" oninput="markDirty(this)"></td>
+                    <td><input type="text" class="row-loc" value="${item.location || ''}" oninput="markDirty(this)"></td>
+                    <td><input type="text" value="${item.sku || ''}" readonly style="background:#f1f5f9; color:#64748b;"></td>
+                    <td><input type="text" class="row-name" value="${item.item_name || ''}" oninput="markDirty(this)"></td>
                     <td><input type="text" class="row-brand" value="${item.brand || ''}" oninput="markDirty(this)"></td>
-                    <td><input type="text" class="row-uom" value="${item.uom}" oninput="markDirty(this)"></td>
-                    <td><input type="text" class="row-loc" value="${item.location}" oninput="markDirty(this)"></td>`;
+                    <td><input type="number" value="${item.quantity || 0}" readonly style="background:#f1f5f9; color:#64748b;"></td>
+                    <td><input type="text" class="row-uom" value="${item.uom || ''}" oninput="markDirty(this)"></td>
+                    <td><input type="number" class="row-price" value="${item.unit_price || 0}" step="0.01" oninput="markDirty(this)"></td>
+                `;
                 b.appendChild(tr);
             });
             document.getElementById('save-btn').disabled = false;
             document.getElementById('prev-btn').disabled = currentPage === 0;
             document.getElementById('next-btn').disabled = to + 1 >= count;
         } else {
-            b.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">NO RESULTS FOUND</td></tr>';
-            document.getElementById('save-btn').disabled = true;
-            document.getElementById('prev-btn').disabled = true;
-            document.getElementById('next-btn').disabled = true;
-            countLabel.innerText = "";
+            b.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;">NO DATA</td></tr>';
         }
     }
 
-    function markDirty(input) {
-        input.closest('tr').classList.add('row-dirty');
-    }
+    function markDirty(input) { input.closest('tr').classList.add('row-dirty'); }
 
     async function saveChanges() {
         const btn = document.getElementById('save-btn');
-        const activeUser = (localStorage.getItem('activeAdmin') || 'ADMIN').toUpperCase();
         const rows = document.querySelectorAll('#bulk-body tr.row-dirty');
-
-        if (rows.length === 0) return alert("NO CHANGES DETECTED");
+        if (rows.length === 0) return alert("NO CHANGES");
 
         btn.disabled = true; btn.innerText = "SAVING...";
-        const batchRef = "EDT-" + Date.now().toString().slice(-6);
-        let successCount = 0;
-
         try {
             for (const row of rows) {
-                const newName = row.querySelector('.row-name').value.trim().toUpperCase();
-                const newBrand = row.querySelector('.row-brand').value.trim().toUpperCase();
-                const newUom = row.querySelector('.row-uom').value.trim().toUpperCase();
-                const newLoc = row.querySelector('.row-loc').value.trim().toUpperCase();
-
-                const { error } = await _supabase.from('inventory').update({
-                    item_name: newName, brand: newBrand, uom: newUom, location: newLoc
+                await _supabase.from('inventory').update({
+                    category: row.querySelector('.row-cat').value.trim().toUpperCase(),
+                    location: row.querySelector('.row-loc').value.trim().toUpperCase(),
+                    item_name: row.querySelector('.row-name').value.trim().toUpperCase(),
+                    brand: row.querySelector('.row-brand').value.trim().toUpperCase(),
+                    uom: row.querySelector('.row-uom').value.trim().toUpperCase(),
+                    unit_price: parseFloat(row.querySelector('.row-price').value) || 0
                 }).eq('id', row.dataset.id);
-                
-                if (!error) successCount++;
             }
-
-            // Record high-level audit log
-            await _supabase.from('activity_logs').insert([{
-                type: 'EDIT',
-                reference_id: batchRef,
-                performed_by: activeUser,
-                summary: `UPDATED ${successCount} ITEMS IN BATCH`.toUpperCase()
-            }]);
-
-            alert(`SUCCESSFULLY UPDATED ${successCount} ITEMS`);
-            window.location.href = 'inventory.html'; 
-
-        } catch (err) {
-            alert("UPDATE ERROR: " + err.message);
-        } finally {
-            btn.disabled = false; 
-            btn.innerText = "UPDATE ALL CHANGES";
-        }
-    }
-
-    async function addSystemItem(type) {
-        const inp = document.getElementById(type === 'uom' ? 'new-uom' : 'new-loc');
-        const val = inp.value.trim().toUpperCase();
-        if(!val) return;
-        const tableName = (type === 'uom') ? 'inventory_uom' : 'inventory_locations';
-        const { error } = await _supabase.from(tableName).insert([{ name: val }]);
-        if (error) alert("ALREADY EXISTS OR ERROR");
-        else { inp.value = ""; refreshSystemLists(); }
-    }
-
-    async function deleteItem(type, name) {
-        if(!confirm(`DELETE "${name}"?`)) return;
-        const tableName = (type === 'uom') ? 'inventory_uom' : 'inventory_locations';
-        await _supabase.from(tableName).delete().eq('name', name);
-        refreshSystemLists();
+            alert("UPDATED SUCCESSFULLY");
+            location.reload();
+        } catch (e) { alert("ERROR: " + e.message); btn.disabled = false; }
     }
 
     window.onload = init;
