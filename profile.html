@@ -3,94 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Profile | EasiStock</title>
+    <title>User Profile | EasiStock</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --primary: #0f172a;
+            --accent: #0081ff;
+            --success: #10b981;
+            --border-main: #e2e8f0;
+        }
+
+        body {
+            margin: 0; font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
+            height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        .main-container {
+            flex: 1; padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto;
+        }
+
+        /* PROFILE CARD TOP */
+        .profile-card {
+            background: white; border-radius: 16px; border: 3px solid var(--primary);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; flex-shrink: 0;
+        }
+
+        .card-header { background: var(--primary); color: white; padding: 20px; display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 50px; height: 50px; background: var(--accent); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.5rem; border: 2px solid white; }
+        .header-text h2 { margin: 0; font-size: 1rem; text-transform: uppercase; }
+        .header-text span { font-size: 0.6rem; font-weight: 700; opacity: 0.8; }
+
+        .card-body { padding: 15px; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .info-item { display: flex; flex-direction: column; }
+        .label { font-size: 0.55rem; font-weight: 800; color: #64748b; text-transform: uppercase; }
+        .value { font-size: 0.75rem; font-weight: 700; color: var(--primary); }
+
+        input { width: 100%; padding: 10px; margin-bottom: 8px; border: 1.5px solid var(--border-main); border-radius: 8px; font-weight: 700; outline: none; box-sizing: border-box; font-size: 0.8rem; }
+
+        .btn-group { display: flex; gap: 8px; }
+        .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: 800; font-size: 0.7rem; cursor: pointer; text-transform: uppercase; }
+        .btn-save { background: var(--accent); color: white; }
+        .btn-back { background: var(--primary); color: white; }
+        .btn-logout { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; }
+
+        /* ACTIVITY TABLE SECTION */
+        .activity-section {
+            background: white; border: 3px solid var(--primary); border-radius: 16px;
+            display: flex; flex-direction: column; flex: 1; overflow: hidden;
+        }
+        .table-header { background: #f1f5f9; padding: 10px; font-size: 0.65rem; font-weight: 800; color: var(--primary); border-bottom: 2px solid var(--primary); text-transform: uppercase; }
+        .scroll-area { flex: 1; overflow: auto; }
         
-        :root { --primary: #0f172a; --accent: #0081ff; }
-
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%); 
-            margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center;
-        }
-
-        .profile-card { 
-            background: white; border: 2px solid var(--primary); 
-            border-radius: 20px; padding: 30px; width: 90%; max-width: 350px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center;
-        }
-
-        .user-icon { 
-            width: 60px; height: 60px; background: #f1f5f9; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 15px; font-size: 1.5rem; border: 2px solid var(--primary);
-        }
-
-        h2 { margin: 0; color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 1.2rem; }
-        p { color: #64748b; font-size: 0.8rem; font-weight: 600; margin-bottom: 25px; }
-
-        input { 
-            width: 100%; padding: 14px; margin-bottom: 15px; border: 2px solid #cbd5e1; 
-            border-radius: 12px; box-sizing: border-box; font-weight: 700; outline: none; text-align: center;
-        }
-        input:focus { border-color: var(--accent); }
-
-        .btn-save { 
-            width: 100%; padding: 14px; background: var(--primary); color: white; 
-            border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase;
-        }
-
-        .btn-back { 
-            display: block; margin-top: 15px; text-decoration: none; color: #64748b; 
-            font-size: 0.75rem; font-weight: 700; 
-        }
+        table { width: 100%; border-collapse: collapse; min-width: 400px; }
+        th { position: sticky; top: 0; background: #f8fafc; padding: 10px; font-size: 0.55rem; text-transform: uppercase; border-bottom: 1px solid var(--border-main); text-align: left; }
+        td { padding: 10px; font-size: 0.7rem; font-weight: 600; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
+        tr:hover td { background: #f0f9ff; }
+        
+        .type-tag { padding: 2px 6px; border-radius: 4px; font-size: 0.55rem; font-weight: 800; background: #e2e8f0; }
     </style>
 </head>
 <body>
 
+<div class="main-container">
     <div class="profile-card">
-        <div class="user-icon">👤</div>
-        <h2 id="display-username">USER</h2>
-        <p>Update Your Password</p>
-
-        <input type="text" id="new-password" placeholder="New Password">
-        <input type="text" id="confirm-password" placeholder="Confirm New Password">
-
-        <button class="btn-save" onclick="updatePassword()">Update Password</button>
-        
-        <a href="inventory.html" class="btn-back">← Back to Inventory</a>
+        <div class="card-header">
+            <div class="avatar" id="u-init">?</div>
+            <div class="header-text">
+                <h2 id="u-name">---</h2>
+                <span id="u-role">---</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="info-grid">
+                <div class="info-item"><span class="label">Staff ID</span><span class="value" id="u-id">---</span></div>
+                <div class="info-item"><span class="label">Session</span><span class="value" style="color:var(--success)">Active</span></div>
+            </div>
+            
+            <input type="password" id="new-pass" placeholder="NEW PASSWORD">
+            <input type="password" id="conf-pass" placeholder="CONFIRM PASSWORD">
+            
+            <div class="btn-group">
+                <button class="btn btn-save" onclick="updatePass()">Update</button>
+                <button class="btn btn-back" onclick="goHome()" id="back-txt">Back</button>
+                <button class="btn btn-logout" onclick="logout()">Logout</button>
+            </div>
+        </div>
     </div>
 
-    <script>
-        const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <div class="activity-section">
+        <div class="table-header">My Personal Activity Logs</div>
+        <div class="scroll-area">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Action</th>
+                        <th>Summary</th>
+                        <th>Ref #</th>
+                    </tr>
+                </thead>
+                <tbody id="log-table-body">
+                    <tr><td colspan="4" style="text-align:center; padding:20px; color:#94a3b8;">Loading logs...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-        // Get the logged-in user from localStorage
-        const currentUser = localStorage.getItem('activeAdmin');
-        document.getElementById('display-username').innerText = currentUser || "GUEST";
+<script>
+    const _supabase = supabase.createClient('https://crruounuhtfzyssyhgcc.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg');
 
-        async function updatePassword() {
-            const pass = document.getElementById('new-password').value.trim();
-            const confirm = document.getElementById('confirm-password').value.trim();
+    const activeUser = localStorage.getItem('activeAdmin');
+    const userRole = localStorage.getItem('userRole');
 
-            if (!pass || !confirm) return alert("Please fill in both fields.");
-            if (pass !== confirm) return alert("Passwords do not match!");
+    async function init() {
+        if (!activeUser) { location.href = 'index.html'; return; }
+        
+        document.getElementById('u-name').innerText = activeUser;
+        document.getElementById('u-init').innerText = activeUser.charAt(0);
+        document.getElementById('u-role').innerText = userRole === 'admin' ? 'Administrator' : 'Staff Member';
+        document.getElementById('u-id').innerText = `STF-${activeUser.length}${activeUser.charCodeAt(0)}`;
+        document.getElementById('back-txt').innerText = userRole === 'admin' ? 'Dashboard' : 'Inventory';
+        
+        loadLogs();
+    }
 
-            const { error } = await _supabase
-                .from('staff_accounts')
-                .update({ password: pass })
-                .eq('username', currentUser);
+    async function loadLogs() {
+        const { data, error } = await _supabase
+            .from('activity_logs')
+            .select('*')
+            .eq('performed_by', activeUser)
+            .order('created_at', { ascending: false })
+            .limit(20);
 
-            if (error) {
-                alert("Error updating password.");
-            } else {
-                alert("Password updated successfully!");
-                window.location.href = 'inventory.html';
-            }
+        const tbody = document.getElementById('log-table-body');
+        if (error || !data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">No activity recorded.</td></tr>';
+            return;
         }
-    </script>
+
+        tbody.innerHTML = data.map(log => `
+            <tr onclick="viewTx('${log.reference_id}')">
+                <td style="white-space:nowrap; color:#64748b;">${new Date(log.created_at).toLocaleDateString()}</td>
+                <td><span class="type-tag">${log.type}</span></td>
+                <td style="color:var(--primary); text-transform:uppercase;">${log.summary}</td>
+                <td style="font-family:monospace; font-weight:800; color:var(--accent);">${log.reference_id || '---'}</td>
+            </tr>
+        `).join('');
+    }
+
+    function viewTx(ref) {
+        if (!ref || ref === 'null') return;
+        // Redirecting to transaction.html with the reference as a URL parameter
+        window.location.href = `transaction.html?ref=${ref}`;
+    }
+
+    function goHome() {
+        window.location.href = (userRole === 'admin') ? 'dashboard.html' : 'inventory.html';
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'index.html';
+    }
+
+    async function updatePass() {
+        const p1 = document.getElementById('new-pass').value.trim();
+        const p2 = document.getElementById('conf-pass').value.trim();
+        if(!p1 || p1 !== p2) return alert("Passwords do not match!");
+        
+        const { error } = await _supabase.from('staff_accounts').update({ password: p1 }).eq('username', activeUser);
+        if(error) alert("Error updating.");
+        else alert("Password updated!");
+    }
+
+    init();
+</script>
 </body>
 </html>
