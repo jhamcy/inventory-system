@@ -15,12 +15,13 @@
             --warning: #f59e0b;
             --danger: #ef4444;
             --excel-border: #cbd5e1;
-            --sidebar-width: 80px;
+            --sidebar-width: 100px; /* Increased for desktop labels */
         }
 
         html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; }
         body { font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%); display: flex; flex-direction: column; }
 
+        /* Navbar remains consistent */
         .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 1000; }
         
         .nav-logo-btn { 
@@ -28,30 +29,79 @@
             text-transform: uppercase; padding: 8px 16px; border-radius: 8px; border: none;
             cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 0px #0056aa;
         }
-        .nav-logo-btn:active { transform: translateY(2px); box-shadow: 0 0px 0px transparent; }
         
         .user-info { display: flex; flex-direction: column; align-items: flex-end; margin-right: 15px; cursor: pointer; padding: 5px; border-radius: 8px; }
-        .user-info:hover { background: rgba(255,255,255,0.1); }
         .user-label { font-size: 0.55rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; }
         .user-name { font-size: 0.75rem; color: white; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
         .online-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
 
+        /* Main Content Layout - Mobile First */
         .main-content { flex: 1; display: flex; flex-direction: column; padding: 10px; overflow: hidden; }
 
         .action-bar-container { padding: 5px 0 15px 0; display: flex; justify-content: center; flex-shrink: 0; }
         .toggle-group { display: flex; width: 100%; max-width: 550px; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        
         .btn-toggle { 
             flex: 1; padding: 10px 0; border: none; border-right: 1px solid rgba(255,255,255,0.15); 
             cursor: pointer; color: rgba(255,255,255,0.6); background: var(--primary); 
             font-size: 0.65rem; font-weight: 800; text-transform: uppercase; 
-            display: none; /* Hidden by default, shown by permissions */
-            flex-direction: column; align-items: center; gap: 4px; 
+            display: none; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s;
         }
         .btn-toggle.active { background: var(--accent) !important; color: white !important; display: flex !important; }
+        .btn-toggle:hover { color: white; background: rgba(255,255,255,0.1); }
 
-        .search-container { margin-bottom: 8px; width: 100%; max-width: 900px; margin-left: auto; margin-right: auto; position: relative; flex-shrink: 0; }
-        .search-input { width: 100%; padding: 10px 40px; border-radius: 10px; border: 2px solid var(--primary); font-size: 0.9rem; font-weight: 700; box-sizing: border-box; outline: none; text-transform: uppercase; }
-        .search-icon { position: absolute; left: 15px; top: 10px; color: var(--primary); font-size: 1rem; }
+        /* Desktop Specific Styles */
+        @media (min-width: 1024px) {
+            .main-content { flex-direction: row; padding: 0; }
+            
+            /* Sidebar style for Desktop */
+            .action-bar-container { 
+                width: var(--sidebar-width); 
+                height: 100%; 
+                background: var(--primary); 
+                padding: 0; 
+                flex-direction: column; 
+                justify-content: flex-start;
+                border-right: 1px solid rgba(255,255,255,0.1);
+            }
+            
+            .toggle-group { 
+                flex-direction: column; 
+                height: 100%; 
+                max-width: none; 
+                border: none; 
+                border-radius: 0; 
+                background: transparent;
+                box-shadow: none;
+            }
+
+            .btn-toggle { 
+                border-right: none; 
+                border-bottom: 1px solid rgba(255,255,255,0.1); 
+                padding: 25px 0; 
+                width: 100%; 
+                font-size: 0.75rem;
+                display: flex; /* Force display on desktop for allowed items */
+            }
+
+            .right-panel { 
+                flex: 1; 
+                display: flex; 
+                flex-direction: column; 
+                padding: 25px; 
+                overflow: hidden; 
+                background: rgba(255,255,255,0.4); /* Soften the background */
+            }
+
+            .search-container { max-width: 100%; margin-bottom: 15px; }
+            .table-scroll-area { border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        }
+
+        /* Elements inside right-panel */
+        .right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .search-container { margin-bottom: 8px; width: 100%; position: relative; flex-shrink: 0; }
+        .search-input { width: 100%; padding: 12px 45px; border-radius: 10px; border: 2px solid var(--primary); font-size: 0.9rem; font-weight: 700; box-sizing: border-box; outline: none; text-transform: uppercase; }
+        .search-icon { position: absolute; left: 15px; top: 12px; color: var(--primary); font-size: 1.1rem; }
 
         .table-scroll-area { flex: 1; overflow: auto; background: white; border: 2px solid var(--primary); border-radius: 12px 12px 0 0; }
         table { border-collapse: collapse; width: max-content; min-width: 100%; table-layout: fixed; }
@@ -69,17 +119,9 @@
         .bg-low { background: var(--warning); }
         .bg-out { background: var(--danger); }
 
-        .pagination-footer { height: 60px; background: white; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--primary); border-radius: 0 0 12px 12px; }
+        .pagination-footer { height: 60px; background: white; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--primary); border-radius: 0 0 12px 12px; flex-shrink: 0; }
         .nav-btns { width: 80px; height: 38px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.7rem; }
         .nav-btns:disabled { background: #cbd5e1; cursor: not-allowed; }
-
-        @media (min-width: 1024px) {
-            .main-content { flex-direction: row; padding: 0; }
-            .action-bar-container { width: var(--sidebar-width); height: 100%; background: var(--primary); padding: 0; flex-direction: column; justify-content: flex-start; }
-            .toggle-group { flex-direction: column; height: 100%; max-width: none; border: none; border-radius: 0; }
-            .btn-toggle { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 25px 0; width: 100%; border-radius: 0; }
-            .right-panel { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow: hidden; }
-        }
     </style>
 </head>
 <body>
@@ -143,6 +185,7 @@
     </div>
 
     <script>
+        // Your existing script remains identical
         const _supabase = supabase.createClient('https://crruounuhtfzyssyhgcc.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg');
         
         let currentPage = 1, currentSearchQuery = "";
@@ -152,13 +195,9 @@
 
         function applyPermissions() {
             if (!activeUser) { location.href = 'index.html'; return; }
-            
-            // 1. Set User UI
             document.getElementById('active-user').innerText = activeUser;
             document.getElementById('user-role-label').innerText = userRole === 'admin' ? 'System Admin' : 'Staff Member';
 
-            // 2. Filter Sidebar Buttons based on userPermissions
-            // Admins usually see everything, Staff only see what's in their array
             document.querySelectorAll('.btn-toggle').forEach(btn => {
                 const page = btn.getAttribute('data-page');
                 if (userRole === 'admin' || userPermissions.includes(page)) {
@@ -169,24 +208,17 @@
             });
         }
 
-        function goHome() { 
-            window.location.href = (userRole === 'admin') ? 'dashboard.html' : 'inventory.html';
-        }
+        function goHome() { window.location.href = (userRole === 'admin') ? 'dashboard.html' : 'inventory.html'; }
 
         async function fetchInventory() {
             const tbody = document.getElementById('inventory-body');
             try {
                 let query = _supabase.from('inventory').select('*', { count: 'exact' });
-
                 if (currentSearchQuery) {
                     query = query.or(`item_name.ilike.%${currentSearchQuery}%,sku.ilike.%${currentSearchQuery}%,brand.ilike.%${currentSearchQuery}%,location.ilike.%${currentSearchQuery}%`);
                 }
-
                 const from = (currentPage - 1) * 25;
-                const to = from + 24;
-
-                const { data, count, error } = await query.order('location').range(from, to);
-
+                const { data, count, error } = await query.order('location').range(from, from + 24);
                 if (error) throw error;
                 renderTable(data || [], count || 0);
             } catch (err) {
@@ -200,19 +232,12 @@
                 tbody.innerHTML = `<tr><td colspan="10" style="padding:20px;">No items found.</td></tr>`;
                 return;
             }
-
             tbody.innerHTML = data.map((item, i) => {
                 const qty = item.quantity || 0;
                 const min = item.min_qty || 10;
                 const price = item.unit_price ? parseFloat(item.unit_price).toLocaleString(undefined, {minimumFractionDigits: 2}) : '0.00';
-
-                let statusBadge = '';
-                if (qty <= 0) statusBadge = '<span class="status-badge bg-out">OUT</span>';
-                else if (qty < min) statusBadge = '<span class="status-badge bg-low">LOW</span>';
-                else statusBadge = '<span class="status-badge bg-healthy">GOOD</span>';
-
-                return `
-                <tr onclick="selectRow(this)">
+                let statusBadge = qty <= 0 ? '<span class="status-badge bg-out">OUT</span>' : (qty < min ? '<span class="status-badge bg-low">LOW</span>' : '<span class="status-badge bg-healthy">GOOD</span>');
+                return `<tr onclick="selectRow(this)">
                     <td class="sticky-col">${((currentPage-1)*25)+i+1}</td>
                     <td>${statusBadge}</td>
                     <td>${item.category || '-'}</td>
@@ -222,11 +247,8 @@
                     <td>${item.brand || '-'}</td>
                     <td style="font-weight:800;">${qty}</td>
                     <td><span style="font-size:0.6rem; background:#64748b; color:white; padding:2px 4px; border-radius:3px;">${item.uom || 'PCS'}</span></td>
-                    <td style="color:var(--success); font-weight:800;">₱${price}</td>
-                </tr>
-                `;
+                    <td style="color:var(--success); font-weight:800;">₱${price}</td></tr>`;
             }).join('');
-
             const totalPages = Math.ceil(total / 25) || 1;
             document.getElementById('page-info').innerText = `Page ${currentPage}/${totalPages} (${total} SKUs)`;
             document.getElementById('prevBtn').disabled = (currentPage === 1);
@@ -236,11 +258,7 @@
         function handleSearch() { currentSearchQuery = document.getElementById('searchInput').value; currentPage = 1; fetchInventory(); }
         function changePage(p) { if(p > 0) { currentPage = p; fetchInventory(); document.querySelector('.table-scroll-area').scrollTop = 0; } }
         function handleLogout() { localStorage.clear(); location.href = 'index.html'; }
-        
-        function selectRow(el) {
-            document.querySelectorAll('#inventory-body tr').forEach(r => r.classList.remove('selected-row'));
-            el.classList.add('selected-row');
-        }
+        function selectRow(el) { document.querySelectorAll('#inventory-body tr').forEach(r => r.classList.remove('selected-row')); el.classList.add('selected-row'); }
 
         applyPermissions();
         fetchInventory();
