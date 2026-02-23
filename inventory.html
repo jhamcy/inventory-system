@@ -23,22 +23,11 @@
 
         .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 1000; }
         
-        /* UPDATED: EasiStock Brand as a Button */
         .nav-logo-btn { 
-            background: var(--accent); 
-            color: white; 
-            font-weight: 800; 
-            font-size: 0.9rem; 
-            text-transform: uppercase; 
-            text-decoration: none; 
-            padding: 8px 16px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer; 
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 0px #0056aa;
+            background: var(--accent); color: white; font-weight: 800; font-size: 0.9rem; 
+            text-transform: uppercase; padding: 8px 16px; border-radius: 8px; border: none;
+            cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 0px #0056aa;
         }
-        .nav-logo-btn:hover { background: #1a8eff; transform: translateY(-1px); }
         .nav-logo-btn:active { transform: translateY(2px); box-shadow: 0 0px 0px transparent; }
         
         .user-info { display: flex; flex-direction: column; align-items: flex-end; margin-right: 15px; cursor: pointer; padding: 5px; border-radius: 8px; }
@@ -51,9 +40,14 @@
 
         .action-bar-container { padding: 5px 0 15px 0; display: flex; justify-content: center; flex-shrink: 0; }
         .toggle-group { display: flex; width: 100%; max-width: 550px; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .btn-toggle { flex: 1; padding: 10px 0; border: none; border-right: 1px solid rgba(255,255,255,0.15); cursor: pointer; color: rgba(255,255,255,0.6); background: var(--primary); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .btn-toggle:last-child { border-right: none; }
-        .btn-toggle.active { background: var(--accent) !important; color: white !important; }
+        .btn-toggle { 
+            flex: 1; padding: 10px 0; border: none; border-right: 1px solid rgba(255,255,255,0.15); 
+            cursor: pointer; color: rgba(255,255,255,0.6); background: var(--primary); 
+            font-size: 0.65rem; font-weight: 800; text-transform: uppercase; 
+            display: none; /* Hidden by default, shown by permissions */
+            flex-direction: column; align-items: center; gap: 4px; 
+        }
+        .btn-toggle.active { background: var(--accent) !important; color: white !important; display: flex !important; }
 
         .search-container { margin-bottom: 8px; width: 100%; max-width: 900px; margin-left: auto; margin-right: auto; position: relative; flex-shrink: 0; }
         .search-input { width: 100%; padding: 10px 40px; border-radius: 10px; border: 2px solid var(--primary); font-size: 0.9rem; font-weight: 700; box-sizing: border-box; outline: none; text-transform: uppercase; }
@@ -62,27 +56,26 @@
         .table-scroll-area { flex: 1; overflow: auto; background: white; border: 2px solid var(--primary); border-radius: 12px 12px 0 0; }
         table { border-collapse: collapse; width: max-content; min-width: 100%; table-layout: fixed; }
         
-        thead th { position: sticky; top: 0; z-index: 20; background: #f1f5f9; height: 45px; font-size: 0.7rem; font-weight: 800; border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border); color: var(--primary); text-transform: uppercase; position: relative; user-select: none; }
-        
+        thead th { position: sticky; top: 0; z-index: 20; background: #f1f5f9; height: 45px; font-size: 0.7rem; font-weight: 800; border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border); color: var(--primary); text-transform: uppercase; }
         .sticky-col { position: sticky; left: 0; z-index: 30; background: #f1f5f9 !important; width: 45px !important; border-right: 2px solid var(--primary) !important; }
 
         tbody td { height: 48px; padding: 0 8px; border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); font-size: 0.8rem; text-align: center; white-space: nowrap; overflow: hidden; font-weight: 600; color: #334155; text-transform: uppercase; }
         tbody tr:hover { background-color: #f0f9ff; cursor: pointer; }
         tbody tr.selected-row { background-color: var(--accent) !important; }
-        tbody tr.selected-row td { color: white !important; border-right-color: rgba(255,255,255,0.2) !important; }
+        tbody tr.selected-row td { color: white !important; }
         
         .status-badge { padding: 4px 8px; border-radius: 6px; font-weight: 800; font-size: 0.65rem; color: white; min-width: 60px; display: inline-block; }
         .bg-healthy { background: var(--success); }
         .bg-low { background: var(--warning); }
         .bg-out { background: var(--danger); }
-        .bg-over { background: var(--accent); }
 
-        .pagination-footer { height: 60px; background: white; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--primary); border-top: none; border-radius: 0 0 12px 12px; }
+        .pagination-footer { height: 60px; background: white; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--primary); border-radius: 0 0 12px 12px; }
         .nav-btns { width: 80px; height: 38px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.7rem; }
+        .nav-btns:disabled { background: #cbd5e1; cursor: not-allowed; }
 
         @media (min-width: 1024px) {
             .main-content { flex-direction: row; padding: 0; }
-            .action-bar-container { width: var(--sidebar-width); height: 100%; background: var(--primary); padding: 0; flex-direction: column; justify-content: flex-start; border-top: 1px solid rgba(255,255,255,0.1); }
+            .action-bar-container { width: var(--sidebar-width); height: 100%; background: var(--primary); padding: 0; flex-direction: column; justify-content: flex-start; }
             .toggle-group { flex-direction: column; height: 100%; max-width: none; border: none; border-radius: 0; }
             .btn-toggle { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 25px 0; width: 100%; border-radius: 0; }
             .right-panel { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow: hidden; }
@@ -105,11 +98,11 @@
     <div class="main-content">
         <div class="action-bar-container">
             <div class="toggle-group" id="perm-nav">
-                <button class="btn-toggle active" onclick="location.href='inventory.html'"><span>📋</span><span>Inv</span></button>
-                <button class="btn-toggle" onclick="location.href='receiving.html'"><span>🚚</span><span>Recv</span></button>
-                <button class="btn-toggle" onclick="location.href='orders.html'"><span>💰</span><span>Sales</span></button>
-                <button class="btn-toggle" onclick="location.href='transfer.html'"><span>🔄</span><span>Trans</span></button>
-                <button class="btn-toggle" onclick="location.href='return.html'"><span>↩️</span><span>Return</span></button>
+                <button class="btn-toggle active" data-page="inventory.html" onclick="location.href='inventory.html'"><span>📋</span><span>Inv</span></button>
+                <button class="btn-toggle" data-page="receiving.html" onclick="location.href='receiving.html'"><span>🚚</span><span>Recv</span></button>
+                <button class="btn-toggle" data-page="orders.html" onclick="location.href='orders.html'"><span>💰</span><span>Sales</span></button>
+                <button class="btn-toggle" data-page="transfer.html" onclick="location.href='transfer.html'"><span>🔄</span><span>Trans</span></button>
+                <button class="btn-toggle" data-page="return.html" onclick="location.href='return.html'"><span>↩️</span><span>Return</span></button>
             </div>
         </div>
 
@@ -141,7 +134,7 @@
 
             <div class="pagination-footer">
                 <div id="page-info" style="font-size: 0.75rem; font-weight: 800; color: var(--primary);">Loading...</div>
-                <div style="display:flex; gap:10px;">
+                <div style="gap:10px; display:flex;">
                     <button class="nav-btns" id="prevBtn" onclick="changePage(currentPage - 1)">PREV</button>
                     <button class="nav-btns" id="nextBtn" onclick="changePage(currentPage + 1)">NEXT</button>
                 </div>
@@ -155,42 +148,63 @@
         let currentPage = 1, currentSearchQuery = "";
         const activeUser = localStorage.getItem('activeAdmin');
         const userRole = localStorage.getItem('userRole');
+        const userPermissions = JSON.parse(localStorage.getItem('userPermissions') || '[]');
 
         function applyPermissions() {
             if (!activeUser) { location.href = 'index.html'; return; }
+            
+            // 1. Set User UI
             document.getElementById('active-user').innerText = activeUser;
             document.getElementById('user-role-label').innerText = userRole === 'admin' ? 'System Admin' : 'Staff Member';
+
+            // 2. Filter Sidebar Buttons based on userPermissions
+            // Admins usually see everything, Staff only see what's in their array
+            document.querySelectorAll('.btn-toggle').forEach(btn => {
+                const page = btn.getAttribute('data-page');
+                if (userRole === 'admin' || userPermissions.includes(page)) {
+                    btn.style.display = 'flex';
+                } else {
+                    btn.style.display = 'none';
+                }
+            });
         }
 
-        /* UPDATED SECURITY LOGIC: 
-           Checks userRole before allowing navigation to dashboard.
-        */
         function goHome() { 
-            if (userRole === 'admin') {
-                window.location.href = 'dashboard.html';
-            } else {
-                // If staff, just refresh/reset inventory view
-                window.location.href = 'inventory.html';
-            }
+            window.location.href = (userRole === 'admin') ? 'dashboard.html' : 'inventory.html';
         }
 
         async function fetchInventory() {
-            let query = _supabase.from('inventory').select('*', { count: 'exact' });
-            if (currentSearchQuery) {
-                query = query.or(`item_name.ilike.%${currentSearchQuery}%,sku.ilike.%${currentSearchQuery}%,brand.ilike.%${currentSearchQuery}%,location.ilike.%${currentSearchQuery}%`);
+            const tbody = document.getElementById('inventory-body');
+            try {
+                let query = _supabase.from('inventory').select('*', { count: 'exact' });
+
+                if (currentSearchQuery) {
+                    query = query.or(`item_name.ilike.%${currentSearchQuery}%,sku.ilike.%${currentSearchQuery}%,brand.ilike.%${currentSearchQuery}%,location.ilike.%${currentSearchQuery}%`);
+                }
+
+                const from = (currentPage - 1) * 25;
+                const to = from + 24;
+
+                const { data, count, error } = await query.order('location').range(from, to);
+
+                if (error) throw error;
+                renderTable(data || [], count || 0);
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="10" style="padding:20px; color:red;">Error: ${err.message}</td></tr>`;
             }
-            const from = (currentPage - 1) * 25;
-            const to = from + 24;
-            const { data, count, error } = await query.order('location').range(from, to);
-            if (!error) renderTable(data || [], count || 0);
         }
 
         function renderTable(data, total) {
             const tbody = document.getElementById('inventory-body');
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" style="padding:20px;">No items found.</td></tr>`;
+                return;
+            }
+
             tbody.innerHTML = data.map((item, i) => {
                 const qty = item.quantity || 0;
                 const min = item.min_qty || 10;
-                const price = item.unit_price ? parseFloat(item.unit_price).toFixed(2) : '0.00';
+                const price = item.unit_price ? parseFloat(item.unit_price).toLocaleString(undefined, {minimumFractionDigits: 2}) : '0.00';
 
                 let statusBadge = '';
                 if (qty <= 0) statusBadge = '<span class="status-badge bg-out">OUT</span>';
@@ -220,7 +234,7 @@
         }
 
         function handleSearch() { currentSearchQuery = document.getElementById('searchInput').value; currentPage = 1; fetchInventory(); }
-        function changePage(p) { if(p > 0) { currentPage = p; fetchInventory(); } }
+        function changePage(p) { if(p > 0) { currentPage = p; fetchInventory(); document.querySelector('.table-scroll-area').scrollTop = 0; } }
         function handleLogout() { localStorage.clear(); location.href = 'index.html'; }
         
         function selectRow(el) {
