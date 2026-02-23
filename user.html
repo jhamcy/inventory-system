@@ -14,47 +14,39 @@
             --danger: #ef4444; 
             --excel-border: #cbd5e1;
         }
-
         body { 
             font-family: 'Inter', sans-serif; 
             background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%); 
             margin: 0; min-height: 100vh; display: flex; flex-direction: column; 
         }
-
         .navbar { 
             height: 60px; background: var(--primary); 
             display: flex; align-items: center; justify-content: space-between; 
             padding: 0 15px; color: white; flex-shrink: 0;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-
         .main-content { padding: 15px; flex: 1; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
-
         .card { 
             background: white; border: 3px solid var(--primary); 
             border-radius: 12px; padding: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); 
         }
-
         .form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-
         @media (min-width: 600px) {
             .form-grid { grid-template-columns: 1fr 1fr; }
             .permission-box, .btn-group, .full-width { grid-column: span 2; }
         }
-        
+
         input, select { 
             padding: 12px; border: 2px solid var(--excel-border); 
             border-radius: 8px; font-weight: 700; text-transform: uppercase; 
             outline: none; font-size: 0.9rem; width: 100%; box-sizing: border-box;
         }
-
         .permission-box { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
             gap: 8px; background: #f8fafc; padding: 12px; border-radius: 10px; 
             border: 1px dashed var(--primary);
         }
-
         .perm-item { 
             display: flex; align-items: center; gap: 8px; 
             font-size: 0.65rem; font-weight: 800; color: var(--primary);
@@ -62,9 +54,7 @@
             border: 1px solid var(--excel-border); cursor: pointer;
             text-transform: uppercase;
         }
-
         .btn-group { display: flex; gap: 10px; width: 100%; }
-
         .btn-action { 
             flex: 1; background: var(--primary); color: white; 
             padding: 14px; border: none; border-radius: 8px; font-weight: 800; 
@@ -72,29 +62,26 @@
             box-shadow: 0 4px 0px #000;
         }
         .btn-update { background: var(--accent); display: none; }
-        .btn-cancel { background: #64748b; display: none; }
-        
-        .btn-action:active { transform: translateY(2px); box-shadow: 0 2px 0px #000; }
+        /* Adjusted cancel to match save button size */
+        .btn-cancel { background: #64748b; display: block; } 
 
+        .btn-action:active { transform: translateY(2px); box-shadow: 0 2px 0px #000; }
         .table-container { 
             background: white; border-radius: 12px; border: 2px solid var(--primary); 
             overflow-x: auto;
         }
-
-        table { width: 100%; border-collapse: collapse; min-width: 500px; }
-        th { background: #f1f5f9; padding: 12px; font-size: 0.65rem; text-transform: uppercase; border-bottom: 2px solid var(--primary); }
-        td { padding: 12px; text-align: center; border-bottom: 1px solid var(--excel-border); font-weight: 700; font-size: 0.75rem; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th { background: #f1f5f9; padding: 12px; font-size: 0.6rem; text-transform: uppercase; border-bottom: 2px solid var(--primary); }
+        td { padding: 12px; text-align: center; border-bottom: 1px solid var(--excel-border); font-weight: 700; font-size: 0.7rem; text-transform: uppercase; }
         
         tbody tr { cursor: pointer; }
         tbody tr:hover { background: #f0f9ff; }
-
         .role-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; color: white; background: #64748b; }
         .role-admin { background: var(--danger); }
         .btn-del { color: var(--danger); background: none; border: none; font-weight: 800; cursor: pointer; font-size: 0.7rem; }
     </style>
 </head>
 <body>
-
     <div class="navbar">
         <span style="font-weight:800; font-size: 0.9rem;">STAFF PERMISSIONS</span>
         <a href="dashboard.html" style="color:white; font-size:0.65rem; font-weight:800; text-decoration:none; border:1px solid white; padding:6px 10px; border-radius:6px; text-transform: uppercase;">Exit</a>
@@ -102,8 +89,11 @@
 
     <div class="main-content">
         <div class="card" id="input-card">
-            <div id="form-header" style="font-size:0.6rem; font-weight:800; color:#64748b; margin-bottom:10px; text-transform: uppercase;">Create New Staff Account</div>
+            <div id="form-header" style="font-size:0.6rem; font-weight:800; color:#64748b; margin-bottom:10px; text-transform: uppercase;">Manage Staff Accounts</div>
             <div class="form-grid">
+                <input type="text" id="id-in" placeholder="Staff ID (e.g. 2024-001)">
+                <input type="text" id="name-in" placeholder="Complete Name">
+                
                 <input type="text" id="user-in" placeholder="Username">
                 <input type="text" id="pass-in" placeholder="Password">
                 
@@ -136,6 +126,8 @@
             <table>
                 <thead>
                     <tr>
+                        <th>ID</th>
+                        <th>Name</th>
                         <th>Username</th>
                         <th>Password</th>
                         <th>Role</th>
@@ -152,28 +144,24 @@
         const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
         let editingUser = null;
 
         async function loadTable() {
             const { data, error } = await _supabase.from('staff_accounts').select('*').order('username');
             if(error) return console.error(error);
-
             const tbody = document.getElementById('user-table-body');
             tbody.innerHTML = ''; 
-
             data.forEach(u => {
                 const tr = document.createElement('tr');
                 tr.onclick = () => activateEditMode(u);
-                
-                // Clean up permission display
                 const permsDisplay = (u.permissions || []).map(p => p.replace('perm_', '').toUpperCase()).join(', ');
-
                 tr.innerHTML = `
+                    <td style="color:#64748b; font-size:0.65rem;">${u.staff_id || '---'}</td>
+                    <td style="color:var(--primary);">${u.full_name || '---'}</td>
                     <td style="color:var(--primary); font-weight:800;">${u.username}</td>
                     <td style="color:var(--accent); font-family: monospace;">${u.password}</td>
                     <td><span class="role-badge ${u.role === 'admin' ? 'role-admin' : ''}">${u.role}</span></td>
-                    <td style="font-size:0.55rem; color:#64748b;">${permsDisplay || 'NONE'}</td>
+                    <td style="font-size:0.5rem; color:#64748b;">${permsDisplay || 'NONE'}</td>
                     <td>
                         ${u.username !== 'ADMIN_MASTER' ? `<button class="btn-del" onclick="event.stopPropagation(); delUser('${u.username}')">DEL</button>` : '---'}
                     </td>
@@ -185,26 +173,27 @@
         function activateEditMode(user) {
             editingUser = user.username;
             document.getElementById('input-card').style.borderColor = 'var(--accent)';
-            document.getElementById('form-header').innerText = "EDITING: " + user.username;
+            document.getElementById('form-header').innerText = "EDITING: " + user.full_name;
+            document.getElementById('id-in').value = user.staff_id || "";
+            document.getElementById('name-in').value = user.full_name || "";
             document.getElementById('user-in').value = user.username;
             document.getElementById('user-in').disabled = true;
             document.getElementById('pass-in').value = user.password;
             document.getElementById('role-in').value = user.role;
-
             const userPerms = user.permissions || [];
             document.querySelectorAll('#perm-list input').forEach(cb => {
                 cb.checked = userPerms.includes(cb.value);
             });
-
             document.getElementById('btn-save').style.display = 'none';
             document.getElementById('btn-update').style.display = 'block';
-            document.getElementById('btn-cancel').style.display = 'block';
         }
 
         function resetForm() {
             editingUser = null;
             document.getElementById('input-card').style.borderColor = 'var(--primary)';
             document.getElementById('form-header').innerText = "Create New Staff Account";
+            document.getElementById('id-in').value = "";
+            document.getElementById('name-in').value = "";
             document.getElementById('user-in').value = "";
             document.getElementById('user-in').disabled = false;
             document.getElementById('pass-in').value = "";
@@ -212,20 +201,18 @@
             document.querySelectorAll('#perm-list input').forEach(cb => cb.checked = false);
             document.getElementById('btn-save').style.display = 'block';
             document.getElementById('btn-update').style.display = 'none';
-            document.getElementById('btn-cancel').style.display = 'none';
         }
 
         async function updateUser() {
+            const staff_id = document.getElementById('id-in').value.trim().toUpperCase();
+            const full_name = document.getElementById('name-in').value.trim().toUpperCase();
             const password = document.getElementById('pass-in').value.trim();
             const role = document.getElementById('role-in').value;
             const perms = Array.from(document.querySelectorAll('#perm-list input:checked')).map(cb => cb.value);
-
-            if(!password) return alert("Enter password");
-
+            if(!password || !full_name) return alert("Enter name and password");
             const { error } = await _supabase.from('staff_accounts')
-                .update({ password, role, permissions: perms })
+                .update({ staff_id, full_name, password, role, permissions: perms })
                 .eq('username', editingUser);
-
             if(error) alert("Error: " + error.message);
             else {
                 alert("Updated!");
@@ -235,18 +222,17 @@
         }
 
         async function saveUser() {
+            const staff_id = document.getElementById('id-in').value.trim().toUpperCase();
+            const full_name = document.getElementById('name-in').value.trim().toUpperCase();
             const username = document.getElementById('user-in').value.trim().toUpperCase();
             const password = document.getElementById('pass-in').value.trim();
             const role = document.getElementById('role-in').value;
             const perms = Array.from(document.querySelectorAll('#perm-list input:checked')).map(cb => cb.value);
-
-            if(!username || !password) return alert("Fill all fields");
-
+            if(!username || !password || !full_name) return alert("Fill identity fields");
             const { error } = await _supabase.from('staff_accounts').insert([{ 
-                username, password, role, permissions: perms 
+                staff_id, full_name, username, password, role, permissions: perms 
             }]);
-
-            if(error) alert("User already exists");
+            if(error) alert("Error: " + error.message);
             else {
                 alert("Success!");
                 resetForm();
