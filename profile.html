@@ -25,6 +25,7 @@
             flex: 1; padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto;
         }
 
+        /* PROFILE CARD */
         .profile-card {
             background: white; border-radius: 16px; border: 3px solid var(--primary);
             box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; flex-shrink: 0;
@@ -32,36 +33,40 @@
 
         .card-header { background: var(--primary); color: white; padding: 20px; display: flex; align-items: center; gap: 15px; }
         .avatar { width: 50px; height: 50px; background: var(--accent); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.5rem; border: 2px solid white; text-transform: uppercase; }
-        .header-text h2 { margin: 0; font-size: 1rem; text-transform: uppercase; }
-        .header-text span { font-size: 0.6rem; font-weight: 700; opacity: 0.8; }
+        .header-text h2 { margin: 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .header-text span { font-size: 0.6rem; font-weight: 700; opacity: 0.8; text-transform: uppercase; }
 
         .card-body { padding: 15px; }
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .info-item { display: flex; flex-direction: column; }
-        .label { font-size: 0.55rem; font-weight: 800; color: #64748b; text-transform: uppercase; }
+        .info-item { display: flex; flex-direction: column; background: #f8fafc; padding: 8px; border-radius: 8px; border: 1px solid var(--border-main); }
+        .label { font-size: 0.5rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
         .value { font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; }
 
-        input { width: 100%; padding: 10px; margin-bottom: 8px; border: 1.5px solid var(--border-main); border-radius: 8px; font-weight: 700; outline: none; box-sizing: border-box; font-size: 0.8rem; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid var(--border-main); border-radius: 8px; font-weight: 700; outline: none; box-sizing: border-box; font-size: 0.85rem; transition: border-color 0.2s; }
+        input:focus { border-color: var(--accent); }
 
-        .btn-group { display: flex; gap: 8px; }
-        .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: 800; font-size: 0.7rem; cursor: pointer; text-transform: uppercase; }
+        .btn-group { display: flex; gap: 8px; margin-top: 5px; }
+        .btn { flex: 1; padding: 14px; border-radius: 8px; border: none; font-weight: 800; font-size: 0.75rem; cursor: pointer; text-transform: uppercase; transition: transform 0.1s; box-shadow: 0 4px 0px rgba(0,0,0,0.1); }
+        .btn:active { transform: translateY(2px); box-shadow: none; }
+        
         .btn-save { background: var(--accent); color: white; }
         .btn-back { background: var(--primary); color: white; }
-        .btn-logout { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; }
+        .btn-logout { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; flex: 0.6; }
 
+        /* LOGS SECTION */
         .activity-section {
             background: white; border: 3px solid var(--primary); border-radius: 16px;
-            display: flex; flex-direction: column; flex: 1; overflow: hidden;
+            display: flex; flex-direction: column; flex: 1; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
-        .table-header { background: #f1f5f9; padding: 10px; font-size: 0.65rem; font-weight: 800; color: var(--primary); border-bottom: 2px solid var(--primary); text-transform: uppercase; }
+        .table-header { background: #f1f5f9; padding: 12px; font-size: 0.7rem; font-weight: 800; color: var(--primary); border-bottom: 2px solid var(--primary); text-transform: uppercase; }
         .scroll-area { flex: 1; overflow: auto; }
         
-        table { width: 100%; border-collapse: collapse; min-width: 400px; }
-        th { position: sticky; top: 0; background: #f8fafc; padding: 10px; font-size: 0.55rem; text-transform: uppercase; border-bottom: 1px solid var(--border-main); text-align: left; }
-        td { padding: 10px; font-size: 0.7rem; font-weight: 600; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; min-width: 450px; }
+        th { position: sticky; top: 0; background: #f8fafc; padding: 12px; font-size: 0.55rem; text-transform: uppercase; border-bottom: 1px solid var(--border-main); text-align: left; color: #64748b; }
+        td { padding: 12px; font-size: 0.7rem; font-weight: 600; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
         tr:hover td { background: #f0f9ff; }
         
-        .type-tag { padding: 2px 6px; border-radius: 4px; font-size: 0.55rem; font-weight: 800; background: #e2e8f0; }
+        .type-tag { padding: 3px 8px; border-radius: 4px; font-size: 0.55rem; font-weight: 800; background: #e2e8f0; color: var(--primary); }
     </style>
 </head>
 <body>
@@ -77,23 +82,30 @@
         </div>
         <div class="card-body">
             <div class="info-grid">
-                <div class="info-item"><span class="label">Staff ID</span><span class="value" id="u-id">---</span></div>
-                <div class="info-item"><span class="label">Username</span><span class="value" id="u-user">---</span></div>
+                <div class="info-item">
+                    <span class="label">Staff ID</span>
+                    <span class="value" id="u-id">---</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Username</span>
+                    <span class="value" id="u-user">---</span>
+                </div>
             </div>
             
+            <div style="font-size: 0.6rem; font-weight: 800; color: #64748b; margin-bottom: 8px; text-transform: uppercase;">Security Update</div>
             <input type="password" id="new-pass" placeholder="NEW PASSWORD">
             <input type="password" id="conf-pass" placeholder="CONFIRM PASSWORD">
             
             <div class="btn-group">
-                <button class="btn btn-save" onclick="updatePass()">Update</button>
-                <button class="btn btn-back" onclick="goHome()" id="back-txt">Back</button>
+                <button class="btn btn-save" onclick="updatePass()">Update Security</button>
+                <button class="btn btn-back" onclick="goHome()" id="back-txt">Dashboard</button>
                 <button class="btn btn-logout" onclick="logout()">Logout</button>
             </div>
         </div>
     </div>
 
     <div class="activity-section">
-        <div class="table-header">My Personal Activity Logs</div>
+        <div class="table-header">My Activity History</div>
         <div class="scroll-area">
             <table>
                 <thead>
@@ -105,7 +117,7 @@
                     </tr>
                 </thead>
                 <tbody id="log-table-body">
-                    <tr><td colspan="4" style="text-align:center; padding:20px; color:#94a3b8;">Loading logs...</td></tr>
+                    <tr><td colspan="4" style="text-align:center; padding:30px; color:#94a3b8;">Fetching your records...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -113,15 +125,17 @@
 </div>
 
 <script>
-    const _supabase = supabase.createClient('https://crruounuhtfzyssyhgcc.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg');
+    const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const activeUser = localStorage.getItem('activeAdmin'); // This is the username
+    const activeUser = localStorage.getItem('activeAdmin'); // LocalStorage Username
     const userRole = localStorage.getItem('userRole');
 
     async function init() {
         if (!activeUser) { location.href = 'index.html'; return; }
         
-        // Fetch detailed profile from Supabase
+        // 1. Fetch live data from staff_accounts
         const { data: user, error } = await _supabase
             .from('staff_accounts')
             .select('full_name, staff_id, role')
@@ -129,16 +143,16 @@
             .single();
 
         if (error || !user) {
-            // Fallback if record not found or error
+            // Error Fallback
             document.getElementById('u-name').innerText = activeUser;
             document.getElementById('u-init').innerText = activeUser.charAt(0);
-            document.getElementById('u-id').innerText = "NOT ASSIGNED";
+            document.getElementById('u-id').innerText = "STF-MANUAL";
         } else {
-            // Use Full Name if exists, otherwise fallback to username
-            const displayName = user.full_name || activeUser;
-            document.getElementById('u-name').innerText = displayName;
-            document.getElementById('u-init').innerText = displayName.charAt(0);
-            document.getElementById('u-id').innerText = user.staff_id || "NOT ASSIGNED";
+            // Success Logic
+            const finalName = user.full_name || activeUser;
+            document.getElementById('u-name').innerText = finalName;
+            document.getElementById('u-init').innerText = finalName.charAt(0);
+            document.getElementById('u-id').innerText = user.staff_id || "STF-PENDING";
         }
 
         document.getElementById('u-user').innerText = activeUser;
@@ -154,11 +168,11 @@
             .select('*')
             .eq('performed_by', activeUser)
             .order('created_at', { ascending: false })
-            .limit(20);
+            .limit(25);
 
         const tbody = document.getElementById('log-table-body');
         if (error || !data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">No activity recorded.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">No activity found for your account.</td></tr>';
             return;
         }
 
@@ -172,6 +186,27 @@
         `).join('');
     }
 
+    async function updatePass() {
+        const p1 = document.getElementById('new-pass').value.trim();
+        const p2 = document.getElementById('conf-pass').value.trim();
+        
+        if(!p1) return alert("Please enter a new password.");
+        if(p1 !== p2) return alert("Passwords do not match!");
+        
+        const { error } = await _supabase
+            .from('staff_accounts')
+            .update({ password: p1 })
+            .eq('username', activeUser);
+
+        if(error) {
+            alert("Update Failed: " + error.message);
+        } else {
+            alert("SUCCESS! Your password has been updated.");
+            document.getElementById('new-pass').value = "";
+            document.getElementById('conf-pass').value = "";
+        }
+    }
+
     function viewTx(ref) {
         if (!ref || ref === 'null') return;
         window.location.href = `transaction.html?ref=${ref}`;
@@ -182,21 +217,9 @@
     }
 
     function logout() {
-        localStorage.clear();
-        window.location.href = 'index.html';
-    }
-
-    async function updatePass() {
-        const p1 = document.getElementById('new-pass').value.trim();
-        const p2 = document.getElementById('conf-pass').value.trim();
-        if(!p1 || p1 !== p2) return alert("Passwords do not match!");
-        
-        const { error } = await _supabase.from('staff_accounts').update({ password: p1 }).eq('username', activeUser);
-        if(error) alert("Error updating.");
-        else {
-            alert("Password updated!");
-            document.getElementById('new-pass').value = "";
-            document.getElementById('conf-pass').value = "";
+        if(confirm("Logout from EasiStock?")) {
+            localStorage.clear();
+            window.location.href = 'index.html';
         }
     }
 
