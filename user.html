@@ -33,7 +33,6 @@
         .card { 
             background: white; border: 3px solid var(--primary); 
             border-radius: 12px; padding: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); 
-            transition: all 0.3s ease;
         }
 
         .form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
@@ -49,20 +48,19 @@
             outline: none; font-size: 0.9rem; width: 100%; box-sizing: border-box;
         }
 
-        input:focus { border-color: var(--accent); }
-
         .permission-box { 
             display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
             gap: 8px; background: #f8fafc; padding: 12px; border-radius: 10px; 
             border: 1px dashed var(--primary);
         }
 
         .perm-item { 
-            display: flex; align-items: center; gap: 6px; 
-            font-size: 0.6rem; font-weight: 800; color: var(--primary);
-            background: white; padding: 6px 8px; border-radius: 6px; 
+            display: flex; align-items: center; gap: 8px; 
+            font-size: 0.65rem; font-weight: 800; color: var(--primary);
+            background: white; padding: 8px; border-radius: 6px; 
             border: 1px solid var(--excel-border); cursor: pointer;
+            text-transform: uppercase;
         }
 
         .btn-group { display: flex; gap: 10px; width: 100%; }
@@ -87,7 +85,7 @@
         th { background: #f1f5f9; padding: 12px; font-size: 0.65rem; text-transform: uppercase; border-bottom: 2px solid var(--primary); }
         td { padding: 12px; text-align: center; border-bottom: 1px solid var(--excel-border); font-weight: 700; font-size: 0.75rem; text-transform: uppercase; }
         
-        tbody tr { cursor: pointer; transition: 0.2s; }
+        tbody tr { cursor: pointer; }
         tbody tr:hover { background: #f0f9ff; }
 
         .role-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; color: white; background: #64748b; }
@@ -98,43 +96,38 @@
 <body>
 
     <div class="navbar">
-        <span style="font-weight:800; font-size: 0.9rem;">STAFF ACCESS MGMT</span>
+        <span style="font-weight:800; font-size: 0.9rem;">STAFF PERMISSIONS</span>
         <a href="dashboard.html" style="color:white; font-size:0.65rem; font-weight:800; text-decoration:none; border:1px solid white; padding:6px 10px; border-radius:6px; text-transform: uppercase;">Exit</a>
     </div>
 
     <div class="main-content">
         <div class="card" id="input-card">
-            <div id="form-header" style="font-size:0.6rem; font-weight:800; color:#64748b; margin-bottom:10px; text-transform: uppercase;">Register New Staff Account</div>
+            <div id="form-header" style="font-size:0.6rem; font-weight:800; color:#64748b; margin-bottom:10px; text-transform: uppercase;">Create New Staff Account</div>
             <div class="form-grid">
                 <input type="text" id="user-in" placeholder="Username">
                 <input type="text" id="pass-in" placeholder="Password">
                 
                 <div class="full-width">
                     <select id="role-in">
-                        <option value="staff">Staff Member (Limited)</option>
-                        <option value="admin">Administrator (Full Access)</option>
+                        <option value="staff">Staff Member</option>
+                        <option value="admin">Administrator</option>
                     </select>
                 </div>
                 
                 <div class="permission-box" id="perm-list">
-                    <div style="grid-column: 1 / -1; font-size: 0.6rem; font-weight: 800; color: #64748b; margin-bottom: 5px;">ALLOWED BUTTONS (PERMISSIONS):</div>
-                    <label class="perm-item"><input type="checkbox" value="add.html"> ADD</label>
-                    <label class="perm-item"><input type="checkbox" value="edit.html"> EDIT</label>
-                    <label class="perm-item"><input type="checkbox" value="adj.html"> ADJ</label>
-                    <label class="perm-item"><input type="checkbox" value="transfer.html"> TRANS</label>
-                    <label class="perm-item"><input type="checkbox" value="receiving.html"> RECV</label>
-                    <label class="perm-item"><input type="checkbox" value="orders.html"> ORDER</label>
-                    <label class="perm-item"><input type="checkbox" value="return.html"> RTN</label>
-                    <label class="perm-item"><input type="checkbox" value="delete.html"> DEL</label>
-                    <label class="perm-item"><input type="checkbox" value="logs.html"> LOGS</label>
-                    <label class="perm-item"><input type="checkbox" value="inventory.html"> STOCK</label>
-                    <label class="perm-item"><input type="checkbox" value="user.html"> USER</label>
+                    <div style="grid-column: 1 / -1; font-size: 0.6rem; font-weight: 800; color: #64748b; margin-bottom: 5px;">ACTION PERMISSIONS:</div>
+                    <label class="perm-item"><input type="checkbox" value="perm_add"> ➕ ADD ITEM</label>
+                    <label class="perm-item"><input type="checkbox" value="perm_edit"> 📝 EDIT ITEM</label>
+                    <label class="perm-item"><input type="checkbox" value="perm_adj"> ⚖️ ADJUST QTY</label>
+                    <label class="perm-item"><input type="checkbox" value="perm_delete"> 🗑️ DELETE</label>
+                    <label class="perm-item"><input type="checkbox" value="perm_logs"> 📜 VIEW LOGS</label>
+                    <label class="perm-item"><input type="checkbox" value="perm_users"> 👥 MGMT USERS</label>
                 </div>
                 
                 <div class="btn-group">
                     <button id="btn-save" class="btn-action" onclick="saveUser()">Create Account</button>
-                    <button id="btn-update" class="btn-action btn-update" onclick="updateUser()">Update Details</button>
-                    <button id="btn-cancel" class="btn-action btn-cancel" onclick="resetForm()">Cancel Edit</button>
+                    <button id="btn-update" class="btn-action btn-update" onclick="updateUser()">Update User</button>
+                    <button id="btn-cancel" class="btn-action btn-cancel" onclick="resetForm()">Cancel</button>
                 </div>
             </div>
         </div>
@@ -146,7 +139,7 @@
                         <th>Username</th>
                         <th>Password</th>
                         <th>Role</th>
-                        <th>Access</th>
+                        <th>Permissions</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -173,11 +166,14 @@
                 const tr = document.createElement('tr');
                 tr.onclick = () => activateEditMode(u);
                 
+                // Clean up permission display
+                const permsDisplay = (u.permissions || []).map(p => p.replace('perm_', '').toUpperCase()).join(', ');
+
                 tr.innerHTML = `
                     <td style="color:var(--primary); font-weight:800;">${u.username}</td>
-                    <td style="color:var(--accent);">${u.password}</td>
+                    <td style="color:var(--accent); font-family: monospace;">${u.password}</td>
                     <td><span class="role-badge ${u.role === 'admin' ? 'role-admin' : ''}">${u.role}</span></td>
-                    <td style="font-size:0.55rem; color:#64748b;">${(u.permissions || []).join(', ')}</td>
+                    <td style="font-size:0.55rem; color:#64748b;">${permsDisplay || 'NONE'}</td>
                     <td>
                         ${u.username !== 'ADMIN_MASTER' ? `<button class="btn-del" onclick="event.stopPropagation(); delUser('${u.username}')">DEL</button>` : '---'}
                     </td>
@@ -189,7 +185,7 @@
         function activateEditMode(user) {
             editingUser = user.username;
             document.getElementById('input-card').style.borderColor = 'var(--accent)';
-            document.getElementById('form-header').innerText = "Updating User: " + user.username;
+            document.getElementById('form-header').innerText = "EDITING: " + user.username;
             document.getElementById('user-in').value = user.username;
             document.getElementById('user-in').disabled = true;
             document.getElementById('pass-in').value = user.password;
@@ -203,13 +199,12 @@
             document.getElementById('btn-save').style.display = 'none';
             document.getElementById('btn-update').style.display = 'block';
             document.getElementById('btn-cancel').style.display = 'block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function resetForm() {
             editingUser = null;
             document.getElementById('input-card').style.borderColor = 'var(--primary)';
-            document.getElementById('form-header').innerText = "Register New Staff Account";
+            document.getElementById('form-header').innerText = "Create New Staff Account";
             document.getElementById('user-in').value = "";
             document.getElementById('user-in').disabled = false;
             document.getElementById('pass-in').value = "";
@@ -225,7 +220,7 @@
             const role = document.getElementById('role-in').value;
             const perms = Array.from(document.querySelectorAll('#perm-list input:checked')).map(cb => cb.value);
 
-            if(!password) return alert("Enter a password");
+            if(!password) return alert("Enter password");
 
             const { error } = await _supabase.from('staff_accounts')
                 .update({ password, role, permissions: perms })
@@ -233,7 +228,7 @@
 
             if(error) alert("Error: " + error.message);
             else {
-                alert("User updated successfully!");
+                alert("Updated!");
                 resetForm();
                 loadTable();
             }
@@ -251,18 +246,18 @@
                 username, password, role, permissions: perms 
             }]);
 
-            if(error) alert("User already exists or database error");
+            if(error) alert("User already exists");
             else {
-                alert("Account Created!");
+                alert("Success!");
                 resetForm();
                 loadTable();
             }
         }
 
         async function delUser(name) {
-            if(!confirm("Permanently delete " + name + "?")) return;
+            if(!confirm("Delete user " + name + "?")) return;
             const { error } = await _supabase.from('staff_accounts').delete().eq('username', name);
-            if(error) alert("Delete failed");
+            if(error) alert("Failed");
             else loadTable();
         }
 
