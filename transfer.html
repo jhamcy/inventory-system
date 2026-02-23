@@ -24,22 +24,11 @@
 
         .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; flex-shrink: 0; }
         
-        /* BRAND BUTTON STYLE */
         .nav-logo-btn { 
-            background: var(--accent); 
-            color: white; 
-            font-weight: 800; 
-            font-size: 0.9rem; 
-            text-transform: uppercase; 
-            text-decoration: none; 
-            padding: 8px 16px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer; 
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 0px #0056aa;
+            background: var(--accent); color: white; font-weight: 800; font-size: 0.9rem; 
+            text-transform: uppercase; padding: 8px 16px; border-radius: 8px; border: none;
+            cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 0px #0056aa;
         }
-        .nav-logo-btn:hover { background: #1a8eff; transform: translateY(-1px); }
         .nav-logo-btn:active { transform: translateY(2px); box-shadow: 0 0px 0px transparent; }
 
         .user-info { display: flex; flex-direction: column; align-items: flex-end; color: white; cursor: pointer; padding: 5px; border-radius: 8px; }
@@ -52,18 +41,24 @@
 
         .action-bar-container { display: flex; justify-content: center; flex-shrink: 0; margin-bottom: 5px; }
         .toggle-group { display: flex; width: 100%; max-width: 550px; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .btn-toggle { flex: 1; padding: 10px 0; border: none; border-right: 1px solid rgba(255,255,255,0.15); cursor: pointer; color: rgba(255,255,255,0.6); background: var(--primary); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .btn-toggle.active { background: var(--accent) !important; color: white !important; }
+        
+        .btn-toggle { 
+            flex: 1; padding: 10px 0; border: none; border-right: 1px solid rgba(255,255,255,0.15); 
+            cursor: pointer; color: rgba(255,255,255,0.6); background: var(--primary); 
+            font-size: 0.65rem; font-weight: 800; text-transform: uppercase; 
+            display: none; /* Controlled by permissions JS */
+            flex-direction: column; align-items: center; gap: 4px; 
+        }
+        .btn-toggle.active { background: var(--accent) !important; color: white !important; display: flex !important; }
         .btn-toggle:last-child { border-right: none; }
 
-        .input-card { background: white; border-radius: 12px; border: 2px solid var(--primary); padding: 12px; flex-shrink: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .input-card { background: white; border-radius: 12px; border: 2px solid var(--primary); padding: 12px; flex-shrink: 0; }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .form-group { margin-bottom: 8px; }
         .full-width { grid-column: span 2; }
         
         label { display: block; font-size: 0.55rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 3px; }
         input, select, textarea { width: 100%; padding: 10px; border: 1.5px solid var(--border-main); border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; outline: none; box-sizing: border-box; font-family: inherit; }
-        textarea { height: 45px; resize: none; text-transform: uppercase; }
+        textarea { height: 45px; resize: none; }
         input[readonly] { background-color: #f1f5f9; color: #475569; border-style: dashed; }
 
         .table-container { flex: 1; background: white; border-radius: 12px; border: 2px solid var(--primary); display: flex; flex-direction: column; overflow: hidden; }
@@ -72,15 +67,14 @@
         .scroll-area { flex: 1; overflow: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 500px; }
         thead th { position: sticky; top: 0; background: #f1f5f9; padding: 10px; font-size: 0.55rem; font-weight: 800; text-transform: uppercase; border-bottom: 2px solid var(--primary); text-align: left; z-index: 20; }
-        tbody td { padding: 10px; border-bottom: 1px solid var(--border-main); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+        tbody td { padding: 10px; border-bottom: 1px solid var(--border-main); font-size: 0.7rem; font-weight: 600; }
 
-        .summary-bar { background: #f8fafc; padding: 10px 15px; border-top: 2px solid var(--primary); display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 800; color: var(--primary); }
+        .summary-bar { background: #f8fafc; padding: 10px 15px; border-top: 2px solid var(--primary); display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 800; }
         .footer-actions { display: flex; gap: 8px; padding-top: 5px; }
-        .btn { border: none; border-radius: 8px; padding: 14px; font-weight: 800; font-size: 0.75rem; cursor: pointer; text-transform: uppercase; transition: transform 0.1s; }
-        .btn:active { transform: translateY(2px); }
+        .btn { border: none; border-radius: 8px; padding: 14px; font-weight: 800; font-size: 0.75rem; cursor: pointer; text-transform: uppercase; }
         .btn-add { background: var(--primary); color: white; width: 100%; margin-top: 5px; }
         .btn-submit { background: var(--success); color: white; flex: 1; box-shadow: 0 4px 0 #059669; }
-        .btn-submit:active { box-shadow: none; }
+        .btn-submit:disabled { background: #94a3b8; box-shadow: none; cursor: not-allowed; }
 
         .route-path { font-size: 0.6rem; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: var(--primary); display: inline-block; }
     </style>
@@ -90,19 +84,19 @@
 <header class="navbar">
     <button class="nav-logo-btn" onclick="goHome()">EasiStock</button>
     <div class="user-info" onclick="location.href='profile.html'">
-        <span class="user-label" id="user-role-label">Staff Member</span>
+        <span class="user-label" id="user-role-label">Loading...</span>
         <span class="user-name"><div class="online-dot"></div><span id="active-user">---</span></span>
     </div>
 </header>
 
 <main class="main-content">
     <div class="action-bar-container">
-        <div class="toggle-group">
-            <button class="btn-toggle" onclick="location.href='inventory.html'"><span>📋</span><span>Inv</span></button>
-            <button class="btn-toggle" onclick="location.href='receiving.html'"><span>🚚</span><span>Recv</span></button>
-            <button class="btn-toggle" onclick="location.href='orders.html'"><span>💰</span><span>Sales</span></button>
-            <button class="btn-toggle active" onclick="location.href='transfer.html'"><span>🔄</span><span>Trans</span></button>
-            <button class="btn-toggle" onclick="location.href='return.html'"><span>↩️</span><span>Return</span></button>
+        <div class="toggle-group" id="perm-nav">
+            <button class="btn-toggle" data-page="inventory.html" onclick="location.href='inventory.html'"><span>📋</span><span>Inv</span></button>
+            <button class="btn-toggle" data-page="receiving.html" onclick="location.href='receiving.html'"><span>🚚</span><span>Recv</span></button>
+            <button class="btn-toggle" data-page="orders.html" onclick="location.href='orders.html'"><span>💰</span><span>Sales</span></button>
+            <button class="btn-toggle active" data-page="transfer.html" onclick="location.href='transfer.html'"><span>🔄</span><span>Trans</span></button>
+            <button class="btn-toggle" data-page="return.html" onclick="location.href='return.html'"><span>↩️</span><span>Return</span></button>
         </div>
     </div>
 
@@ -175,11 +169,12 @@
 
     const activeUser = localStorage.getItem('activeAdmin');
     const userRole = localStorage.getItem('userRole');
+    const userPermissions = JSON.parse(localStorage.getItem('userPermissions') || '[]');
 
     function init() {
         if (!activeUser) { location.href = 'index.html'; return; }
-        document.getElementById('active-user').innerText = activeUser;
-        document.getElementById('user-role-label').innerText = userRole === 'admin' ? 'System Admin' : 'Staff Member';
+        
+        applyPermissions();
         
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('trans-date').value = today;
@@ -187,9 +182,22 @@
         loadInventory();
     }
 
+    function applyPermissions() {
+        document.getElementById('active-user').innerText = activeUser;
+        document.getElementById('user-role-label').innerText = userRole === 'admin' ? 'System Admin' : 'Staff Member';
+
+        document.querySelectorAll('.btn-toggle').forEach(btn => {
+            const page = btn.getAttribute('data-page');
+            if (userRole === 'admin' || userPermissions.includes(page)) {
+                btn.style.display = 'flex';
+            } else {
+                btn.style.display = 'none';
+            }
+        });
+    }
+
     function goHome() { 
-        if (userRole === 'admin') window.location.href = 'dashboard.html';
-        else window.location.href = 'inventory.html';
+        window.location.href = (userRole === 'admin') ? 'dashboard.html' : 'inventory.html';
     }
 
     function generateRef() {
@@ -198,8 +206,10 @@
     }
 
     async function loadInventory() {
-        const { data } = await _supabase.from('inventory').select('*').order('item_name');
+        const { data, error } = await _supabase.from('inventory').select('*').order('item_name');
+        if (error) console.error(error);
         masterInventory = data || [];
+        
         document.getElementById('items-list').innerHTML = masterInventory.map(i => 
             `<option value="${i.item_name} [${i.location || 'MAIN'} | SOH: ${i.quantity || 0}]">`
         ).join('');
@@ -254,36 +264,60 @@
         const note = document.getElementById('transfer-note').value.trim();
 
         btn.disabled = true; btn.innerText = "PROCESSING...";
-
         const finalNote = note ? `INTERNAL TRANSFER: ${note}` : `INTERNAL TRANSFER`;
 
         try {
             for (const item of batchItems) {
-                // Deduct from Source
-                const { data: source } = await _supabase.from('inventory').select('quantity').eq('id', item.id).single();
-                await _supabase.from('inventory').update({ quantity: (source.quantity || 0) - item.moveQty }).eq('id', item.id);
+                // 1. Deduct from Source
+                const { data: source, error: fetchSrcErr } = await _supabase.from('inventory').select('quantity').eq('id', item.id).single();
+                if (fetchSrcErr) throw fetchSrcErr;
+                
+                const { error: updSrcErr } = await _supabase.from('inventory').update({ quantity: (source.quantity || 0) - item.moveQty }).eq('id', item.id);
+                if (updSrcErr) throw updSrcErr;
 
-                // Add/Update Destination
-                const { data: dest } = await _supabase.from('inventory').select('id, quantity').eq('item_name', item.item_name).eq('location', item.nextLoc).maybeSingle();
-                if (dest) await _supabase.from('inventory').update({ quantity: (dest.quantity || 0) + item.moveQty }).eq('id', dest.id);
-                else await _supabase.from('inventory').insert([{ item_name: item.item_name, location: item.nextLoc, quantity: item.moveQty, uom: item.uom, sku: item.sku, category: item.category, unit_price: item.unit_price }]);
+                // 2. Add to Destination
+                const { data: dest, error: fetchDestErr } = await _supabase.from('inventory').select('id, quantity').eq('item_name', item.item_name).eq('location', item.nextLoc).maybeSingle();
+                
+                if (dest) {
+                    await _supabase.from('inventory').update({ quantity: (dest.quantity || 0) + item.moveQty }).eq('id', dest.id);
+                } else {
+                    await _supabase.from('inventory').insert([{ 
+                        item_name: item.item_name, 
+                        location: item.nextLoc, 
+                        quantity: item.moveQty, 
+                        uom: item.uom, 
+                        sku: item.sku, 
+                        category: item.category, 
+                        unit_price: item.unit_price 
+                    }]);
+                }
 
+                // 3. Log Transaction
                 await _supabase.from('inventory_transactions').insert([{
-                    reference_id: ref, sku: item.sku, item_name: item.item_name,
-                    qty_change: item.moveQty, location: `${item.location} -> ${item.nextLoc}`, notes: finalNote.toUpperCase()
+                    reference_id: ref, 
+                    sku: item.sku, 
+                    item_name: item.item_name,
+                    qty_change: item.moveQty, 
+                    location: `${item.location} -> ${item.nextLoc}`, 
+                    notes: finalNote.toUpperCase()
                 }]);
             }
 
+            // 4. Activity Log
             await _supabase.from('activity_logs').insert([{ 
                 type: 'TRANSFER', 
                 reference_id: ref, 
                 performed_by: activeUser, 
-                summary: `MOVED ${batchItems.length} ITEMS`.toUpperCase() 
+                summary: `MOVED ${batchItems.length} ITEMS (${ref})`.toUpperCase() 
             }]);
 
-            alert("SUCCESS");
+            alert("TRANSFER COMPLETED SUCCESSFULLY");
             window.location.reload();
-        } catch (e) { alert("Error: " + e.message); btn.disabled = false; btn.innerText = "Post Batch Transfer"; }
+        } catch (e) { 
+            alert("Error: " + e.message); 
+            btn.disabled = false; 
+            btn.innerText = "Post Batch Transfer"; 
+        }
     }
 
     init();
