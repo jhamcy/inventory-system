@@ -31,6 +31,7 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
+        /* Logo Transition */
         .logo-container img {
             width: 120px; 
             height: auto;
@@ -39,8 +40,14 @@
             margin-left: auto;
             margin-right: auto;
             border-radius: 15px;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
+        .logo-container img:hover {
+            transform: scale(1.1) rotate(2deg);
+        }
+
+        /* Brand Title Transition */
         .brand-title {
             margin-top: 0;
             margin-bottom: 30px; 
@@ -49,6 +56,18 @@
             font-weight: 800;
             letter-spacing: -1px;
             text-transform: uppercase;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+
+        .brand-title:hover {
+            letter-spacing: 2px;
+            color: #0081ff;
+        }
+
+        .password-wrapper {
+            position: relative;
+            width: 100%;
         }
 
         input {
@@ -69,6 +88,43 @@
             background: white;
         }
 
+        /* Transition for password reveal text */
+        #password.revealed {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0.5; transform: translateY(-2px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .toggle-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            user-select: none;
+            padding: 5px 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(0, 129, 255, 0.1);
+        }
+
+        .toggle-btn span {
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+        }
+
         .btn-login {
             width: 100%; 
             padding: 16px; 
@@ -82,9 +138,11 @@
             font-size: 1rem;
             text-transform: uppercase;
             letter-spacing: 1px;
+            transition: transform 0.2s active, background 0.3s;
         }
 
         .btn-login:hover { background: #1e293b; }
+        .btn-login:active { transform: scale(0.98); }
 
         .divider {
             margin-top: 25px; 
@@ -106,7 +164,14 @@
         <div class="brand-title">EasiStock</div>
         
         <input type="text" id="username" placeholder="USERNAME" style="text-transform: uppercase;">
-        <input type="password" id="password" placeholder="PASSWORD">
+        
+        <div class="password-wrapper">
+            <input type="password" id="password" placeholder="PASSWORD">
+            <div class="toggle-btn" id="toggleAction">
+                <span id="toggleText">Show</span>
+                <div class="icon" id="toggleIcon">🚫</div>
+            </div>
+        </div>
         
         <button class="btn-login" onclick="signIn()">Enter System</button>
         
@@ -118,55 +183,64 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function signIn() {
-            const userField = document.getElementById('username');
-            const passField = document.getElementById('password');
+        const passwordField = document.getElementById('password');
+        const toggleAction = document.getElementById('toggleAction');
+        const toggleText = document.getElementById('toggleText');
+        const toggleIcon = document.getElementById('toggleIcon');
+
+        toggleAction.addEventListener('click', () => {
+            const isVisible = passwordField.type === 'text';
             
-            const userIn = userField.value.trim().toUpperCase();
-            const passIn = passField.value.trim();
+            // Re-trigger reveal animation
+            passwordField.classList.remove('revealed');
+            void passwordField.offsetWidth; // Trigger reflow
+            passwordField.classList.add('revealed');
+
+            if (isVisible) {
+                passwordField.type = 'password';
+                toggleText.textContent = 'Show';
+                toggleIcon.textContent = '🚫';
+                toggleText.style.color = '#64748b';
+            } else {
+                passwordField.type = 'text';
+                toggleText.textContent = 'Hide';
+                toggleIcon.textContent = '👁️';
+                toggleText.style.color = '#0081ff';
+            }
+        });
+
+        async function signIn() {
+            const userIn = document.getElementById('username').value.trim().toUpperCase();
+            const passIn = document.getElementById('password').value.trim();
             
             if (!userIn || !passIn) {
                 alert("Missing Credentials");
                 return;
             }
 
-            console.log("Attempting Login for:", userIn);
-
             try {
-                // 1. Fetch user from table
                 const { data, error } = await _supabase
                     .from('staff_accounts')
                     .select('*')
                     .eq('username', userIn);
 
-                // 2. Check for Connection Errors (like RLS blocking)
                 if (error) {
-                    console.error("Supabase Error:", error);
                     alert("System Error: " + error.message);
                     return;
                 }
 
-                // 3. Check if user exists
                 if (!data || data.length === 0) {
-                    alert("User not found. Check spelling.");
+                    alert("User not found.");
                     return;
                 }
 
                 const userData = data[0];
 
-                // 4. Verify Password
                 if (userData.password === passIn) {
-                    // Success! Store session details
                     localStorage.setItem('activeAdmin', userData.username);
                     localStorage.setItem('userRole', userData.role);
-                    
-                    // Store permissions as a JSON string so other pages can read them
-                    const perms = userData.permissions || [];
-                    localStorage.setItem('userPermissions', JSON.stringify(perms));
+                    localStorage.setItem('userPermissions', JSON.stringify(userData.permissions || []));
 
-                    console.log("Success! Redirecting...");
-
-                    // 5. Route based on role
                     if (userData.role === 'admin') {
                         window.location.href = 'dashboard.html';
                     } else {
@@ -175,14 +249,11 @@
                 } else {
                     alert("Wrong Password.");
                 }
-
             } catch (err) {
-                console.error("Unexpected Error:", err);
                 alert("An unexpected error occurred.");
             }
         }
 
-        // Enter key support
         document.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') signIn();
         });
