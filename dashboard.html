@@ -17,137 +17,161 @@
             --warning: #f59e0b;
             --user-manage: #ec4899; 
             --reorder: #f97316;
+            --sidebar-width-desktop: 110px;
         }
-        body {
-            margin: 0; font-family: 'Inter', sans-serif;
-            background: #f1f5f9; min-height: 100vh;
-        }
+
+        html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; display: flex; flex-direction: column; }
+
         .navbar { 
             height: 64px; background: var(--primary); color: white;
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            padding: 0 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000;
         }
-        .container { padding: 20px; max-width: 1100px; margin: 0 auto; }
-        .welcome-section { margin-bottom: 25px; }
-        .welcome-section h1 { margin: 0; color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 1.5rem; letter-spacing: -1px; }
         
-        /* RESPONSIVE GRID - PREVENTS NARROW BUTTONS */
-        .dash-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); 
-            gap: 15px; margin-bottom: 30px;
-        }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-        .dash-card {
-            background: white; padding: 20px 10px; border-radius: 12px;
-            border: 2px solid var(--primary); transition: all 0.2s ease;
-            cursor: pointer; text-align: center;
-            display: flex; flex-direction: column; align-items: center; gap: 8px;
-            position: relative; overflow: hidden;
-            min-height: 110px;
-            justify-content: center;
-        }
-        .dash-card:hover { 
-            transform: translateY(-5px); 
-            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
-            background: #f8fafc;
-        }
+        .action-bar-container { padding: 10px; display: flex; justify-content: center; background: #e2e8f0; flex-shrink: 0; }
+        .toggle-group { display: flex; width: 100%; max-width: 550px; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); }
+        .btn-toggle { flex: 1; padding: 10px 0; border: none; border-right: 1px solid rgba(255,255,255,0.15); cursor: pointer; color: rgba(255,255,255,0.6); background: var(--primary); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; display: none; flex-direction: column; align-items: center; gap: 4px; transition: all 0.3s ease; }
+        
+        .dashboard-body { flex: 1; overflow-y: auto; padding: 20px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        .header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+        .welcome-section h1 { margin: 0; color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 1.5rem; letter-spacing: -1px; }
+        .clock-container { text-align: right; background: var(--primary); color: white; padding: 10px 20px; border-radius: 12px; min-width: 180px; }
+        #live-clock { font-size: 1.4rem; font-weight: 800; display: block; color: var(--accent); }
+        #live-date { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; opacity: 0.8; }
+
+        .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .dash-card { background: white; padding: 20px 10px; border-radius: 12px; border: 2px solid var(--primary); transition: all 0.2s ease; cursor: pointer; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; min-height: 110px; justify-content: center; }
+        .dash-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15); background: #f8fafc; }
         .dash-card span { font-size: 2rem; }
         .dash-card h3 { margin: 0; text-transform: uppercase; font-size: 0.8rem; color: var(--primary); font-weight: 800; }
         .dash-card p { margin: 0; font-size: 0.65rem; color: #64748b; font-weight: 600; }
 
-        .section-title { 
-            font-size: 0.7rem; font-weight: 800; color: #64748b; 
-            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; 
-            display: flex; align-items: center; gap: 10px; margin-top: 20px;
+        @media (min-width: 1024px) {
+            .main-content { flex-direction: row; }
+            .dashboard-body { order: 1; }
+            .action-bar-container { order: 2; width: var(--sidebar-width-desktop); height: 100%; background: var(--primary); padding: 0; border-left: 2px solid rgba(255,255,255,0.1); }
+            .toggle-group { flex-direction: column; height: 100%; border-radius: 0; border: none; }
+            .btn-toggle { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 35px 5px; width: 100%; display: none; }
+            .btn-toggle span:first-child { font-size: 1.8rem; transition: 0.3s; }
+            .btn-toggle span:last-child { font-size: 0.65rem; opacity: 0; transform: translateY(10px); transition: 0.3s; margin-top: 5px; }
+            .btn-toggle:hover span:last-child { opacity: 1; transform: translateY(0); color: #fff; }
+            .btn-toggle:hover span:first-child { transform: scale(1.1) translateY(-5px); }
+            .btn-toggle:hover { background: rgba(255,255,255,0.08); }
         }
-        .section-title::after { content: ""; flex: 1; height: 1px; background: #cbd5e1; }
 
-        .status-bar {
-            background: white; padding: 15px; border-radius: 12px;
-            border: 2px solid var(--primary); display: flex; 
-            flex-wrap: wrap; gap: 20px; justify-content: space-around;
-        }
+        .section-title { font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; margin-top: 20px; }
+        .section-title::after { content: ""; flex: 1; height: 1px; background: #cbd5e1; }
+        .status-bar { background: white; padding: 15px; border-radius: 12px; border: 2px solid var(--primary); display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-around; }
         .stat-item { display: flex; flex-direction: column; align-items: center; }
         .stat-label { font-size: 0.6rem; font-weight: 800; color: #64748b; text-transform: uppercase; }
         .stat-value { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
-        
-        .btn-inventory { background: var(--accent); color: white; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; }
         
         .hidden { display: none !important; }
 
         @media (max-width: 480px) {
             .dash-grid { grid-template-columns: repeat(2, 1fr); }
+            .header-flex { flex-direction: column; align-items: center; text-align: center; }
         }
     </style>
 </head>
 <body>
     <div class="navbar">
         <div id="nav-brand" style="font-weight: 800; letter-spacing: 0.5px; font-size: 0.9rem;">EASISTOCK ADMIN</div>
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <a href="inventory.html" class="btn-inventory">MASTER LIST</a>
-            <button onclick="logout()" style="background:none; border:none; color:#ef4444; font-weight:800; cursor:pointer; font-size:0.7rem;">LOGOUT</button>
-        </div>
+        <button onclick="logout()" style="background:none; border:none; color:#ef4444; font-weight:800; cursor:pointer; font-size:0.7rem;">LOGOUT ⏻</button>
     </div>
 
-    <div class="container">
-        <div class="welcome-section">
-            <h1 id="welcome-user">Control Dashboard</h1>
-            <p id="role-subtitle" style="color: #64748b; font-size: 0.8rem; font-weight: 600;">Inventory Management System</p>
-        </div>
-
-        <div class="section-title">Operations</div>
-        <div class="dash-grid">
-            <div class="dash-card" data-perm="add.html" onclick="navTo('add.html')" style="border-bottom: 6px solid var(--success);">
-                <span>📦</span><h3>Add Item</h3><p>Bulk Loader</p>
-            </div>
-            <div class="dash-card" data-perm="reorder.html" onclick="navTo('reorder.html')" style="border-bottom: 6px solid var(--reorder);">
-                <span>⚠️</span><h3>Reorder</h3><p>Stock Alerts</p>
-            </div>
-            <div class="dash-card" data-perm="adj.html" onclick="navTo('adj.html')" style="border-bottom: 6px solid var(--warning);">
-                <span>⚖️</span><h3>Adjust</h3><p>Stock Levels</p>
-            </div>
-            <div class="dash-card" data-perm="edit.html" onclick="navTo('edit.html')" style="border-bottom: 6px solid var(--accent);">
-                <span>📝</span><h3>Edit</h3><p>Modify Info</p>
-            </div>
-            <div class="dash-card" data-perm="delete.html" onclick="navTo('delete.html')" style="border-bottom: 6px solid var(--danger);">
-                <span>🗑️</span><h3>Delete</h3><p>Remove SKU</p>
+    <div class="main-content">
+        <div class="action-bar-container">
+            <div class="toggle-group" id="perm-nav">
+                <button class="btn-toggle" data-page="inventory.html" onclick="navTo('inventory.html')"><span>📋</span><span>Inventory</span></button>
+                <button class="btn-toggle" data-page="receiving.html" onclick="navTo('receiving.html')"><span>🚚</span><span>Receiving</span></button>
+                <button class="btn-toggle" data-page="orders.html" onclick="navTo('orders.html')"><span>💰</span><span>Sales</span></button>
+                <button class="btn-toggle" data-page="transfer.html" onclick="navTo('transfer.html')"><span>🔄</span><span>Transfer</span></button>
+                <button class="btn-toggle" data-page="return.html" onclick="navTo('return.html')"><span>↩️</span><span>Return</span></button>
             </div>
         </div>
 
-        <div class="section-title">Configuration</div>
-        <div class="dash-grid">
-            <div class="dash-card" data-perm="par-levels.html" onclick="navTo('par-levels.html')" style="border-bottom: 6px solid var(--accent);">
-                <span>📊</span><h3>Par Levels</h3><p>Min/Max Setup</p>
-            </div>
-            <div class="dash-card" data-perm="categories.html" onclick="navTo('categories.html')" style="border-bottom: 6px solid var(--warning);">
-                <span>🏷️</span><h3>Categories</h3><p>Prefix Manager</p>
-            </div>
-            <div class="dash-card" data-perm="logs.html" onclick="navTo('logs.html')" style="border-bottom: 6px solid var(--report);">
-                <span>📜</span><h3>History</h3><p>Audit Logs</p>
-            </div>
-            <div class="dash-card" id="user-manage-card" onclick="navTo('user.html')" style="border-bottom: 6px solid var(--user-manage);">
-                <span>👥</span><h3>Users</h3><p>Staff Access</p>
-            </div>
-        </div>
+        <div class="dashboard-body">
+            <div class="container">
+                <div class="header-flex">
+                    <div class="welcome-section">
+                        <h1 id="welcome-user">Control Dashboard</h1>
+                        <p id="role-subtitle" style="color: #64748b; font-size: 0.8rem; font-weight: 600; margin:0;">Inventory Management System</p>
+                    </div>
+                    <div class="clock-container">
+                        <span id="live-clock">00:00:00 AM</span>
+                        <span id="live-date">...</span>
+                    </div>
+                </div>
 
-        <div class="status-bar">
-            <div class="stat-item">
-                <span class="stat-label">Total SKUs</span>
-                <span id="total-items" class="stat-value">--</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Restock Required</span>
-                <span id="low-stock" class="stat-value">--</span>
+                <div class="section-title">Operations</div>
+                <div class="dash-grid">
+                    <div class="dash-card" data-perm="add.html" onclick="navTo('add.html')" style="border-bottom: 6px solid var(--success);">
+                        <span>📦</span><h3>Add Item</h3><p>Bulk Loader</p>
+                    </div>
+                    <div class="dash-card" data-perm="reorder.html" onclick="navTo('reorder.html')" style="border-bottom: 6px solid var(--reorder);">
+                        <span>⚠️</span><h3>Reorder</h3><p>Stock Alerts</p>
+                    </div>
+                    <div class="dash-card" data-perm="adj.html" onclick="navTo('adj.html')" style="border-bottom: 6px solid var(--warning);">
+                        <span>⚖️</span><h3>Adjust</h3><p>Stock Levels</p>
+                    </div>
+                    <div class="dash-card" data-perm="edit.html" onclick="navTo('edit.html')" style="border-bottom: 6px solid var(--accent);">
+                        <span>📝</span><h3>Edit</h3><p>Modify Info</p>
+                    </div>
+                    <div class="dash-card" data-perm="delete.html" onclick="navTo('delete.html')" style="border-bottom: 6px solid var(--danger);">
+                        <span>🗑️</span><h3>Delete</h3><p>Remove SKU</p>
+                    </div>
+                </div>
+
+                <div class="section-title">Configuration</div>
+                <div class="dash-grid">
+                    <div class="dash-card" data-perm="par-levels.html" onclick="navTo('par-levels.html')" style="border-bottom: 6px solid var(--accent);">
+                        <span>📊</span><h3>Par Levels</h3><p>Min/Max Setup</p>
+                    </div>
+                    <div class="dash-card" data-perm="categories.html" onclick="navTo('categories.html')" style="border-bottom: 6px solid var(--warning);">
+                        <span>🏷️</span><h3>Categories</h3><p>Prefix Manager</p>
+                    </div>
+                    <div class="dash-card" data-perm="logs.html" onclick="navTo('logs.html')" style="border-bottom: 6px solid var(--report);">
+                        <span>📜</span><h3>History</h3><p>Audit Logs</p>
+                    </div>
+                    <div class="dash-card" id="user-manage-card" onclick="navTo('user.html')" style="border-bottom: 6px solid var(--user-manage);">
+                        <span>👥</span><h3>Users</h3><p>Staff Access</p>
+                    </div>
+                </div>
+
+                <div class="status-bar">
+                    <div class="stat-item">
+                        <span class="stat-label">Total SKUs</span>
+                        <span id="total-items" class="stat-value">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Restock Required</span>
+                        <span id="low-stock" class="stat-value">--</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // SUPABASE CONNECTION
+        function updateClock() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const clockEl = document.getElementById('live-clock');
+            const dateEl = document.getElementById('live-date');
+            if(clockEl) clockEl.innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            if(dateEl) dateEl.innerText = now.toLocaleDateString('en-US', options);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
         const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
-        
         let _supabase;
 
         function initSupabase() {
@@ -161,61 +185,59 @@
         const activeUser = localStorage.getItem('activeAdmin');
         const userRole = localStorage.getItem('userRole');
         let userPermissions = [];
-
-        try {
-            userPermissions = JSON.parse(localStorage.getItem('userPermissions')) || [];
-        } catch(e) { userPermissions = []; }
+        try { userPermissions = JSON.parse(localStorage.getItem('userPermissions')) || []; } catch(e) { }
 
         function checkAccess() {
-            if (!activeUser) {
-                window.location.href = 'index.html';
-                return;
-            }
-            document.getElementById('welcome-user').innerText = "Hello, " + activeUser;
-            document.getElementById('role-subtitle').innerText = (userRole === 'admin' ? "System Administrator" : "Staff Operations");
+            if (!activeUser) { window.location.href = 'index.html'; return; }
+            
+            const welcomeEl = document.getElementById('welcome-user');
+            const roleEl = document.getElementById('role-subtitle');
+            if(welcomeEl) welcomeEl.innerText = "Hello, " + activeUser;
+            if(roleEl) roleEl.innerText = (userRole === 'admin' ? "System Administrator" : "Staff Operations");
+
+            document.querySelectorAll('.btn-toggle, .dash-card[data-perm]').forEach(el => {
+                const requiredPage = el.getAttribute('data-page') || el.getAttribute('data-perm');
+                
+                if (userRole === 'admin' || userPermissions.includes(requiredPage)) {
+                    el.classList.remove('hidden');
+                    if (el.classList.contains('btn-toggle')) {
+                        el.style.display = 'flex';
+                    }
+                } else {
+                    el.classList.add('hidden');
+                    el.style.display = 'none';
+                }
+            });
 
             if (userRole !== 'admin') {
                 const userCard = document.getElementById('user-manage-card');
-                if(userCard) userCard.classList.add('hidden');
-                document.querySelectorAll('.dash-card[data-perm]').forEach(card => {
-                    const requiredPage = card.getAttribute('data-perm');
-                    if (!userPermissions.includes(requiredPage)) card.classList.add('hidden');
-                });
+                if(userCard) { userCard.classList.add('hidden'); userCard.style.display = 'none'; }
             }
         }
 
         async function loadStats() {
             if (!_supabase) return;
             try {
-                const { data: items, error } = await _supabase.from('inventory').select('quantity, min_qty');
-                if (error) throw error;
-
-                const totalSKUs = items.length;
-                const lowStockCount = items.filter(item => {
-                    const min = item.min_qty || 5; 
-                    return (item.quantity || 0) < min;
-                }).length;
-
-                document.getElementById('total-items').innerText = totalSKUs || 0;
-                const lowStockDisplay = document.getElementById('low-stock');
-                lowStockDisplay.innerText = lowStockCount || 0;
-                lowStockDisplay.style.color = lowStockCount > 0 ? "var(--danger)" : "var(--success)";
-            } catch (e) {
-                console.error("Stats Error:", e);
-            }
+                const { data: items } = await _supabase.from('inventory').select('quantity, min_qty');
+                if (items) {
+                    const lowStockCount = items.filter(item => (item.quantity || 0) < (item.min_qty || 5)).length;
+                    const totalEl = document.getElementById('total-items');
+                    const lowEl = document.getElementById('low-stock');
+                    if(totalEl) totalEl.innerText = items.length;
+                    if(lowEl) {
+                        lowEl.innerText = lowStockCount;
+                        lowEl.style.color = lowStockCount > 0 ? "var(--danger)" : "var(--success)";
+                    }
+                }
+            } catch (e) { console.error(e); }
         }
 
         function navTo(page) { window.location.href = page; }
         function logout() { localStorage.clear(); window.location.href = 'index.html'; }
 
-        // FINAL INITIALIZATION
         window.onload = () => {
             checkAccess();
-            if (initSupabase()) {
-                loadStats();
-            } else {
-                console.error("Supabase CDN not loaded. Check internet connection.");
-            }
+            if (initSupabase()) loadStats();
         };
     </script>
 </body>

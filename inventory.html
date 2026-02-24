@@ -15,13 +15,12 @@
             --warning: #f59e0b;
             --danger: #ef4444;
             --excel-border: #cbd5e1;
-            --sidebar-width: 100px; /* Increased for desktop labels */
+            --sidebar-width-desktop: 110px; /* Slightly wider for full words */
         }
 
         html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; }
         body { font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%); display: flex; flex-direction: column; }
 
-        /* Navbar remains consistent */
         .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 1000; }
         
         .nav-logo-btn { 
@@ -35,93 +34,90 @@
         .user-name { font-size: 0.75rem; color: white; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
         .online-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
 
-        /* Main Content Layout - Mobile First */
         .main-content { flex: 1; display: flex; flex-direction: column; padding: 10px; overflow: hidden; }
 
+        /* MOBILE VIEW */
         .action-bar-container { padding: 5px 0 15px 0; display: flex; justify-content: center; flex-shrink: 0; }
-        .toggle-group { display: flex; width: 100%; max-width: 550px; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .toggle-group { display: flex; width: 100%; max-width: 550px; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); }
         
         .btn-toggle { 
             flex: 1; padding: 10px 0; border: none; border-right: 1px solid rgba(255,255,255,0.15); 
             cursor: pointer; color: rgba(255,255,255,0.6); background: var(--primary); 
             font-size: 0.65rem; font-weight: 800; text-transform: uppercase; 
-            display: none; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s;
+            display: none; flex-direction: column; align-items: center; gap: 4px; transition: all 0.3s ease;
         }
         .btn-toggle.active { background: var(--accent) !important; color: white !important; display: flex !important; }
-        .btn-toggle:hover { color: white; background: rgba(255,255,255,0.1); }
 
-        /* Desktop Specific Styles */
+        /* DESKTOP VIEW - FULL WORDS & RIGHT SIDEBAR */
         @media (min-width: 1024px) {
             .main-content { flex-direction: row; padding: 0; }
-            
-            /* Sidebar style for Desktop */
+            .right-panel { order: 1; flex: 1; padding: 25px; }
+
             .action-bar-container { 
-                width: var(--sidebar-width); 
+                order: 2; 
+                width: var(--sidebar-width-desktop); 
                 height: 100%; 
                 background: var(--primary); 
                 padding: 0; 
                 flex-direction: column; 
-                justify-content: flex-start;
-                border-right: 1px solid rgba(255,255,255,0.1);
+                border-left: 2px solid rgba(255,255,255,0.1); 
             }
             
-            .toggle-group { 
-                flex-direction: column; 
-                height: 100%; 
-                max-width: none; 
-                border: none; 
-                border-radius: 0; 
-                background: transparent;
-                box-shadow: none;
-            }
+            .toggle-group { flex-direction: column; height: 100%; border-radius: 0; border: none; }
 
             .btn-toggle { 
                 border-right: none; 
-                border-bottom: 1px solid rgba(255,255,255,0.1); 
-                padding: 25px 0; 
+                border-bottom: 1px solid rgba(255,255,255,0.05); 
+                padding: 35px 5px; /* Added slight side padding */
                 width: 100%; 
-                font-size: 0.75rem;
-                display: flex; /* Force display on desktop for allowed items */
             }
 
-            .right-panel { 
-                flex: 1; 
-                display: flex; 
-                flex-direction: column; 
-                padding: 25px; 
-                overflow: hidden; 
-                background: rgba(255,255,255,0.4); /* Soften the background */
+            .btn-toggle span:first-child {
+                font-size: 1.8rem;
+                transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             }
 
-            .search-container { max-width: 100%; margin-bottom: 15px; }
-            .table-scroll-area { border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+            /* Reveal Full Word Label on Hover */
+            .btn-toggle span:last-child {
+                font-size: 0.65rem; /* Smaller font for long words like "Receiving" */
+                opacity: 0;
+                transform: translateY(10px);
+                transition: all 0.3s ease;
+                margin-top: 5px;
+            }
+
+            .btn-toggle:hover span:last-child {
+                opacity: 1;
+                transform: translateY(0);
+                color: #fff;
+            }
+
+            .btn-toggle:hover span:first-child {
+                transform: scale(1.1) translateY(-5px);
+            }
+            
+            .btn-toggle:hover { background: rgba(255,255,255,0.08); }
         }
 
-        /* Elements inside right-panel */
-        .right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .search-container { margin-bottom: 8px; width: 100%; position: relative; flex-shrink: 0; }
-        .search-input { width: 100%; padding: 12px 45px; border-radius: 10px; border: 2px solid var(--primary); font-size: 0.9rem; font-weight: 700; box-sizing: border-box; outline: none; text-transform: uppercase; }
-        .search-icon { position: absolute; left: 15px; top: 12px; color: var(--primary); font-size: 1.1rem; }
+        /* Table & Search Panel */
+        .right-panel { display: flex; flex-direction: column; overflow: hidden; }
+        .search-container { margin-bottom: 12px; width: 100%; position: relative; flex-shrink: 0; }
+        .search-input { width: 100%; padding: 15px 50px; border-radius: 12px; border: 2px solid var(--primary); font-size: 1rem; font-weight: 700; box-sizing: border-box; outline: none; text-transform: uppercase; }
+        .search-icon { position: absolute; left: 18px; top: 15px; color: var(--primary); font-size: 1.2rem; }
 
-        .table-scroll-area { flex: 1; overflow: auto; background: white; border: 2px solid var(--primary); border-radius: 12px 12px 0 0; }
-        table { border-collapse: collapse; width: max-content; min-width: 100%; table-layout: fixed; }
+        .table-scroll-area { flex: 1; overflow: auto; background: white; border: 2px solid var(--primary); border-radius: 12px; }
+        table { border-collapse: collapse; width: max-content; min-width: 100%; }
         
-        thead th { position: sticky; top: 0; z-index: 20; background: #f1f5f9; height: 45px; font-size: 0.7rem; font-weight: 800; border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border); color: var(--primary); text-transform: uppercase; }
-        .sticky-col { position: sticky; left: 0; z-index: 30; background: #f1f5f9 !important; width: 45px !important; border-right: 2px solid var(--primary) !important; }
+        thead th { position: sticky; top: 0; z-index: 20; background: #f1f5f9; height: 50px; font-size: 0.75rem; font-weight: 800; border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border); color: var(--primary); text-transform: uppercase; }
+        .sticky-col { position: sticky; left: 0; z-index: 30; background: #f1f5f9 !important; width: 50px !important; border-right: 2px solid var(--primary) !important; }
 
-        tbody td { height: 48px; padding: 0 8px; border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); font-size: 0.8rem; text-align: center; white-space: nowrap; overflow: hidden; font-weight: 600; color: #334155; text-transform: uppercase; }
-        tbody tr:hover { background-color: #f0f9ff; cursor: pointer; }
+        tbody td { height: 52px; padding: 0 10px; border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); font-size: 0.85rem; text-align: center; white-space: nowrap; font-weight: 600; color: #334155; text-transform: uppercase; }
+        tbody tr:hover { background-color: #f8fafc; }
         tbody tr.selected-row { background-color: var(--accent) !important; }
         tbody tr.selected-row td { color: white !important; }
-        
-        .status-badge { padding: 4px 8px; border-radius: 6px; font-weight: 800; font-size: 0.65rem; color: white; min-width: 60px; display: inline-block; }
-        .bg-healthy { background: var(--success); }
-        .bg-low { background: var(--warning); }
-        .bg-out { background: var(--danger); }
 
-        .pagination-footer { height: 60px; background: white; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--primary); border-radius: 0 0 12px 12px; flex-shrink: 0; }
-        .nav-btns { width: 80px; height: 38px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.7rem; }
-        .nav-btns:disabled { background: #cbd5e1; cursor: not-allowed; }
+        .pagination-footer { height: 65px; background: white; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--primary); border-radius: 0 0 12px 12px; flex-shrink: 0; }
+        .nav-btns { width: 100px; height: 42px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -140,10 +136,10 @@
     <div class="main-content">
         <div class="action-bar-container">
             <div class="toggle-group" id="perm-nav">
-                <button class="btn-toggle active" data-page="inventory.html" onclick="location.href='inventory.html'"><span>📋</span><span>Inv</span></button>
-                <button class="btn-toggle" data-page="receiving.html" onclick="location.href='receiving.html'"><span>🚚</span><span>Recv</span></button>
+                <button class="btn-toggle active" data-page="inventory.html" onclick="location.href='inventory.html'"><span>📋</span><span>Inventory</span></button>
+                <button class="btn-toggle" data-page="receiving.html" onclick="location.href='receiving.html'"><span>🚚</span><span>Receiving</span></button>
                 <button class="btn-toggle" data-page="orders.html" onclick="location.href='orders.html'"><span>💰</span><span>Sales</span></button>
-                <button class="btn-toggle" data-page="transfer.html" onclick="location.href='transfer.html'"><span>🔄</span><span>Trans</span></button>
+                <button class="btn-toggle" data-page="transfer.html" onclick="location.href='transfer.html'"><span>🔄</span><span>Transfer</span></button>
                 <button class="btn-toggle" data-page="return.html" onclick="location.href='return.html'"><span>↩️</span><span>Return</span></button>
             </div>
         </div>
@@ -175,7 +171,7 @@
             </div>
 
             <div class="pagination-footer">
-                <div id="page-info" style="font-size: 0.75rem; font-weight: 800; color: var(--primary);">Loading...</div>
+                <div id="page-info" style="font-size: 0.8rem; font-weight: 800; color: var(--primary);">Loading...</div>
                 <div style="gap:10px; display:flex;">
                     <button class="nav-btns" id="prevBtn" onclick="changePage(currentPage - 1)">PREV</button>
                     <button class="nav-btns" id="nextBtn" onclick="changePage(currentPage + 1)">NEXT</button>
@@ -185,9 +181,8 @@
     </div>
 
     <script>
-        // Your existing script remains identical
+        // ... Supabase logic stays exactly as you had it ...
         const _supabase = supabase.createClient('https://crruounuhtfzyssyhgcc.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg');
-        
         let currentPage = 1, currentSearchQuery = "";
         const activeUser = localStorage.getItem('activeAdmin');
         const userRole = localStorage.getItem('userRole');
@@ -197,41 +192,26 @@
             if (!activeUser) { location.href = 'index.html'; return; }
             document.getElementById('active-user').innerText = activeUser;
             document.getElementById('user-role-label').innerText = userRole === 'admin' ? 'System Admin' : 'Staff Member';
-
             document.querySelectorAll('.btn-toggle').forEach(btn => {
                 const page = btn.getAttribute('data-page');
-                if (userRole === 'admin' || userPermissions.includes(page)) {
-                    btn.style.display = 'flex';
-                } else {
-                    btn.style.display = 'none';
-                }
+                if (userRole === 'admin' || userPermissions.includes(page)) { btn.style.display = 'flex'; }
             });
         }
-
         function goHome() { window.location.href = (userRole === 'admin') ? 'dashboard.html' : 'inventory.html'; }
-
         async function fetchInventory() {
             const tbody = document.getElementById('inventory-body');
             try {
                 let query = _supabase.from('inventory').select('*', { count: 'exact' });
-                if (currentSearchQuery) {
-                    query = query.or(`item_name.ilike.%${currentSearchQuery}%,sku.ilike.%${currentSearchQuery}%,brand.ilike.%${currentSearchQuery}%,location.ilike.%${currentSearchQuery}%`);
-                }
+                if (currentSearchQuery) query = query.or(`item_name.ilike.%${currentSearchQuery}%,sku.ilike.%${currentSearchQuery}%,brand.ilike.%${currentSearchQuery}%,location.ilike.%${currentSearchQuery}%`);
                 const from = (currentPage - 1) * 25;
                 const { data, count, error } = await query.order('location').range(from, from + 24);
                 if (error) throw error;
                 renderTable(data || [], count || 0);
-            } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="10" style="padding:20px; color:red;">Error: ${err.message}</td></tr>`;
-            }
+            } catch (err) { tbody.innerHTML = `<tr><td colspan="10" style="padding:20px; color:red;">Error: ${err.message}</td></tr>`; }
         }
-
         function renderTable(data, total) {
             const tbody = document.getElementById('inventory-body');
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" style="padding:20px;">No items found.</td></tr>`;
-                return;
-            }
+            if (data.length === 0) { tbody.innerHTML = `<tr><td colspan="10" style="padding:20px;">No items found.</td></tr>`; return; }
             tbody.innerHTML = data.map((item, i) => {
                 const qty = item.quantity || 0;
                 const min = item.min_qty || 10;
@@ -239,13 +219,10 @@
                 let statusBadge = qty <= 0 ? '<span class="status-badge bg-out">OUT</span>' : (qty < min ? '<span class="status-badge bg-low">LOW</span>' : '<span class="status-badge bg-healthy">GOOD</span>');
                 return `<tr onclick="selectRow(this)">
                     <td class="sticky-col">${((currentPage-1)*25)+i+1}</td>
-                    <td>${statusBadge}</td>
-                    <td>${item.category || '-'}</td>
-                    <td>${item.location || '-'}</td>
+                    <td>${statusBadge}</td><td>${item.category || '-'}</td><td>${item.location || '-'}</td>
                     <td style="font-family:monospace; font-weight:800; color:var(--accent);">${item.sku || '-'}</td>
                     <td style="text-align:left; font-weight:700;">${item.item_name || '-'}</td>
-                    <td>${item.brand || '-'}</td>
-                    <td style="font-weight:800;">${qty}</td>
+                    <td>${item.brand || '-'}</td><td style="font-weight:800;">${qty}</td>
                     <td><span style="font-size:0.6rem; background:#64748b; color:white; padding:2px 4px; border-radius:3px;">${item.uom || 'PCS'}</span></td>
                     <td style="color:var(--success); font-weight:800;">₱${price}</td></tr>`;
             }).join('');
@@ -254,12 +231,10 @@
             document.getElementById('prevBtn').disabled = (currentPage === 1);
             document.getElementById('nextBtn').disabled = (currentPage >= totalPages);
         }
-
         function handleSearch() { currentSearchQuery = document.getElementById('searchInput').value; currentPage = 1; fetchInventory(); }
         function changePage(p) { if(p > 0) { currentPage = p; fetchInventory(); document.querySelector('.table-scroll-area').scrollTop = 0; } }
         function handleLogout() { localStorage.clear(); location.href = 'index.html'; }
         function selectRow(el) { document.querySelectorAll('#inventory-body tr').forEach(r => r.classList.remove('selected-row')); el.classList.add('selected-row'); }
-
         applyPermissions();
         fetchInventory();
     </script>
