@@ -14,239 +14,255 @@
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --reorder: #f97316;
-            --excel-border: #cbd5e1;
+            --border-main: #cbd5e1;
+            --sidebar-width-desktop: 110px;
         }
 
-        body {
-            margin: 0; font-family: 'Inter', sans-serif;
-            background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
-            height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
-            align-items: center;
-        }
+        /* --- GLOBAL LAYOUT --- */
+        html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; position: fixed; width: 100%; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%); display: flex; flex-direction: column; }
 
-        .navbar { 
-            width: 100%; height: 60px; background: var(--primary); 
-            display: flex; align-items: center; justify-content: space-between; 
-            padding: 0 15px; flex-shrink: 0; box-sizing: border-box;
-        }
-
-        .nav-logo-text { color: white; font-weight: 800; font-size: 1rem; text-transform: uppercase; }
-
-        .btn-home {
-            background: var(--accent); color: white; border: none; padding: 8px 15px;
-            border-radius: 8px; font-weight: 800; font-size: 0.7rem; cursor: pointer;
-            text-decoration: none; text-transform: uppercase;
-        }
-
-        .main-content { 
-            width: 100%; max-width: 700px; flex: 1; padding: 10px; 
-            display: flex; flex-direction: column; overflow: hidden;
-            box-sizing: border-box;
-        }
-
-        .filter-grid { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 6px; 
-            margin-bottom: 10px; width: 100%; background: white;
-            padding: 10px; border-radius: 12px; border: 2px solid var(--primary);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); box-sizing: border-box; 
-            flex-shrink: 0; 
-        }
-
-        .search-wrapper { grid-column: span 2; }
-        .search-input, .type-select, .date-input { 
-            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;
-            font-size: 0.8rem; font-weight: 700; box-sizing: border-box; outline: none; background: #f8fafc;
-        }
-
-        .btn-reset { 
-            grid-column: span 2; background: #64748b; color: white; border: none; 
-            padding: 8px; border-radius: 8px; font-weight: 800; font-size: 0.65rem; 
-            cursor: pointer; text-transform: uppercase; 
-        }
-
-        .section-header { 
-            width: 100%; background: var(--primary); color: white; padding: 10px 15px; 
-            border-radius: 12px 12px 0 0; font-size: 0.65rem; font-weight: 800; 
-            text-transform: uppercase; display: flex; justify-content: space-between; 
-            box-sizing: border-box; flex-shrink: 0;
-        }
-
-        .table-area { 
-            width: 100%; background: white; border: 2px solid var(--primary); border-top: none; 
-            border-radius: 0 0 12px 12px; overflow-y: auto;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); flex: 1;
-            -webkit-overflow-scrolling: touch;
-        }
+        .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; flex-shrink: 0; z-index: 1000; }
+        .nav-title { color: white; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
         
-        table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+        .user-info { display: flex; flex-direction: column; align-items: flex-end; margin-right: 10px; }
+        .user-label { font-size: 0.5rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; }
+        .user-name { font-size: 0.7rem; color: white; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+        .online-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
 
-        thead th { 
-            position: sticky; top: 0; z-index: 10; background: #f1f5f9;
-            padding: 10px; font-size: 0.55rem; text-transform: uppercase; 
-            border-bottom: 2px solid var(--primary); color: var(--primary); font-weight: 800; text-align: left;
+        .main-content { flex: 1; display: flex; flex-direction: column; padding: 8px; overflow: hidden; gap: 8px; }
+
+        /* --- SIDEBAR --- */
+        .action-bar-container { display: flex; justify-content: center; flex-shrink: 0; }
+        .toggle-group { display: flex; width: 100%; max-width: 550px; border-radius: 10px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); }
+        .btn-toggle { flex: 1; padding: 8px 0; border: none; border-right: 1px solid rgba(255,255,255,0.15); cursor: pointer; color: rgba(255,255,255,0.6); background: var(--primary); font-size: 0.6rem; font-weight: 800; text-transform: uppercase; display: none; flex-direction: column; align-items: center; gap: 2px; }
+        .btn-toggle.active { background: var(--accent) !important; color: white !important; display: flex !important; }
+
+        /* --- CONTENT CARD --- */
+        .right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; height: 100%; }
+        .log-card { background: white; border-radius: 12px; border: 2px solid var(--primary); display: flex; flex-direction: column; height: 100%; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        .filter-area { padding: 12px; border-bottom: 2px solid var(--primary); background: #f8fafc; flex-shrink: 0; }
+        .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .search-wrapper { grid-column: span 2; }
+        
+        .search-input, .type-select, .date-input { 
+            width: 100%; padding: 10px; border-radius: 8px; border: 2px solid var(--border-main);
+            font-size: 0.75rem; font-weight: 700; outline: none; background: #fff;
         }
+        .search-input:focus { border-color: var(--accent); }
 
-        tbody tr { cursor: pointer; }
-        tbody tr:hover { background-color: #f8fafc; }
+        .grid-area { flex: 1; overflow: auto; background: #fff; -webkit-overflow-scrolling: touch; }
+        table { border-collapse: separate; border-spacing: 0; width: 100%; table-layout: fixed; }
+        
+        thead th { position: sticky; top: 0; background: #f1f5f9; font-size: 0.6rem; font-weight: 800; border-bottom: 2px solid var(--primary); text-transform: uppercase; z-index: 20; height: 40px; padding: 0 10px; text-align: left; }
 
-        tbody td { padding: 10px; border-bottom: 1px solid var(--excel-border); font-size: 0.7rem; font-weight: 600; vertical-align: middle; word-wrap: break-word; }
+        tbody td { padding: 12px 10px; border-bottom: 1px solid var(--border-main); font-size: 0.7rem; font-weight: 600; vertical-align: top; }
+        tbody tr:hover { background-color: #f8fafc; cursor: pointer; }
 
-        .badge { 
-            padding: 4px 2px; border-radius: 4px; font-weight: 800; font-size: 0.5rem; 
-            color: white; text-align: center; display: block; width: 100%; box-sizing: border-box;
-            text-transform: uppercase;
+        .badge { padding: 4px 6px; border-radius: 4px; font-weight: 900; font-size: 0.55rem; color: white; text-transform: uppercase; display: inline-block; }
+        .ref-id { color: var(--accent); font-weight: 800; font-family: monospace; font-size: 0.75rem; display: block; }
+        .summary-text { font-size: 0.6rem; color: #64748b; font-weight: 500; display: block; margin-top: 4px; text-transform: uppercase; line-height: 1.2; }
+
+        /* --- FOOTER --- */
+        .bulk-footer { padding: 8px; border-top: 2px solid var(--primary); display: flex; justify-content: space-between; align-items: center; background: white; flex-shrink: 0; }
+        #log-count { font-size: 0.7rem; font-weight: 900; color: var(--accent); }
+        
+        .btn-back { height: 40px; background: var(--primary); color: white; border-radius: 8px; font-weight: 800; text-transform: uppercase; cursor: pointer; border: none; font-size: 0.7rem; padding: 0 20px; text-decoration: none; display: flex; align-items: center; }
+
+        /* --- DESKTOP VIEW --- */
+        @media (min-width: 1024px) {
+            .main-content { flex-direction: row; padding: 0; gap: 0; }
+            .right-panel { order: 1; padding: 20px; }
+            .action-bar-container { order: 2; width: var(--sidebar-width-desktop); height: 100%; background: var(--primary); flex-direction: column; }
+            .toggle-group { flex-direction: column; height: 100%; border-radius: 0; border: none; }
+            .btn-toggle { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 30px 5px; width: 100%; display: flex; }
+            .btn-toggle span:first-child { font-size: 1.5rem; }
+            
+            .filter-grid { grid-template-columns: 2fr 1fr 1fr 1fr; }
+            .search-wrapper { grid-column: span 1; }
         }
-
-        .ref-id { color: var(--accent); font-weight: 800; font-family: monospace; font-size: 0.7rem; }
-        .summary-text { font-size: 0.55rem; color: #64748b; font-weight: 500; display: block; margin-top: 2px; text-transform: uppercase; }
     </style>
 </head>
 <body>
-    <header class="navbar">
-        <div class="nav-logo-text">Audit Master Log</div>
-        <a href="dashboard.html" class="btn-home">🏠 Home</a>
-    </header>
 
-    <main class="main-content">
-        <div class="filter-grid">
-            <div class="search-wrapper">
-                <input type="text" id="mainSearch" class="search-input" placeholder="🔍 SEARCH REF OR NOTE..." onkeyup="applyFilters()">
+<header class="navbar">
+    <div class="nav-title">Audit Master Log</div>
+    <div class="user-info">
+        <span class="user-label">Logged In As</span>
+        <span class="user-name"><div class="online-dot"></div><span id="display-user">ADMIN</span></span>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="action-bar-container">
+        <div class="toggle-group" id="perm-nav">
+            <button class="btn-toggle active" data-page="inventory.html" onclick="location.href='inventory.html'"><span>📋</span><span>Inventory</span></button>
+            <button class="btn-toggle" data-page="receiving.html" onclick="location.href='receiving.html'"><span>🚚</span><span>Receiving</span></button>
+            <button class="btn-toggle" data-page="orders.html" onclick="location.href='orders.html'"><span>💰</span><span>Sales</span></button>
+            <button class="btn-toggle" data-page="transfer.html" onclick="location.href='transfer.html'"><span>🔄</span><span>Transfer</span></button>
+            <button class="btn-toggle" data-page="return.html" onclick="location.href='return.html'"><span>↩️</span><span>Return</span></button>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="log-card">
+            <div class="filter-area">
+                <div class="filter-grid">
+                    <div class="search-wrapper">
+                        <input type="text" id="mainSearch" class="search-input" placeholder="🔍 SEARCH REF OR NOTE..." onkeyup="applyFilters()">
+                    </div>
+                    <select id="typeFilter" class="type-select" onchange="applyFilters()">
+                        <option value="ALL">ALL ACTIVITIES</option>
+                        <option value="RECEIVING">🚚 RECEIVING</option>
+                        <option value="SALES">💰 SALES</option>
+                        <option value="TRANSFER">🔄 TRANSFERS</option>
+                        <option value="RETURN">↩️ RETURNS</option>
+                        <option value="EDIT">✏️ EDITS</option>
+                        <option value="ADJUST">⚖️ ADJUSTMENTS</option>
+                        <option value="STATUS">🛡️ STATUS</option>
+                    </select>
+                    <input type="date" id="dateFrom" class="date-input" onchange="applyFilters()">
+                    <input type="date" id="dateTo" class="date-input" onchange="applyFilters()">
+                </div>
             </div>
-            <select id="typeFilter" class="type-select" onchange="applyFilters()">
-                <option value="ALL">ALL ACTIVITIES</option>
-                <option value="RECEIVING">🚚 RECEIVING</option>
-                <option value="SALES">💰 SALES</option>
-                <option value="TRANSFER">🔄 TRANSFERS</option>
-                <option value="RETURN">↩️ RETURNS</option>
-                <option value="REORDER">⚠️ PROCUREMENT</option> 
-                <option value="EDIT">✏️ EDITS</option>
-                <option value="ADJUST">⚖️ ADJUSTMENTS</option>
-            </select>
-            <div style="display: flex; gap: 4px;">
-                <input type="date" id="dateFrom" class="date-input" onchange="applyFilters()">
-                <input type="date" id="dateTo" class="date-input" onchange="applyFilters()">
+
+            <div class="grid-area">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 100px;">Date</th>
+                            <th style="width: 110px;">Type</th>
+                            <th>Reference & Summary</th>
+                            <th style="width: 100px; text-align: right;">User</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logs-master-body">
+                        <tr><td colspan="4" style="text-align:center; padding:40px; color:#94a3b8;">Fetching records...</td></tr>
+                    </tbody>
+                </table>
             </div>
-            <button class="btn-reset" onclick="resetFilters()">Reset All Filters</button>
+
+            <div class="bulk-footer">
+                <a href="dashboard.html" class="btn-back">EXIT LOGS</a>
+                <div id="log-count">0 RECORDS FOUND</div>
+                <button class="btn-back" style="background:#64748b;" onclick="resetFilters()">RESET</button>
+            </div>
         </div>
+    </div>
+</main>
 
-        <div class="section-header">
-            <span>📑 System History</span>
-            <span id="log-count">0 RECORDS</span>
-        </div>
-        
-        <div class="table-area">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 20%;">Date</th>
-                        <th style="width: 25%;">Type</th>
-                        <th style="width: 35%;">Ref / Note</th>
-                        <th style="width: 20%; text-align: right;">User</th>
-                    </tr>
-                </thead>
-                <tbody id="logs-master-body">
-                    <tr><td colspan="4" style="text-align:center; padding:30px;">Loading...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </main>
+<script>
+    const _supabase = supabase.createClient('https://crruounuhtfzyssyhgcc.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg');
 
-    <script>
-        const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let masterLogData = [];
 
-        let masterLogData = [];
+    async function init() {
+        const activeUser = localStorage.getItem('activeAdmin') || 'STAFF';
+        document.getElementById('display-user').innerText = activeUser.toUpperCase();
+        applyPermissions();
+        fetchLogs();
+    }
 
-        async function fetchLogs() {
-            const { data, error } = await _supabase
-                .from('activity_logs')
-                .select('*')
-                .order('created_at', { ascending: false });
+    function applyPermissions() {
+        const userRole = localStorage.getItem('userRole');
+        const userPermissions = JSON.parse(localStorage.getItem('userPermissions') || '[]');
+        document.querySelectorAll('.btn-toggle').forEach(btn => {
+            const page = btn.getAttribute('data-page');
+            if (userRole === 'admin' || userPermissions.includes(page)) {
+                btn.style.display = 'flex';
+            }
+        });
+    }
 
-            if (error) return;
+    async function fetchLogs() {
+        const { data, error } = await _supabase
+            .from('activity_logs')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-            masterLogData = data.map(log => ({
-                rawDate: log.created_at.split('T')[0],
-                displayDate: new Date(log.created_at).toLocaleDateString('en-GB'),
-                type: (log.type === 'ORDER' ? 'SALES' : (log.type || 'INFO')).toUpperCase(),
-                ref: log.reference_id || '---',
-                summary: log.summary || '',
-                user: (log.performed_by || 'STAFF').toUpperCase()
-            }));
+        if (error) return;
 
-            renderTable(masterLogData);
+        masterLogData = data.map(log => ({
+            rawDate: log.created_at.split('T')[0],
+            displayDate: new Date(log.created_at).toLocaleDateString('en-GB'),
+            type: (log.type === 'ORDER' ? 'SALES' : (log.type || 'INFO')).toUpperCase(),
+            ref: log.reference_id || '---',
+            summary: log.summary || '',
+            user: (log.performed_by || 'STAFF').toUpperCase()
+        }));
+
+        renderTable(masterLogData);
+    }
+
+    function renderTable(list) {
+        const tbody = document.getElementById('logs-master-body');
+        document.getElementById('log-count').innerText = `${list.length} RECORDS FOUND`;
+
+        if (list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px;">No records match your filters.</td></tr>';
+            return;
         }
 
-        function renderTable(list) {
-            const tbody = document.getElementById('logs-master-body');
-            document.getElementById('log-count').innerText = `${list.length} RECORDS`;
+        tbody.innerHTML = list.map(row => `
+            <tr onclick="location.href='transaction.html?ref=${encodeURIComponent(row.ref)}'">
+                <td style="color: #64748b; font-size: 0.65rem;">${row.displayDate}</td>
+                <td><span class="badge" style="background:${getTypeColor(row.type)}">${row.type}</span></td>
+                <td>
+                    <span class="ref-id">${row.ref}</span>
+                    <span class="summary-text">${row.summary}</span>
+                </td>
+                <td style="text-align:right; font-weight: 800; color: var(--primary);">${row.user}</td>
+            </tr>
+        `).join('');
+    }
 
-            if (list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px;">No records.</td></tr>';
-                return;
+    function getTypeColor(type) {
+        if (type.includes('RECEIVING')) return '#059669'; // Emerald
+        if (type.includes('SALES') || type.includes('ORDER')) return '#6366f1'; // Indigo
+        if (type.includes('TRANS')) return '#0ea5e9'; // Sky
+        if (type.includes('RETURN')) return '#f59e0b'; // Amber
+        if (type.includes('EDIT')) return '#8b5cf6'; // Violet
+        if (type.includes('ADJUST')) return '#d946ef'; // Fuchsia
+        if (type.includes('STATUS')) return '#f43f5e'; // Rose
+        return '#64748b'; // Slate
+    }
+
+    function applyFilters() {
+        const searchVal = document.getElementById('mainSearch').value.toUpperCase();
+        const typeVal = document.getElementById('typeFilter').value;
+        const fromVal = document.getElementById('dateFrom').value;
+        const toVal = document.getElementById('dateTo').value;
+
+        const filtered = masterLogData.filter(item => {
+            const matchesSearch = item.ref.toUpperCase().includes(searchVal) || item.summary.toUpperCase().includes(searchVal);
+            
+            let matchesType = (typeVal === "ALL");
+            if (!matchesType) {
+                if (typeVal === "SALES") {
+                    matchesType = (item.type === "SALES" || item.type === "ORDER");
+                } else {
+                    matchesType = item.type.includes(typeVal);
+                }
             }
 
-            tbody.innerHTML = list.map(row => `
-                <tr onclick="location.href='transaction.html?ref=${encodeURIComponent(row.ref)}'">
-                    <td style="font-size: 0.55rem; color: #64748b;">${row.displayDate}</td>
-                    <td><span class="badge" style="background:${getTypeColor(row.type)}">${row.type}</span></td>
-                    <td>
-                        <span class="ref-id">${row.ref}</span>
-                        <span class="summary-text">${row.summary}</span>
-                    </td>
-                    <td style="text-align:right; font-size: 0.55rem; color: var(--primary); font-weight: 800;">${row.user}</td>
-                </tr>
-            `).join('');
-        }
+            let matchesDate = true;
+            if (fromVal && item.rawDate < fromVal) matchesDate = false;
+            if (toVal && item.rawDate > toVal) matchesDate = false;
+            return matchesSearch && matchesType && matchesDate;
+        });
+        renderTable(filtered);
+    }
 
-        function getTypeColor(type) {
-            if (type.includes('RECV') || type.includes('RECEIVING')) return '#059669'; // Green
-            if (type.includes('SALES') || type.includes('ORDER')) return '#6366f1'; // Indigo
-            if (type.includes('TRANS')) return '#0081ff'; // Blue
-            if (type.includes('RTN') || type.includes('RETURN')) return '#f59e0b'; // Amber
-            if (type.includes('REORDER') || type.includes('PROC')) return '#f97316'; // Orange
-            if (type.includes('EDIT')) return '#8b5cf6'; // Purple
-            return '#475569'; // Gray
-        }
+    function resetFilters() {
+        document.getElementById('mainSearch').value = '';
+        document.getElementById('typeFilter').value = 'ALL';
+        document.getElementById('dateFrom').value = '';
+        document.getElementById('dateTo').value = '';
+        renderTable(masterLogData);
+    }
 
-        function applyFilters() {
-            const searchVal = document.getElementById('mainSearch').value.toUpperCase();
-            const typeVal = document.getElementById('typeFilter').value;
-            const fromVal = document.getElementById('dateFrom').value;
-            const toVal = document.getElementById('dateTo').value;
-
-            const filtered = masterLogData.filter(item => {
-                const matchesSearch = item.ref.includes(searchVal) || item.summary.toUpperCase().includes(searchVal);
-                
-                // Special handling for Sales/Order filtering
-                let matchesType = (typeVal === "ALL");
-                if (!matchesType) {
-                    if (typeVal === "SALES") {
-                        matchesType = (item.type === "SALES" || item.type === "ORDER");
-                    } else {
-                        matchesType = item.type.includes(typeVal);
-                    }
-                }
-
-                let matchesDate = true;
-                if (fromVal && item.rawDate < fromVal) matchesDate = false;
-                if (toVal && item.rawDate > toVal) matchesDate = false;
-                return matchesSearch && matchesType && matchesDate;
-            });
-            renderTable(filtered);
-        }
-
-        function resetFilters() {
-            document.getElementById('mainSearch').value = '';
-            document.getElementById('typeFilter').value = 'ALL';
-            document.getElementById('dateFrom').value = '';
-            document.getElementById('dateTo').value = '';
-            renderTable(masterLogData);
-        }
-
-        window.onload = fetchLogs;
-    </script>
+    window.onload = init;
+</script>
 </body>
 </html>

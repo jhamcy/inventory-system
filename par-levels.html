@@ -11,6 +11,7 @@
             --primary: #0f172a; 
             --accent: #0081ff;  
             --success: #10b981;
+            --danger: #ef4444;
             --excel-border: #cbd5e1;
         }
         html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; }
@@ -26,128 +27,144 @@
         .search-icon { position: absolute; left: 15px; top: 12px; color: var(--primary); font-size: 1.1rem; }
 
         .table-scroll-area { flex: 1; overflow: auto; background: white; border: 2px solid var(--primary); border-radius: 12px 12px 0 0; }
-        table { border-collapse: collapse; width: max-content; min-width: 100%; table-layout: fixed; }
-        thead th { position: sticky; top: 0; z-index: 20; background: #f1f5f9; height: 45px; font-size: 0.7rem; font-weight: 800; border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border); color: var(--primary); text-transform: uppercase; }
+        table { border-collapse: collapse; width: 100%; min-width: 800px; table-layout: fixed; }
+        thead th { position: sticky; top: 0; z-index: 20; background: #f1f5f9; height: 45px; font-size: 0.65rem; font-weight: 800; border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border); color: var(--primary); text-transform: uppercase; }
         
-        .sticky-col { position: sticky; left: 0; z-index: 30; background: #f1f5f9 !important; width: 45px !important; border-right: 2px solid var(--primary) !important; }
+        tbody td { height: 50px; padding: 0 10px; border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); font-size: 0.75rem; text-align: center; font-weight: 700; color: #334155; text-transform: uppercase; }
         
-        tbody td { height: 48px; padding: 0 8px; border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); font-size: 0.8rem; text-align: center; white-space: nowrap; overflow: hidden; font-weight: 600; color: #334155; text-transform: uppercase; }
-        
-        /* Editable Input Styling */
-        .limit-input { width: 80%; padding: 6px; border: 1px solid var(--excel-border); border-radius: 4px; text-align: center; font-weight: 800; color: var(--accent); }
-        .limit-input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+        .limit-input { width: 70px; padding: 8px; border: 2px solid var(--excel-border); border-radius: 6px; text-align: center; font-weight: 800; color: var(--accent); font-family: 'Inter'; }
+        .limit-input:focus { border-color: var(--accent); outline: none; background: #f0f7ff; }
 
-        .pagination-footer { height: 60px; background: white; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--primary); border-top: none; border-radius: 0 0 12px 12px; }
-        .save-btn { background: var(--success); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.75rem; text-transform: uppercase; box-shadow: 0 4px 0 #059669; transition: all 0.1s; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; font-weight: 800; }
+        .status-low { background: #fef2f2; color: var(--danger); border: 1px solid var(--danger); }
+        .status-ok { background: #ecfdf5; color: var(--success); border: 1px solid var(--success); }
+
+        .pagination-footer { height: 70px; background: white; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--primary); border-top: none; border-radius: 0 0 12px 12px; }
+        .save-btn { background: var(--success); color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; box-shadow: 0 4px 0 #059669; }
         .save-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #059669; }
     </style>
 </head>
 <body>
     <div class="navbar">
         <a class="nav-logo-text" onclick="location.href='dashboard.html'">EasiStock</a>
-        <div style="color:white; font-weight:800; font-size:0.7rem; letter-spacing: 1px;">MIN/MAX SETTINGS</div>
+        <div style="color:white; font-weight:800; font-size:0.7rem;">INVENTORY CONTROL: PAR LEVELS</div>
     </div>
 
     <div class="main-content">
         <div class="search-container">
             <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" class="search-input" placeholder="SEARCH ITEMS TO SET LIMITS..." oninput="fetchItems()">
+            <input type="text" id="searchInput" class="search-input" placeholder="SEARCH ITEMS BY NAME OR SKU..." oninput="fetchItems()">
         </div>
 
         <div class="table-scroll-area">
             <table>
                 <thead>
                     <tr>
-                        <th class="sticky-col">#</th>
-                        <th style="width:140px;">SKU</th>
-                        <th style="width:250px;">Description</th>
-                        <th style="width:100px;">Min Qty</th>
-                        <th style="width:100px;">Max Qty</th>
-                        <th style="width:120px;">Current</th>
+                        <th style="width:150px;">SKU / Part #</th>
+                        <th>Item Description</th>
+                        <th style="width:120px;">Current Stock</th>
+                        <th style="width:120px;">Min (Floor)</th>
+                        <th style="width:120px;">Max (Ceiling)</th>
+                        <th style="width:100px;">Status</th>
                     </tr>
                 </thead>
                 <tbody id="par-body">
-                    <tr><td colspan="6" style="padding:40px;">Loading items...</td></tr>
+                    <tr><td colspan="6" style="padding:60px; color:#94a3b8;">Initializing Stock List...</td></tr>
                 </tbody>
             </table>
         </div>
 
         <div class="pagination-footer">
-            <button class="save-btn" onclick="saveAllLimits()">💾 Save All Changes</button>
-            <div id="status-info" style="font-size: 0.7rem; font-weight: 800; color: var(--primary);">Editing Par Levels</div>
+            <div>
+                <button class="save-btn" id="saveBtn" onclick="saveAllLimits()">💾 Save All Thresholds</button>
+            </div>
+            <div id="status-info" style="text-align: right;">
+                <div style="font-size: 0.55rem; font-weight: 800; color: #64748b; text-transform: uppercase;">System Ready</div>
+                <div style="font-size: 0.8rem; font-weight: 800; color: var(--primary);">Bulk Editor Active</div>
+            </div>
         </div>
     </div>
 
     <script>
-        const _supabase = supabase.createClient('https://crruounuhtfzyssyhgcc.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg');
-
-        let itemsData = [];
+        const _URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
+        const _KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
+        const _sb = supabase.createClient(_URL, _KEY);
 
         async function fetchItems() {
             const searchTerm = document.getElementById('searchInput').value;
-            let query = _supabase.from('inventory').select('*');
+            let query = _sb.from('inventory').select('*');
 
             if (searchTerm) {
                 query = query.or(`item_name.ilike.%${searchTerm}%,sku.ilike.%${searchTerm}%`);
             }
 
-            const { data, error } = await query.order('sku', { ascending: true });
+            const { data, error } = await query.order('item_name', { ascending: true });
 
-            if (!error) {
-                itemsData = data;
-                renderTable(data);
-            }
+            if (!error) renderTable(data);
         }
 
         function renderTable(data) {
             const tbody = document.getElementById('par-body');
-            tbody.innerHTML = data.map((item, i) => `
+            if(data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="padding:40px;">No items found matching search.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map(item => {
+                const isLow = (item.quantity || 0) < (item.min_qty || 0);
+                return `
                 <tr data-sku="${item.sku}">
-                    <td class="sticky-col">${i + 1}</td>
-                    <td style="font-family:monospace; font-weight:800;">${item.sku}</td>
+                    <td style="font-family:monospace; font-weight:800; color:var(--accent);">${item.sku}</td>
                     <td style="text-align:left; font-weight:700;">${item.item_name}</td>
-                    <td>
-                        <input type="number" class="limit-input min-val" value="${item.min_qty || 0}">
-                    </td>
-                    <td>
-                        <input type="number" class="limit-input max-val" value="${item.max_qty || 0}">
-                    </td>
                     <td style="font-weight:800; background: #f8fafc;">${item.quantity || 0}</td>
-                </tr>
-            `).join('');
+                    <td><input type="number" class="limit-input min-val" value="${item.min_qty || 0}"></td>
+                    <td><input type="number" class="limit-input max-val" value="${item.max_qty || 0}"></td>
+                    <td>
+                        <span class="status-badge ${isLow ? 'status-low' : 'status-ok'}">
+                            ${isLow ? 'REORDER' : 'HEALTHY'}
+                        </span>
+                    </td>
+                </tr>`;
+            }).join('');
         }
 
         async function saveAllLimits() {
+            const btn = document.getElementById('saveBtn');
+            btn.innerText = "⏳ Saving...";
+            btn.style.opacity = "0.7";
+
             const rows = document.querySelectorAll('#par-body tr');
-            const updates = [];
+            const promises = [];
 
             rows.forEach(row => {
                 const sku = row.getAttribute('data-sku');
                 const min = row.querySelector('.min-val').value;
                 const max = row.querySelector('.max-val').value;
-                updates.push({ sku, min_qty: parseInt(min), max_qty: parseInt(max) });
+                
+                if(sku) {
+                    promises.push(
+                        _sb.from('inventory')
+                           .update({ min_qty: parseInt(min), max_qty: parseInt(max) })
+                           .eq('sku', sku)
+                    );
+                }
             });
 
-            // Upsert in Supabase (Assumes SKU is the unique primary key)
-            for (const item of updates) {
-                const { error } = await _supabase
-                    .from('inventory')
-                    .update({ min_qty: item.min_qty, max_qty: item.max_qty })
-                    .eq('sku', item.sku);
-                
-                if (error) console.error("Error updating", item.sku, error);
-            }
-
-            alert("✅ All Min/Max levels updated successfully!");
+            await Promise.all(promises);
             
-            // Log the activity
+            // Activity Log
             const admin = localStorage.getItem('activeAdmin') || 'Admin';
-            await _supabase.from('activity_logs').insert([{
+            await _sb.from('activity_logs').insert([{
                 type: 'ADJUST',
-                reference_id: 'PAR-' + Date.now().toString().slice(-6),
-                summary: `Min/Max levels updated by ${admin}`,
+                reference_id: 'PAR-' + Math.floor(Math.random()*10000),
+                summary: `BULK PAR LEVEL UPDATE BY ${admin}`,
                 performed_by: admin
             }]);
+
+            btn.innerText = "💾 Save All Changes";
+            btn.style.opacity = "1";
+            alert("✅ Inventory thresholds updated successfully!");
+            fetchItems();
         }
 
         window.onload = fetchItems;

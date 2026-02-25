@@ -13,6 +13,7 @@
             --accent: #0081ff;
             --success: #10b981;
             --border-main: #e2e8f0;
+            --danger: #ef4444;
         }
 
         body {
@@ -22,7 +23,7 @@
         }
 
         .main-container {
-            flex: 1; padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto;
+            flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; max-width: 600px; margin: 0 auto; width: 100%; box-sizing: border-box;
         }
 
         /* PROFILE CARD */
@@ -31,42 +32,44 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; flex-shrink: 0;
         }
 
-        .card-header { background: var(--primary); color: white; padding: 20px; display: flex; align-items: center; gap: 15px; }
-        .avatar { width: 50px; height: 50px; background: var(--accent); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.5rem; border: 2px solid white; text-transform: uppercase; }
-        .header-text h2 { margin: 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        .header-text span { font-size: 0.6rem; font-weight: 700; opacity: 0.8; text-transform: uppercase; }
+        .card-header { background: var(--primary); color: white; padding: 15px; display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 45px; height: 45px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; border: 2px solid white; text-transform: uppercase; }
+        .header-text h2 { margin: 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .header-text span { font-size: 0.55rem; font-weight: 700; opacity: 0.8; text-transform: uppercase; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; }
 
         .card-body { padding: 15px; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
         .info-item { display: flex; flex-direction: column; background: #f8fafc; padding: 8px; border-radius: 8px; border: 1px solid var(--border-main); }
         .label { font-size: 0.5rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
-        .value { font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; }
+        .value { font-size: 0.7rem; font-weight: 700; color: var(--primary); text-transform: uppercase; }
 
-        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid var(--border-main); border-radius: 8px; font-weight: 700; outline: none; box-sizing: border-box; font-size: 0.85rem; transition: border-color 0.2s; }
+        .security-title { font-size: 0.6rem; font-weight: 800; color: #64748b; margin-bottom: 8px; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
+        input { width: 100%; padding: 12px; margin-bottom: 8px; border: 2px solid var(--border-main); border-radius: 8px; font-weight: 700; outline: none; box-sizing: border-box; font-size: 0.8rem; }
         input:focus { border-color: var(--accent); }
 
-        .btn-group { display: flex; gap: 8px; margin-top: 5px; }
-        .btn { flex: 1; padding: 14px; border-radius: 8px; border: none; font-weight: 800; font-size: 0.75rem; cursor: pointer; text-transform: uppercase; transition: transform 0.1s; box-shadow: 0 4px 0px rgba(0,0,0,0.1); }
-        .btn:active { transform: translateY(2px); box-shadow: none; }
+        .btn-group { display: grid; grid-template-columns: 1.5fr 1fr; gap: 8px; margin-top: 5px; }
+        .btn { padding: 12px; border-radius: 8px; border: none; font-weight: 800; font-size: 0.7rem; cursor: pointer; text-transform: uppercase; transition: transform 0.1s; }
+        .btn:active { transform: scale(0.98); }
         
-        .btn-save { background: var(--accent); color: white; }
+        .btn-save { background: var(--accent); color: white; grid-column: span 2; box-shadow: 0 4px 0 #0056b3; margin-bottom: 4px; }
         .btn-back { background: var(--primary); color: white; }
-        .btn-logout { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; flex: 0.6; }
+        .btn-logout { background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; }
 
         /* LOGS SECTION */
         .activity-section {
             background: white; border: 3px solid var(--primary); border-radius: 16px;
             display: flex; flex-direction: column; flex: 1; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
-        .table-header { background: #f1f5f9; padding: 12px; font-size: 0.7rem; font-weight: 800; color: var(--primary); border-bottom: 2px solid var(--primary); text-transform: uppercase; }
-        .scroll-area { flex: 1; overflow: auto; }
+        .table-header { background: #f1f5f9; padding: 12px; font-size: 0.65rem; font-weight: 800; color: var(--primary); border-bottom: 2px solid var(--primary); text-transform: uppercase; display: flex; justify-content: space-between; }
+        .scroll-area { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; }
         
-        table { width: 100%; border-collapse: collapse; min-width: 450px; }
-        th { position: sticky; top: 0; background: #f8fafc; padding: 12px; font-size: 0.55rem; text-transform: uppercase; border-bottom: 1px solid var(--border-main); text-align: left; color: #64748b; }
-        td { padding: 12px; font-size: 0.7rem; font-weight: 600; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
-        tr:hover td { background: #f0f9ff; }
+        table { width: 100%; border-collapse: collapse; min-width: 400px; }
+        th { position: sticky; top: 0; background: #f8fafc; padding: 10px; font-size: 0.5rem; text-transform: uppercase; border-bottom: 1px solid var(--border-main); text-align: left; color: #64748b; z-index: 10; }
+        td { padding: 10px; font-size: 0.65rem; font-weight: 600; border-bottom: 1px solid #f1f5f9; }
+        tr:hover td { background: #f0f9ff; cursor: pointer; }
         
-        .type-tag { padding: 3px 8px; border-radius: 4px; font-size: 0.55rem; font-weight: 800; background: #e2e8f0; color: var(--primary); }
+        .type-tag { padding: 3px 6px; border-radius: 4px; font-size: 0.5rem; font-weight: 900; background: var(--primary); color: white; text-transform: uppercase; }
+        .ref-code { font-family: monospace; color: var(--accent); font-weight: 800; }
     </style>
 </head>
 <body>
@@ -76,48 +79,51 @@
         <div class="card-header">
             <div class="avatar" id="u-init">?</div>
             <div class="header-text">
-                <h2 id="u-name">LOADING...</h2>
+                <h2 id="u-name">ACCESSING...</h2>
                 <span id="u-role">---</span>
             </div>
         </div>
         <div class="card-body">
             <div class="info-grid">
                 <div class="info-item">
-                    <span class="label">Staff ID</span>
+                    <span class="label">STAFF ID</span>
                     <span class="value" id="u-id">---</span>
                 </div>
                 <div class="info-item">
-                    <span class="label">Username</span>
+                    <span class="label">LOGIN USER</span>
                     <span class="value" id="u-user">---</span>
                 </div>
             </div>
             
-            <div style="font-size: 0.6rem; font-weight: 800; color: #64748b; margin-bottom: 8px; text-transform: uppercase;">Security Update</div>
+            <div class="security-title"><span>🔐</span> SECURITY UPDATE</div>
             <input type="password" id="new-pass" placeholder="NEW PASSWORD">
             <input type="password" id="conf-pass" placeholder="CONFIRM PASSWORD">
             
             <div class="btn-group">
-                <button class="btn btn-save" onclick="updatePass()">Update Security</button>
-                <button class="btn btn-back" onclick="goHome()" id="back-txt">Dashboard</button>
-                <button class="btn btn-logout" onclick="logout()">Logout</button>
+                <button class="btn btn-save" onclick="updatePass()">Save New Security</button>
+                <button class="btn btn-back" onclick="goHome()" id="back-txt">EXIT</button>
+                <button class="btn btn-logout" onclick="logout()">LOGOUT</button>
             </div>
         </div>
     </div>
 
     <div class="activity-section">
-        <div class="table-header">My Activity History</div>
+        <div class="table-header">
+            <span>📜 RECENT ACTIVITY</span>
+            <span id="activity-count" style="color: var(--accent);">0 EVENTS</span>
+        </div>
         <div class="scroll-area">
             <table>
                 <thead>
                     <tr>
-                        <th>Date</th>
-                        <th>Action</th>
-                        <th>Summary</th>
-                        <th>Ref #</th>
+                        <th style="width: 70px;">DATE</th>
+                        <th style="width: 90px;">TYPE</th>
+                        <th>SUMMARY</th>
+                        <th style="width: 80px;">REF</th>
                     </tr>
                 </thead>
                 <tbody id="log-table-body">
-                    <tr><td colspan="4" style="text-align:center; padding:30px; color:#94a3b8;">Fetching your records...</td></tr>
+                    <tr><td colspan="4" style="text-align:center; padding:30px; color:#94a3b8;">Loading feed...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -125,91 +131,87 @@
 </div>
 
 <script>
-    const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const _URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
+    const _KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
+    const _sb = supabase.createClient(_URL, _KEY);
 
-    const activeUser = localStorage.getItem('activeAdmin'); // LocalStorage Username
+    const activeUser = localStorage.getItem('activeAdmin'); 
     const userRole = localStorage.getItem('userRole');
 
     async function init() {
-        if (!activeUser) { location.href = 'index.html'; return; }
+        if (!activeUser) { window.location.href = 'index.html'; return; }
         
-        // 1. Fetch live data from staff_accounts
-        const { data: user, error } = await _supabase
+        const { data: user, error } = await _sb
             .from('staff_accounts')
             .select('full_name, staff_id, role')
             .eq('username', activeUser)
             .single();
 
-        if (error || !user) {
-            // Error Fallback
-            document.getElementById('u-name').innerText = activeUser;
-            document.getElementById('u-init').innerText = activeUser.charAt(0);
-            document.getElementById('u-id').innerText = "STF-MANUAL";
-        } else {
-            // Success Logic
+        if (!error && user) {
             const finalName = user.full_name || activeUser;
             document.getElementById('u-name').innerText = finalName;
             document.getElementById('u-init').innerText = finalName.charAt(0);
-            document.getElementById('u-id').innerText = user.staff_id || "STF-PENDING";
+            document.getElementById('u-id').innerText = user.staff_id || "STF-GEN";
+            document.getElementById('u-role').innerText = user.role === 'admin' ? 'SYSTEM ADMINISTRATOR' : 'STOCK OPERATOR';
         }
 
         document.getElementById('u-user').innerText = activeUser;
-        document.getElementById('u-role').innerText = userRole === 'admin' ? 'Administrator' : 'Staff Member';
-        document.getElementById('back-txt').innerText = userRole === 'admin' ? 'Dashboard' : 'Inventory';
+        document.getElementById('back-txt').innerText = (userRole === 'admin') ? 'DASHBOARD' : 'INVENTORY';
         
         loadLogs();
     }
 
     async function loadLogs() {
-        const { data, error } = await _supabase
+        const { data, error } = await _sb
             .from('activity_logs')
             .select('*')
             .eq('performed_by', activeUser)
             .order('created_at', { ascending: false })
-            .limit(25);
+            .limit(20);
 
         const tbody = document.getElementById('log-table-body');
         if (error || !data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">No activity found for your account.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">No recent history.</td></tr>';
             return;
         }
 
+        document.getElementById('activity-count').innerText = `${data.length} EVENTS`;
+
         tbody.innerHTML = data.map(log => `
             <tr onclick="viewTx('${log.reference_id}')">
-                <td style="white-space:nowrap; color:#64748b;">${new Date(log.created_at).toLocaleDateString()}</td>
-                <td><span class="type-tag">${log.type}</span></td>
-                <td style="color:var(--primary); text-transform:uppercase;">${log.summary}</td>
-                <td style="font-family:monospace; font-weight:800; color:var(--accent);">${log.reference_id || '---'}</td>
+                <td style="color:#64748b; font-size: 0.55rem;">${new Date(log.created_at).toLocaleDateString('en-GB')}</td>
+                <td><span class="type-tag" style="background:${getTypeColor(log.type)}">${log.type}</span></td>
+                <td style="color:var(--primary); font-weight:700;">${log.summary}</td>
+                <td class="ref-code">${log.reference_id || '---'}</td>
             </tr>
         `).join('');
+    }
+
+    function getTypeColor(type) {
+        if(type.includes('RECV')) return '#10b981';
+        if(type.includes('SALE') || type.includes('ORDER')) return '#6366f1';
+        return '#475569';
     }
 
     async function updatePass() {
         const p1 = document.getElementById('new-pass').value.trim();
         const p2 = document.getElementById('conf-pass').value.trim();
         
-        if(!p1) return alert("Please enter a new password.");
-        if(p1 !== p2) return alert("Passwords do not match!");
+        if(!p1 || p1.length < 4) return alert("Password must be at least 4 characters.");
+        if(p1 !== p2) return alert("Confirmation does not match!");
         
-        const { error } = await _supabase
-            .from('staff_accounts')
-            .update({ password: p1 })
-            .eq('username', activeUser);
+        const { error } = await _sb.from('staff_accounts').update({ password: p1 }).eq('username', activeUser);
 
-        if(error) {
-            alert("Update Failed: " + error.message);
-        } else {
-            alert("SUCCESS! Your password has been updated.");
+        if(error) alert("Update Failed");
+        else {
+            alert("Security Updated Successfully!");
             document.getElementById('new-pass').value = "";
             document.getElementById('conf-pass').value = "";
         }
     }
 
     function viewTx(ref) {
-        if (!ref || ref === 'null') return;
-        window.location.href = `transaction.html?ref=${ref}`;
+        if (ref && ref !== '---') window.location.href = `transaction.html?ref=${ref}`;
     }
 
     function goHome() {
@@ -217,7 +219,7 @@
     }
 
     function logout() {
-        if(confirm("Logout from EasiStock?")) {
+        if(confirm("Sign out of session?")) {
             localStorage.clear();
             window.location.href = 'index.html';
         }

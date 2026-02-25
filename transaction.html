@@ -61,7 +61,7 @@
             margin-bottom: 5px;
         }
         .table-wrapper { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; min-width: 1000px; table-layout: fixed; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; table-layout: fixed; }
         
         thead { position: sticky; top: 0; background: #f1f5f9; z-index: 10; }
         th { 
@@ -71,7 +71,9 @@
         }
         td { padding: 10px; border-bottom: 1px solid var(--excel-border); font-size: 0.7rem; color: #1e293b; vertical-align: middle; }
 
-        .sku-code { font-family: monospace; font-weight: 800; color: var(--accent); }
+        .item-name-cell { font-weight: 800; color: var(--primary); text-transform: uppercase; font-size: 0.75rem; }
+        .sku-tag { font-family: monospace; font-size: 0.6rem; color: var(--accent); display: block; margin-top: 2px; }
+        
         .uom-tag { font-size: 0.6rem; color: white; background: #64748b; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
         
         .qty-badge { font-weight: 800; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; min-width: 45px; text-align: center; display: inline-block; }
@@ -79,7 +81,7 @@
         .minus { color: var(--danger); background: #fef2f2; border: 1px solid var(--danger); }
         .reorder-style { color: var(--reorder); background: #fff7ed; border: 1px solid var(--reorder); }
 
-        .footer-actions { width: 100%; text-align: center; padding: 10px 0 25px 0; flex-shrink: 0; }
+        .footer-actions { width: 100%; text-align: center; padding: 10px 0 25px 0; flex-shrink: 0; display: flex; justify-content: center; gap: 15px; }
         .btn-back {
             background: var(--primary); color: white; border: none;
             padding: 14px 45px; border-radius: 10px; font-weight: 800;
@@ -96,20 +98,20 @@
 <body>
 
     <header class="navbar">
-        <div class="nav-logo-text">Detail Report</div>
-        <div id="disp-ref-top" style="color: white; font-weight: 800; font-size: 0.7rem; background: var(--accent); padding: 5px 12px; border-radius: 6px;">---</div>
+        <div class="nav-logo-text">Transaction Detail</div>
+        <div id="disp-ref-top" style="color: white; font-weight: 800; font-size: 0.7rem; background: var(--accent); padding: 5px 12px; border-radius: 6px;">REF: ---</div>
     </header>
 
     <main class="main-content">
         <div class="info-card">
-            <div class="info-item"><span class="info-label">Ref</span><span id="val-ref" class="info-value">---</span></div>
+            <div class="info-item"><span class="info-label">Reference</span><span id="val-ref" class="info-value">---</span></div>
             <div class="info-item"><span class="info-label">Action</span><span id="val-type" class="info-value">---</span></div>
-            <div class="info-item"><span class="info-label">User</span><span id="val-user" class="info-value">---</span></div>
-            <div class="info-item"><span class="info-label">Date</span><span id="val-date" class="info-value">---</span></div>
+            <div class="info-item"><span class="info-label">Performed By</span><span id="val-user" class="info-value">---</span></div>
+            <div class="info-item"><span class="info-label">Timestamp</span><span id="val-date" class="info-value">---</span></div>
             
             <div class="notes-area" id="notes-box">
                 <div class="info-label" style="color: var(--accent); margin-bottom: 4px;">Summary</div>
-                <div id="val-notes" class="notes-text">LOADING...</div>
+                <div id="val-notes" class="notes-text">RETRIEVING DATA...</div>
             </div>
         </div>
 
@@ -118,25 +120,24 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 120px;">SKU</th>
+                            <th style="width: 250px;">Item Description</th>
                             <th style="width: 120px;">Category</th>
                             <th style="width: 100px;">Location</th>
-                            <th style="width: 200px;">Description</th>
                             <th style="width: 100px;">Brand</th>
-                            <th style="width: 70px;">UOM</th>
+                            <th style="width: 80px;">UOM</th>
                             <th style="width: 100px;">Unit Price</th>
                             <th style="width: 80px; text-align: center;" id="qty-header">Qty</th>
                         </tr>
                     </thead>
                     <tbody id="inventory-body">
-                        <tr><td colspan="8" style="text-align: center; padding: 60px; color: #94a3b8; font-weight: 600;">Connecting...</td></tr>
+                        <tr><td colspan="7" style="text-align: center; padding: 60px; color: #94a3b8; font-weight: 600;">Connecting...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
         <div class="footer-actions">
-            <button class="btn-back" onclick="location.href='logs.html'">Return to Logs</button>
+            <button class="btn-back" onclick="handleBack()">Close Report</button>
         </div>
     </main>
 
@@ -151,33 +152,38 @@
             if(!ref) return;
 
             try {
+                // 1. Get Log Metadata
                 const { data: logData } = await sb.from('activity_logs').select('*').eq('reference_id', ref).maybeSingle();
 
                 if (logData) {
                     document.getElementById('val-ref').innerText = ref;
-                    document.getElementById('disp-ref-top').innerText = ref;
+                    document.getElementById('disp-ref-top').innerText = `REF: ${ref}`;
                     document.getElementById('val-type').innerText = (logData.type === 'ORDER' ? 'SALES' : logData.type).toUpperCase();
-                    document.getElementById('val-user').innerText = logData.performed_by || 'ADMIN';
-                    document.getElementById('val-date').innerText = new Date(logData.created_at).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' });
+                    document.getElementById('val-user').innerText = (logData.performed_by || 'ADMIN').toUpperCase();
+                    document.getElementById('val-date').innerText = new Date(logData.created_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
                     document.getElementById('val-notes').innerText = logData.summary || 'TRANSACTION COMPLETED.';
                     
                     if(logData.type === 'REORDER') {
                         document.getElementById('disp-ref-top').style.background = 'var(--reorder)';
-                        document.getElementById('qty-header').innerText = 'Suggested';
+                        document.getElementById('qty-header').innerText = 'BUY NEED';
                         document.getElementById('notes-box').style.borderLeftColor = 'var(--reorder)';
                         loadReorderItems(); 
                         return;
                     }
                 }
 
+                // 2. Get Line Items
                 const { data: items } = await sb.from('inventory_transactions').select('*').eq('reference_id', ref);
                 
                 if(items && items.length > 0) {
                     renderStandardTable(items);
                 } else {
-                    document.getElementById('inventory-body').innerHTML = `<tr><td colspan="8" style="text-align:center; padding:40px;">No items found in this transaction.</td></tr>`;
+                    document.getElementById('inventory-body').innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px;">No detailed item records found.</td></tr>`;
                 }
-            } catch (err) { console.error(err); }
+            } catch (err) { 
+                console.error(err);
+                document.getElementById('inventory-body').innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:red;">Error loading report data.</td></tr>`;
+            }
         }
 
         function renderStandardTable(items) {
@@ -188,10 +194,12 @@
 
                 return `
                 <tr>
-                    <td><span class="sku-code">${row.sku || 'N/A'}</span></td>
+                    <td>
+                        <div class="item-name-cell">${row.item_name || 'UNKNOWN ITEM'}</div>
+                        <span class="sku-tag">SKU: ${row.sku || 'N/A'}</span>
+                    </td>
                     <td style="font-weight: 700; text-transform: uppercase; font-size: 0.6rem;">${row.category || '---'}</td>
                     <td style="font-weight: 700;">${row.location || 'MAIN'}</td>
-                    <td style="font-weight: 700; text-transform: uppercase; font-size: 0.65rem;">${row.item_name || 'UNKNOWN'}</td>
                     <td>${row.brand || '---'}</td>
                     <td><span class="uom-tag">${row.uom || 'PCS'}</span></td>
                     <td style="font-weight: 700;">${row.unit_price ? row.unit_price.toFixed(2) : '0.00'}</td>
@@ -203,21 +211,47 @@
         }
 
         async function loadReorderItems() {
-            // Reorder shows current low stock items
-            const { data: items } = await sb.from('inventory').select('*').lt('quantity', 10);
-            document.getElementById('inventory-body').innerHTML = items.map(row => `
+            // Fetch items where stock < min_qty to recreate the logic of the reorder list
+            const { data: items } = await sb.from('inventory').select('*');
+            
+            const lowStock = items.filter(i => (i.quantity || 0) < (i.min_qty || 5));
+
+            if(lowStock.length === 0) {
+                document.getElementById('inventory-body').innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px;">No reorder suggestions available.</td></tr>`;
+                return;
+            }
+
+            document.getElementById('inventory-body').innerHTML = lowStock.map(row => {
+                const qty = row.quantity || 0;
+                const max = row.max_qty || 20;
+                const buyNeed = max - qty;
+
+                return `
                 <tr>
-                    <td><span class="sku-code">${row.sku || 'N/A'}</span></td>
+                    <td>
+                        <div class="item-name-cell">${row.item_name || 'UNKNOWN ITEM'}</div>
+                        <span class="sku-tag">SKU: ${row.sku || 'N/A'}</span>
+                    </td>
                     <td style="font-weight: 700; text-transform: uppercase; font-size: 0.6rem;">${row.category || '---'}</td>
                     <td style="font-weight: 700;">${row.location || 'MAIN'}</td>
-                    <td style="font-weight: 700; text-transform: uppercase; font-size: 0.65rem;">${row.item_name || 'UNKNOWN'}</td>
                     <td>${row.brand || '---'}</td>
                     <td><span class="uom-tag">${row.uom || 'PCS'}</span></td>
                     <td style="font-weight: 700;">${row.unit_price ? row.unit_price.toFixed(2) : '0.00'}</td>
                     <td style="text-align: center;">
-                        <span class="qty-badge reorder-style">+50</span>
+                        <span class="qty-badge reorder-style">+${buyNeed}</span>
                     </td>
-                </tr>`).join('');
+                </tr>`;
+            }).join('');
+        }
+
+        function handleBack() {
+            // Smart navigation logic
+            const ref = document.referrer;
+            if (ref.includes('user.html') || ref.includes('profile.html')) {
+                window.history.back();
+            } else {
+                location.href = 'logs.html';
+            }
         }
 
         window.onload = fetchReport;
