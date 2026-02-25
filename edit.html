@@ -12,135 +12,175 @@
             --primary: #0f172a;
             --accent: #0081ff;
             --success: #10b981;
+            --warning: #f59e0b;
             --danger: #ef4444;
-            --excel-border: #cbd5e1;
+            --border-main: #cbd5e1;
+            --sidebar-width-desktop: 110px;
         }
-        * { box-sizing: border-box; }
-        body {
-            margin: 0; font-family: 'Inter', sans-serif;
-            background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
-            height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
-        }
-        input[type="text"] { text-transform: uppercase; }
-        .navbar { height: 56px; background: var(--primary); display: flex; align-items: center; padding: 0 15px; flex-shrink: 0; }
-        .nav-logo-text { color: white; font-weight: 800; font-size: 1rem; text-transform: uppercase; }
-        
-        .main-content { flex: 1; padding: 10px; display: flex; flex-direction: column; overflow-y: auto; gap: 15px; }
-        
-        .bulk-container {
-            background: white; border: 2px solid var(--primary); border-radius: 12px;
-            display: flex; flex-direction: column; height: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            overflow: hidden; flex-shrink: 0;
-        }
-        .bulk-header {
-            padding: 12px; border-bottom: 2px solid var(--primary);
-            display: flex; flex-direction: column; background: #f8fafc;
-            gap: 10px; flex-shrink: 0;
-        }
-        .header-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-        .header-top h2 { margin: 0; font-size: 0.75rem; font-weight: 800; color: var(--primary); }
-        .cat-select { 
-            padding: 0 8px; border-radius: 6px; border: 1px solid var(--excel-border); 
-            font-weight: 700; font-size: 0.65rem; height: 36px; width: 160px;
-            background: white; text-transform: uppercase;
-        }
-        .search-row { width: 100%; }
-        .search-input { 
-            width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--excel-border); 
-            font-size: 0.75rem; font-weight: 600; outline: none; background: white;
-        }
-        .grid-area { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; }
 
+        /* --- GLOBAL LAYOUT --- */
+        html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; position: fixed; width: 100%; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%); display: flex; flex-direction: column; }
+
+        .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; flex-shrink: 0; z-index: 1000; }
+        .nav-title { color: white; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .user-info { display: flex; flex-direction: column; align-items: flex-end; margin-right: 10px; }
+        .user-label { font-size: 0.5rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; }
+        .user-name { font-size: 0.7rem; color: white; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+        .online-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
+
+        .main-content { flex: 1; display: flex; flex-direction: column; padding: 8px; overflow: hidden; gap: 8px; }
+
+        /* --- SIDEBAR / TOGGLE NAV --- */
+        .action-bar-container { display: flex; justify-content: center; flex-shrink: 0; }
+        .toggle-group { display: flex; width: 100%; max-width: 550px; border-radius: 10px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); }
+        .btn-toggle { flex: 1; padding: 8px 0; border: none; border-right: 1px solid rgba(255,255,255,0.15); cursor: pointer; color: rgba(255,255,255,0.6); background: var(--primary); font-size: 0.6rem; font-weight: 800; text-transform: uppercase; display: none; flex-direction: column; align-items: center; gap: 2px; }
+        .btn-toggle.active { background: var(--accent) !important; color: white !important; display: flex !important; }
+
+        /* --- EDITOR CARD --- */
+        .right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; height: 100%; }
+        .bulk-card { background: white; border-radius: 12px; border: 2px solid var(--primary); display: flex; flex-direction: column; height: 100%; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        .bulk-header { padding: 12px; border-bottom: 2px solid var(--primary); background: #f8fafc; flex-shrink: 0; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .header-top h2 { margin: 0; font-size: 0.75rem; font-weight: 800; color: var(--primary); }
+        
+        .cat-select { padding: 0 8px; border-radius: 6px; border: 1px solid var(--border-main); font-weight: 700; font-size: 0.7rem; height: 36px; width: 160px; text-transform: uppercase; }
+        .search-input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-main); font-size: 0.75rem; font-weight: 600; outline: none; }
+
+        .grid-area { flex: 1; overflow: auto; background: #fff; -webkit-overflow-scrolling: touch; }
         table { border-collapse: collapse; width: 100%; min-width: 1300px; table-layout: fixed; }
         
-        thead th { 
-            position: sticky; top: 0; background: #f1f5f9; 
-            font-size: 0.6rem; font-weight: 800; 
-            border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border);
-            text-transform: uppercase; color: #475569; z-index: 20; height: 45px;
-        }
-        .sticky-col { 
-            position: sticky !important; left: 0; z-index: 35 !important; 
-            background: #f1f5f9 !important; width: 45px !important; 
-            border-right: 2px solid var(--primary) !important; text-align: center;
-        }
-        tbody td { border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); height: 48px; }
-        tbody td input, tbody td select { width: 100%; height: 100%; padding: 0 8px; border: none; outline: none; font-size: 0.7rem; font-weight: 700; background: transparent; font-family: inherit; }
+        thead th { position: sticky; top: 0; background: #f1f5f9; font-size: 0.6rem; font-weight: 800; border-bottom: 2px solid var(--primary); border-right: 1px solid var(--border-main); text-transform: uppercase; z-index: 20; height: 45px; }
+        .sticky-col { position: sticky !important; left: 0; z-index: 35 !important; background: #f1f5f9 !important; width: 45px !important; border-right: 2px solid var(--primary) !important; text-align: center; }
+
+        tbody td { border-bottom: 1px solid var(--border-main); border-right: 1px solid var(--border-main); height: 48px; }
+        tbody td input { width: 100%; height: 100%; padding: 0 8px; border: none; outline: none; font-size: 0.75rem; font-weight: 700; background: transparent; text-transform: uppercase; }
         
         .row-dirty { background-color: #fffbeb !important; }
-        .status-pill { font-size: 0.6rem; padding: 4px 8px; border-radius: 4px; font-weight: 800; }
+        .status-pill { font-size: 0.55rem; padding: 3px 6px; border-radius: 4px; font-weight: 900; color: white; }
 
-        .bulk-footer { padding: 10px; border-top: 2px solid var(--primary); display: flex; align-items: center; gap: 6px; background: white; }
-        .btn { height: 44px; border-radius: 8px; font-weight: 800; text-transform: uppercase; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; text-decoration: none; }
-        .btn-save { background: var(--primary); color: white; flex: 1; font-size: 0.7rem; }
-        .btn-back { background: #64748b; color: white; width: 150px; font-size: 0.65rem; }
+        /* --- FOOTER --- */
+        .bulk-footer { padding: 8px; border-top: 2px solid var(--primary); display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; background: white; flex-shrink: 0; }
+        .btn-save { grid-column: span 4; background: var(--primary); color: white; order: -1; box-shadow: 0 3px 0 #000; }
+
+        .btn { height: 44px; border-radius: 8px; font-weight: 800; text-transform: uppercase; cursor: pointer; border: none; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; }
+        .btn-back { background: #64748b; color: white; }
+        .btn-page { background: #f1f5f9; color: var(--primary); border: 1px solid var(--primary); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* --- DESKTOP --- */
+        @media (min-width: 1024px) {
+            .main-content { flex-direction: row; padding: 0; gap: 0; }
+            .right-panel { order: 1; padding: 20px; }
+            .action-bar-container { order: 2; width: var(--sidebar-width-desktop); height: 100%; background: var(--primary); flex-direction: column; }
+            .toggle-group { flex-direction: column; height: 100%; border-radius: 0; border: none; }
+            .btn-toggle { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 30px 5px; width: 100%; display: flex; }
+            .btn-toggle span:first-child { font-size: 1.5rem; }
+            
+            .bulk-footer { grid-template-columns: 150px 1fr 80px 80px; padding: 15px 20px; }
+            .btn-save { grid-column: unset; order: 0; height: 48px; }
+            .btn { height: 48px; }
+        }
     </style>
 </head>
 
 <body>
-<header class="navbar"><div class="nav-logo-text">EasiStock Edit Items</div></header>
-<main class="main-content">
+<header class="navbar">
+    <div class="nav-title">Master Data Editor</div>
+    <div class="user-info">
+        <span class="user-label">Admin Access</span>
+        <span class="user-name"><div class="online-dot"></div><span id="display-user">STAFF</span></span>
+    </div>
+</header>
 
-    <div class="bulk-container">
-        <div class="bulk-header">
-            <div class="header-top">
-                <h2>BATCH EDITOR</h2>
-                <select id="cat-filter" class="cat-select" onchange="resetAndLoad()">
-                    <option value="" disabled selected>CHOOSE CATEGORY</option>
-                    <option value="ALL">ALL CATEGORY</option>
-                </select>
-            </div>
-            <div class="search-row">
-                <input type="text" id="table-search" class="search-input" placeholder="SEARCH ITEM CODE OR DESCRIPTION..." oninput="autoSearch()">
-                <div id="count-label" class="result-count" style="font-size: 0.6rem; font-weight: 800; color: var(--accent); margin-top: 4px;"></div>
-            </div>
+<main class="main-content">
+    <div class="action-bar-container">
+        <div class="toggle-group" id="perm-nav">
+            <button class="btn-toggle active" data-page="inventory.html" onclick="location.href='inventory.html'"><span>📋</span><span>Inventory</span></button>
+            <button class="btn-toggle" data-page="receiving.html" onclick="location.href='receiving.html'"><span>🚚</span><span>Receiving</span></button>
+            <button class="btn-toggle" data-page="orders.html" onclick="location.href='orders.html'"><span>💰</span><span>Sales</span></button>
+            <button class="btn-toggle" data-page="transfer.html" onclick="location.href='transfer.html'"><span>🔄</span><span>Transfer</span></button>
+            <button class="btn-toggle" data-page="return.html" onclick="location.href='return.html'"><span>↩️</span><span>Return</span></button>
         </div>
-        <div class="grid-area">
-            <table>
-                <thead>
-                    <tr>
-                        <th class="sticky-col">#</th>
-                        <th style="width: 100px;">STATUS</th>
-                        <th style="width: 140px;">CATEGORY</th>
-                        <th style="width: 120px;">LOCATION</th>
-                        <th style="width: 130px;">ITEM CODE</th>
-                        <th style="width: 250px;">ITEM DESCRIPTION</th>
-                        <th style="width: 120px;">BRAND</th>
-                        <th style="width: 90px;">STOCKS</th>
-                        <th style="width: 80px;">UOM</th>
-                        <th style="width: 110px;">UNIT PRICE</th>
-                    </tr>
-                </thead>
-                <tbody id="bulk-body">
-                    <tr><td colspan="10" style="text-align:center; padding:40px; color:#64748b; font-weight:600; font-size:0.8rem;">SELECT A CATEGORY TO LOAD DATA</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="bulk-footer">
-            <a href="dashboard.html" class="btn btn-back">EXIT</a>
-            <button class="btn btn-save" id="save-btn" onclick="saveChanges()" disabled>UPDATE ALL CHANGES</button>
-            <button class="btn btn-page" id="prev-btn" style="width:60px" onclick="changePage(-1)" disabled>PREV</button>
-            <button class="btn btn-page" id="next-btn" style="width:60px" onclick="changePage(1)" disabled>NEXT</button>
+    </div>
+
+    <div class="right-panel">
+        <div class="bulk-card">
+            <div class="bulk-header">
+                <div class="header-top">
+                    <h2>BATCH EDITOR</h2>
+                    <select id="cat-filter" class="cat-select" onchange="resetAndLoad()">
+                        <option value="" disabled selected>CATEGORY</option>
+                        <option value="ALL">ALL</option>
+                    </select>
+                </div>
+                <input type="text" id="table-search" class="search-input" placeholder="SEARCH SKU OR DESCRIPTION..." oninput="autoSearch()">
+                <div id="count-label" style="font-size: 0.6rem; font-weight: 800; color: var(--accent); margin-top: 4px;"></div>
+            </div>
+            
+            <div class="grid-area">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="sticky-col">#</th>
+                            <th style="width: 80px;">STAT</th>
+                            <th style="width: 140px;">CATEGORY</th>
+                            <th style="width: 120px;">LOCATION</th>
+                            <th style="width: 140px;">SKU</th>
+                            <th style="width: 250px;">DESCRIPTION</th>
+                            <th style="width: 120px;">BRAND</th>
+                            <th style="width: 90px;">STOCKS</th>
+                            <th style="width: 80px;">UOM</th>
+                            <th style="width: 110px;">PRICE</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bulk-body">
+                        <tr><td colspan="10" style="text-align:center; padding:40px; color:#64748b; font-weight:600;">SELECT A CATEGORY TO START</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="bulk-footer">
+                <button class="btn btn-back" onclick="location.href='inventory.html'">Exit</button>
+                <button class="btn btn-save" id="save-btn" onclick="saveChanges()" disabled>Update All Changes</button>
+                <button class="btn btn-page" id="prev-btn" onclick="changePage(-1)" disabled>Prev</button>
+                <button class="btn btn-page" id="next-btn" onclick="changePage(1)" disabled>Next</button>
+            </div>
         </div>
     </div>
 </main>
 
 <script>
-    const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const _supabase = supabase.createClient('https://crruounuhtfzyssyhgcc.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg');
     
     let searchTimer;
     let currentPage = 0;
     const itemsPerPage = 50;
 
     async function init() {
+        const activeUser = localStorage.getItem('activeAdmin') || 'STAFF';
+        document.getElementById('display-user').innerText = activeUser.toUpperCase();
+        
         const { data } = await _supabase.from('inventory_categories').select('*').order('name');
         const filter = document.getElementById('cat-filter');
         if(data) data.forEach(c => {
             const opt = document.createElement('option');
             opt.value = c.name; opt.textContent = c.name.toUpperCase();
             filter.appendChild(opt);
+        });
+        applyPermissions();
+    }
+
+    function applyPermissions() {
+        const userRole = localStorage.getItem('userRole');
+        const userPermissions = JSON.parse(localStorage.getItem('userPermissions') || '[]');
+        document.querySelectorAll('.btn-toggle').forEach(btn => {
+            const page = btn.getAttribute('data-page');
+            if (userRole === 'admin' || userPermissions.includes(page)) {
+                btn.style.display = 'flex';
+            }
         });
     }
 
@@ -171,16 +211,16 @@
 
         if(data && data.length > 0) {
             b.innerHTML = '';
-            countLabel.innerText = `SHOWING ${from + 1} - ${Math.min(to + 1, count)} OF ${count}`;
+            countLabel.innerText = `ITEMS ${from + 1} - ${Math.min(to + 1, count)} OF ${count}`;
             data.forEach((item, i) => {
                 const tr = document.createElement('tr');
                 tr.dataset.id = item.id;
-                const status = (item.quantity || 0) <= 0 ? 'OUT' : ((item.quantity || 0) <= 10 ? 'LOW' : 'GOOD');
+                const status = (item.quantity || 0) <= 0 ? 'OUT' : ((item.quantity || 0) <= 10 ? 'LOW' : 'OK');
                 const statusColor = status === 'OUT' ? '#ef4444' : (status === 'LOW' ? '#f59e0b' : '#10b981');
 
                 tr.innerHTML = `
                     <td class="sticky-col" style="color:#94a3b8; font-size:0.6rem;">${from + i + 1}</td>
-                    <td style="text-align:center;"><span class="status-pill" style="background:${statusColor}; color:white;">${status}</span></td>
+                    <td style="text-align:center;"><span class="status-pill" style="background:${statusColor};">${status}</span></td>
                     <td><input type="text" class="row-cat" value="${item.category || ''}" oninput="markDirty(this)"></td>
                     <td><input type="text" class="row-loc" value="${item.location || ''}" oninput="markDirty(this)"></td>
                     <td><input type="text" value="${item.sku || ''}" readonly style="background:#f1f5f9; color:#64748b;"></td>
@@ -188,7 +228,7 @@
                     <td><input type="text" class="row-brand" value="${item.brand || ''}" oninput="markDirty(this)"></td>
                     <td><input type="number" value="${item.quantity || 0}" readonly style="background:#f1f5f9; color:#64748b;"></td>
                     <td><input type="text" class="row-uom" value="${item.uom || ''}" oninput="markDirty(this)"></td>
-                    <td><input type="number" class="row-price" value="${item.unit_price || 0}" step="0.01" oninput="markDirty(this)"></td>
+                    <td><input type="number" class="row-price" value="${item.price || 0}" step="0.01" oninput="markDirty(this)"></td>
                 `;
                 b.appendChild(tr);
             });
@@ -196,7 +236,7 @@
             document.getElementById('prev-btn').disabled = currentPage === 0;
             document.getElementById('next-btn').disabled = to + 1 >= count;
         } else {
-            b.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;">NO DATA</td></tr>';
+            b.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px;">NO RESULTS FOUND</td></tr>';
         }
     }
 
@@ -205,7 +245,7 @@
     async function saveChanges() {
         const btn = document.getElementById('save-btn');
         const rows = document.querySelectorAll('#bulk-body tr.row-dirty');
-        if (rows.length === 0) return alert("NO CHANGES");
+        if (rows.length === 0) return alert("NO CHANGES DETECTED");
 
         btn.disabled = true; btn.innerText = "SAVING...";
         try {
@@ -216,12 +256,12 @@
                     item_name: row.querySelector('.row-name').value.trim().toUpperCase(),
                     brand: row.querySelector('.row-brand').value.trim().toUpperCase(),
                     uom: row.querySelector('.row-uom').value.trim().toUpperCase(),
-                    unit_price: parseFloat(row.querySelector('.row-price').value) || 0
+                    price: parseFloat(row.querySelector('.row-price').value) || 0
                 }).eq('id', row.dataset.id);
             }
-            alert("UPDATED SUCCESSFULLY");
-            location.reload();
-        } catch (e) { alert("ERROR: " + e.message); btn.disabled = false; }
+            alert("MASTER DATA UPDATED");
+            resetAndLoad();
+        } catch (e) { alert("ERROR: " + e.message); btn.disabled = false; btn.innerText = "Update All Changes"; }
     }
 
     window.onload = init;

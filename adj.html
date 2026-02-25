@@ -14,126 +14,156 @@
             --warning: #f59e0b;
             --success: #10b981;
             --danger: #ef4444;
-            --border-gray: #cbd5e1;
+            --border-main: #cbd5e1;
+            --sidebar-width-desktop: 110px;
         }
 
-        * { box-sizing: border-box; }
+        /* --- GLOBAL LAYOUT --- */
+        html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; position: fixed; width: 100%; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%); display: flex; flex-direction: column; }
 
-        body {
-            margin: 0; font-family: 'Inter', sans-serif;
-            background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
-            height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
-            font-size: 0.75rem;
-        }
-
-        .navbar { height: 50px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; flex-shrink: 0; }
-        .nav-logo-text { color: white; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; }
-        .user-tag { color: var(--success); font-size: 0.6rem; font-weight: 800; text-transform: uppercase; }
-
-        .main-content { flex: 1; padding: 8px; display: flex; flex-direction: column; overflow: hidden; }
-
-        .adj-container {
-            background: white; border: 2px solid var(--primary); border-radius: 12px;
-            display: flex; flex-direction: column; height: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            overflow: hidden;
-        }
-
-        .adj-header {
-            padding: 10px; border-bottom: 2px solid var(--primary);
-            display: flex; justify-content: space-between; align-items: center; background: #fffbeb;
-            gap: 8px; flex-shrink: 0;
-        }
-
-        #search-box { 
-            padding: 8px; border-radius: 6px; border: 1px solid var(--border-gray); 
-            width: 180px; font-size: 0.7rem; text-transform: uppercase;
-        }
-
-        .grid-area { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; position: relative; }
+        .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; flex-shrink: 0; z-index: 1000; }
+        .nav-title { color: white; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
         
-        table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 950px; table-layout: fixed; }
+        .user-info { display: flex; flex-direction: column; align-items: flex-end; margin-right: 10px; }
+        .user-label { font-size: 0.5rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; }
+        .user-name { font-size: 0.7rem; color: white; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+        .online-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
+
+        .main-content { flex: 1; display: flex; flex-direction: column; padding: 8px; overflow: hidden; gap: 8px; }
+
+        /* --- SIDEBAR / TOGGLE NAV --- */
+        .action-bar-container { display: flex; justify-content: center; flex-shrink: 0; }
+        .toggle-group { display: flex; width: 100%; max-width: 550px; border-radius: 10px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); }
+        .btn-toggle { flex: 1; padding: 8px 0; border: none; border-right: 1px solid rgba(255,255,255,0.15); cursor: pointer; color: rgba(255,255,255,0.6); background: var(--primary); font-size: 0.6rem; font-weight: 800; text-transform: uppercase; display: none; flex-direction: column; align-items: center; gap: 2px; }
+        .btn-toggle.active { background: var(--accent) !important; color: white !important; display: flex !important; }
+
+        /* --- ADJUSTMENT CARD --- */
+        .right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; height: 100%; }
+        .adj-card { background: white; border-radius: 12px; border: 2px solid var(--primary); display: flex; flex-direction: column; height: 100%; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
-        thead th { 
-            position: sticky; top: 0; background: #f8fafc; padding: 8px; font-size: 0.6rem; font-weight: 800; 
-            border-bottom: 2px solid var(--primary); border-right: 1px solid #e2e8f0;
-            text-transform: uppercase; color: #475569; text-align: left; z-index: 20;
-        }
+        .adj-header { padding: 10px; border-bottom: 2px solid var(--primary); display: flex; justify-content: space-between; align-items: center; background: #fffbeb; flex-shrink: 0; }
+        .adj-header h2 { margin: 0; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--warning); }
+        #search-box { padding: 8px; border-radius: 6px; border: 1px solid var(--border-main); width: 180px; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; }
 
-        .sticky-col {
-            position: sticky !important; left: 0; background: #f8fafc !important; 
-            z-index: 25 !important; border-right: 2px solid var(--primary) !important; width: 100px;
-        }
+        .grid-area { flex: 1; overflow: auto; background: #fff; -webkit-overflow-scrolling: touch; }
+        table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 1100px; table-layout: fixed; }
         
-        tbody td.sticky-col { background: #f1f5f9 !important; z-index: 15 !important; font-size: 0.6rem; font-weight: 800; color: var(--primary); }
-
-        tbody td { padding: 6px 8px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; font-size: 0.65rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-        .adj-input { width: 100%; padding: 6px; border: 1.5px solid var(--border-gray); border-radius: 4px; font-weight: 800; color: var(--accent); font-size: 0.7rem; outline: none; text-align: center; }
+        thead th { position: sticky; top: 0; background: #f8fafc; font-size: 0.6rem; font-weight: 800; border-bottom: 2px solid var(--primary); border-right: 1px solid #e2e8f0; text-transform: uppercase; z-index: 20; height: 40px; text-align: left; padding: 0 8px; }
         
-        .reason-select { width: 100%; padding: 5px; border: 1px solid var(--border-gray); border-radius: 4px; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; background: #fdfdfd; }
+        .sticky-col { position: sticky !important; left: 0; background: #f8fafc !important; z-index: 25 !important; border-right: 2px solid var(--primary) !important; width: 100px; }
+        tbody td.sticky-col { background: #f1f5f9 !important; z-index: 15 !important; font-size: 0.65rem; font-weight: 800; color: var(--primary); }
 
-        .bulk-footer { padding: 10px; border-top: 2px solid var(--primary); display: flex; gap: 6px; background: white; flex-shrink: 0; }
-        
-        .btn { height: 44px; padding: 0 15px; border-radius: 8px; font-weight: 800; text-transform: uppercase; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 0.7rem; }
-        .btn-update { background: var(--primary); color: white; flex: 2; }
-        .btn-back { background: #64748b; color: white; flex: 1; }
+        tbody td { padding: 6px 8px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .diff-tag { font-size: 0.55rem; font-weight: 900; margin-left: 4px; }
+        .adj-input { width: 100%; padding: 6px; border: 1.5px solid var(--border-main); border-radius: 4px; font-weight: 800; color: var(--accent); font-size: 0.8rem; outline: none; text-align: center; }
+        .price-input { color: var(--success); text-align: right; }
+        .reason-select { width: 100%; padding: 5px; border: 1px solid var(--border-main); border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }
+
+        /* --- FOOTER GRID --- */
+        .bulk-footer { padding: 8px; border-top: 2px solid var(--primary); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: white; flex-shrink: 0; }
+        .btn-update { grid-column: span 2; order: -1; background: var(--primary); color: white; box-shadow: 0 3px 0 #000; }
+
+        .btn { height: 44px; border-radius: 8px; font-weight: 800; text-transform: uppercase; font-size: 0.7rem; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .btn-back { background: #64748b; color: white; }
+        .btn:active { transform: translateY(2px); box-shadow: none; }
+
+        .diff-tag { font-size: 0.6rem; font-weight: 900; margin-left: 5px; min-width: 40px; }
         .diff-plus { color: var(--success); }
         .diff-minus { color: var(--danger); }
+
+        /* --- DESKTOP VIEW --- */
+        @media (min-width: 1024px) {
+            .main-content { flex-direction: row; padding: 0; gap: 0; }
+            .right-panel { order: 1; padding: 20px; }
+            .action-bar-container { order: 2; width: var(--sidebar-width-desktop); height: 100%; background: var(--primary); flex-direction: column; border-left: 2px solid rgba(255,255,255,0.1); }
+            .toggle-group { flex-direction: column; height: 100%; border-radius: 0; border: none; }
+            .btn-toggle { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 30px 5px; width: 100%; display: flex; }
+            .btn-toggle span:first-child { font-size: 1.5rem; }
+            .btn-toggle span:last-child { font-size: 0.6rem; opacity: 1; margin-top: 4px; }
+            
+            .bulk-footer { grid-template-columns: 200px 1fr; padding: 15px 20px; }
+            .btn-update { grid-column: unset; order: 1; height: 48px; }
+            .btn { height: 48px; }
+        }
     </style>
 </head>
 <body>
 
 <header class="navbar">
-    <div class="nav-logo-text">Audit Adjust</div>
-    <div id="active-user-tag" class="user-tag">SYSTEM</div>
+    <div class="nav-title">Audit & Reconcile</div>
+    <div class="user-info">
+        <span class="user-label">Logged In As</span>
+        <span class="user-name"><div class="online-dot"></div><span id="display-user">STAFF</span></span>
+    </div>
 </header>
 
 <main class="main-content">
-    <div class="adj-container">
-        <div class="adj-header">
-            <h2 style="font-size:0.65rem; color:var(--warning); margin:0;">STK RECONCILE</h2>
-            <input type="text" id="search-box" placeholder="SEARCH..." oninput="this.value = this.value.toUpperCase(); filterRows()">
+    <div class="action-bar-container">
+        <div class="toggle-group" id="perm-nav">
+            <button class="btn-toggle active" data-page="inventory.html" onclick="location.href='inventory.html'"><span>📋</span><span>Inventory</span></button>
+            <button class="btn-toggle" data-page="receiving.html" onclick="location.href='receiving.html'"><span>🚚</span><span>Receiving</span></button>
+            <button class="btn-toggle" data-page="orders.html" onclick="location.href='orders.html'"><span>💰</span><span>Sales</span></button>
+            <button class="btn-toggle" data-page="transfer.html" onclick="location.href='transfer.html'"><span>🔄</span><span>Transfer</span></button>
+            <button class="btn-toggle" data-page="return.html" onclick="location.href='return.html'"><span>↩️</span><span>Return</span></button>
         </div>
+    </div>
 
-        <div class="grid-area">
-            <table>
-                <thead>
-                    <tr>
-                        <th class="sticky-col">LOCATION</th>
-                        <th style="width: 110px;">SKU</th>
-                        <th style="width: 220px;">DESCRIPTION</th>
-                        <th style="width: 90px;">BRAND</th>
-                        <th style="width: 100px; text-align: center;">CURRENT</th>
-                        <th style="width: 110px; text-align: center;">NEW QTY</th>
-                        <th style="width: 140px;">REASON</th>
-                    </tr>
-                </thead>
-                <tbody id="adj-body">
-                    <tr><td colspan="7" style="text-align:center; padding:30px;">Loading Inventory...</td></tr>
-                </tbody>
-            </table>
-        </div>
+    <div class="right-panel">
+        <div class="adj-card">
+            <div class="adj-header">
+                <h2>Stock Reconciliation</h2>
+                <input type="text" id="search-box" placeholder="FILTER ITEMS..." oninput="filterRows()">
+            </div>
 
-        <div class="bulk-footer">
-            <a href="dashboard.html" class="btn btn-back">EXIT TO DASHBOARD</a>
-            <button class="btn btn-update" id="save-btn" onclick="applyAdjustments()">POST CHANGES</button>
+            <div class="grid-area">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="sticky-col">Location</th>
+                            <th style="width: 120px;">SKU</th>
+                            <th style="width: 250px;">Description</th>
+                            <th style="width: 100px;">Current Qty</th>
+                            <th style="width: 110px;">New Qty</th>
+                            <th style="width: 120px;">New Price</th>
+                            <th style="width: 160px;">Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adj-body">
+                        <tr><td colspan="7" style="text-align:center; padding:40px;">Loading inventory data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="bulk-footer">
+                <button class="btn btn-back" onclick="location.href='dashboard.html'">Discard</button>
+                <button class="btn btn-update" id="save-btn" onclick="applyAdjustments()">Post Audit Changes</button>
+            </div>
         </div>
     </div>
 </main>
 
 <script>
-    const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const _supabase = supabase.createClient('https://crruounuhtfzyssyhgcc.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg');
     
-    const reasons = ["COUNT DISCREPANCY", "DAMAGED/EXPIRED", "RETURN TO VENDOR", "ENTRY ERROR", "LOST/STOLEN", "BEGINNING BALANCE"];
+    const reasons = ["COUNT DISCREPANCY", "DAMAGED/EXPIRED", "RETURN TO VENDOR", "ENTRY ERROR", "LOST/STOLEN", "BEGINNING BALANCE", "PRICE ADJUSTMENT"];
 
     async function init() {
         const activeUser = localStorage.getItem('activeAdmin') || 'STAFF';
-        document.getElementById('active-user-tag').innerText = activeUser.toUpperCase();
+        document.getElementById('display-user').innerText = activeUser.toUpperCase();
         loadInventory();
+        applyPermissions();
+    }
+
+    function applyPermissions() {
+        const userRole = localStorage.getItem('userRole');
+        const userPermissions = JSON.parse(localStorage.getItem('userPermissions') || '[]');
+        document.querySelectorAll('.btn-toggle').forEach(btn => {
+            const page = btn.getAttribute('data-page');
+            if (userRole === 'admin' || userPermissions.includes(page)) {
+                btn.style.display = 'flex';
+            }
+        });
     }
 
     async function loadInventory() {
@@ -142,21 +172,23 @@
         if(!data) return;
         
         tbody.innerHTML = data.map(item => `
-            <tr data-id="${item.id}" data-name="${item.item_name}" data-sku="${item.sku}" data-oldqty="${item.quantity}" data-location="${item.location || 'MAIN'}">
+            <tr data-id="${item.id}" data-name="${item.item_name}" data-sku="${item.sku}" data-oldqty="${item.quantity}" data-oldprice="${item.price || 0}" data-location="${item.location || 'MAIN'}">
                 <td class="sticky-col">${item.location || 'MAIN'}</td>
-                <td style="color:var(--accent); font-family:monospace;">${item.sku}</td>
+                <td style="color:var(--accent); font-family:monospace; font-weight:800;">${item.sku}</td>
                 <td style="text-transform: uppercase;">${item.item_name}</td>
-                <td style="color:#94a3b8; font-size:0.55rem;">${item.brand || '---'}</td>
                 <td style="font-weight: 800; text-align:center; background:#f8fafc;">${item.quantity}</td>
                 <td>
                     <div style="display:flex; align-items:center;">
-                        <input type="number" class="adj-input" placeholder="${item.quantity}" oninput="calcDiff(this)">
+                        <input type="number" class="adj-input row-qty" placeholder="${item.quantity}" oninput="calcDiff(this)">
                         <span class="diff-tag"></span>
                     </div>
                 </td>
                 <td>
+                    <input type="number" class="adj-input price-input row-price" placeholder="${item.price || '0.00'}" step="0.01">
+                </td>
+                <td>
                     <select class="reason-select">
-                        <option value="">-- REASON --</option>
+                        <option value="">-- SELECT --</option>
                         ${reasons.map(r => `<option value="${r}">${r}</option>`).join('')}
                     </select>
                 </td>
@@ -171,7 +203,7 @@
         const diffSpan = tr.querySelector('.diff-tag');
         if(isNaN(newQty)) { diffSpan.innerText = ""; return; }
         const diff = newQty - oldQty;
-        diffSpan.innerText = diff === 0 ? "" : (diff > 0 ? `(+${diff})` : `(${diff})`);
+        diffSpan.innerText = diff === 0 ? "" : (diff > 0 ? `+${diff}` : `${diff}`);
         diffSpan.className = `diff-tag ${diff > 0 ? 'diff-plus' : 'diff-minus'}`;
     }
 
@@ -185,36 +217,51 @@
 
     async function applyAdjustments() {
         const rows = document.querySelectorAll('#adj-body tr');
-        const activeUser = document.getElementById('active-user-tag').innerText;
+        const activeUser = document.getElementById('display-user').innerText;
         const transEntries = [];
         const batchRef = "ADJ-" + Date.now().toString().slice(-6);
         let count = 0;
 
         for (const row of rows) {
-            const newQtyVal = row.querySelector('.adj-input').value;
+            const newQtyVal = row.querySelector('.row-qty').value;
+            const newPriceVal = row.querySelector('.row-price').value;
             const reason = row.querySelector('.reason-select').value;
-            const oldQty = parseInt(row.dataset.oldqty);
             
-            if(newQtyVal !== "" && parseInt(newQtyVal) !== oldQty) {
-                if(!reason) return alert(`Select a reason for ${row.dataset.sku}`);
-                
-                const newQty = parseInt(newQtyVal);
-                await _supabase.from('inventory').update({ quantity: newQty }).eq('id', row.dataset.id);
+            const oldQty = parseInt(row.dataset.oldqty);
+            const oldPrice = parseFloat(row.dataset.oldprice);
 
-                transEntries.push({
-                    reference_id: batchRef,
-                    sku: row.dataset.sku,
-                    item_name: row.dataset.name,
-                    qty_change: newQty - oldQty,
-                    location: row.dataset.location,
-                    notes: reason
-                });
-                count++;
+            const hasQtyChange = newQtyVal !== "" && parseInt(newQtyVal) !== oldQty;
+            const hasPriceChange = newPriceVal !== "" && parseFloat(newPriceVal) !== oldPrice;
+            
+            if(hasQtyChange || hasPriceChange) {
+                if(!reason) return alert(`Select a reason for SKU: ${row.dataset.sku}`);
+                
+                const finalQty = hasQtyChange ? parseInt(newQtyVal) : oldQty;
+                const finalPrice = hasPriceChange ? parseFloat(newPriceVal) : oldPrice;
+
+                const { error } = await _supabase.from('inventory').update({ 
+                    quantity: finalQty,
+                    price: finalPrice
+                }).eq('id', row.dataset.id);
+                
+                if(!error) {
+                    transEntries.push({
+                        reference_id: batchRef,
+                        sku: row.dataset.sku,
+                        item_name: row.dataset.name,
+                        qty_change: finalQty - oldQty,
+                        location: row.dataset.location,
+                        notes: `${reason}${hasPriceChange ? ' (PRICE UPDATED)' : ''}`
+                    });
+                    count++;
+                }
             }
         }
 
-        if (count === 0) return alert("No changes detected.");
-        document.getElementById('save-btn').disabled = true;
+        if (count === 0) return alert("No changes to update.");
+        
+        const btn = document.getElementById('save-btn');
+        btn.disabled = true; btn.innerText = "POSTING...";
 
         try {
             await _supabase.from('inventory_transactions').insert(transEntries);
@@ -222,12 +269,16 @@
                 type: "ADJUST",
                 reference_id: batchRef,
                 performed_by: activeUser,
-                summary: `AUDITED ${count} ITEMS`.toUpperCase()
+                summary: `AUDITED ${count} ITEMS (STOCK/PRICE)`
             }]);
 
-            alert("ADJUSTMENTS POSTED");
+            alert("ADJUSTMENTS POSTED SUCCESSFULLY");
             window.location.href = 'inventory.html';
-        } catch (err) { alert(err.message); document.getElementById('save-btn').disabled = false; }
+        } catch (err) { 
+            alert(err.message); 
+            btn.disabled = false; 
+            btn.innerText = "Post Audit Changes"; 
+        }
     }
 
     window.onload = init;
