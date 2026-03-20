@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Company Portal | JmcyFlow</title>
+    <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -26,7 +27,6 @@
             align-items: center;
             min-height: 100vh;
             padding: 20px;
-            overflow: hidden;
         }
 
         #portal-card {
@@ -38,12 +38,9 @@
             border: 1px solid rgba(255,255,255,0.08);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             text-align: center;
-            position: relative;
-            z-index: 2;
         }
 
-        /* Shake Animation for Errors */
-        .shake { animation: shake 0.4s ease-in-out; border-color: var(--error) !important; }
+        .shake { animation: shake 0.4s ease-in-out; }
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-8px); }
@@ -52,8 +49,7 @@
         }
 
         .company-header h2 { font-size: 1.8rem; margin-bottom: 8px; letter-spacing: -1px; }
-        .company-header h2 span { color: var(--primary); }
-        .status-badge { font-size: 0.7rem; text-transform: uppercase; color: #fbbf24; margin-bottom: 25px; display: block; }
+        .status-badge { font-size: 0.7rem; text-transform: uppercase; color: #fbbf24; margin-bottom: 25px; display: block; letter-spacing: 1px; }
 
         .form-group { text-align: left; margin-bottom: 18px; }
         label { display: block; font-size: 0.8rem; margin-bottom: 8px; color: var(--text-dim); font-weight: 600; }
@@ -72,29 +68,7 @@
 
         input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
 
-        /* Notification Toast */
-        #toast {
-            position: fixed;
-            top: 20px;
-            right: -300px;
-            background: var(--error);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 12px;
-            font-weight: 600;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 1000;
-        }
-        #toast.show { right: 20px; }
-
-        #login-section {
-            display: none;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            animation: slideDown 0.4s ease-out forwards;
-        }
+        #login-section { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
 
         .btn-action {
             width: 100%;
@@ -108,17 +82,26 @@
             transition: 0.3s;
         }
 
-        #find-btn:disabled { opacity: 0.6; cursor: wait; }
+        .btn-action:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-action:disabled { opacity: 0.5; cursor: wait; }
 
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        #toast {
+            position: fixed;
+            top: 20px;
+            right: -300px;
+            background: var(--error);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            transition: 0.5s;
+            z-index: 1000;
         }
+        #toast.show { right: 20px; }
     </style>
 </head>
 <body>
 
-    <div id="toast">⚠️ Company Not Found</div>
+    <div id="toast">⚠️ Message here</div>
 
     <div id="portal-card">
         <div class="company-header">
@@ -144,7 +127,7 @@
                     <label>Password</label>
                     <input type="password" id="pass" required>
                 </div>
-                <button type="submit" class="btn-action">Authorize Access</button>
+                <button type="submit" class="btn-action" id="login-btn">Authorize Access</button>
             </form>
         </div>
 
@@ -156,22 +139,30 @@
     <script>
         const SUPABASE_URL = "https://pehffyqlssrqogosfsab.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s";
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // FIXED: Renamed to _supabase
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let activeCompany = null;
+
+        // On Load: Check if ID is already in URL (from registration redirect)
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            if(id) {
+                document.getElementById('portalSearch').value = id;
+                lookupCompany();
+            }
+        };
 
         function showNotification(msg) {
             const toast = document.getElementById('toast');
             toast.innerText = "⚠️ " + msg;
             toast.classList.add('show');
-            
-            // Shake the input field
-            const input = document.getElementById('portalSearch');
-            input.classList.add('shake');
-
+            document.getElementById('portal-card').classList.add('shake');
             setTimeout(() => {
                 toast.classList.remove('show');
-                input.classList.remove('shake');
+                document.getElementById('portal-card').classList.remove('shake');
             }, 3000);
         }
 
@@ -186,11 +177,11 @@
             findBtn.innerText = "Searching...";
             
             try {
-                const { data, error } = await supabase
+                const { data, error } = await _supabase
                     .from('companies')
                     .select('*')
                     .eq('portal_id', query)
-                    .single();
+                    .maybeSingle(); // Better than .single() as it doesn't throw error on 0 results
 
                 if (data) {
                     activeCompany = data;
@@ -201,15 +192,15 @@
                     findBtn.innerText = "Verify Portal";
                 }
             } catch (err) {
-                showNotification("Network Error. Try again.");
+                showNotification("Database Error.");
                 findBtn.disabled = false;
                 findBtn.innerText = "Verify Portal";
             }
         }
 
         function revealLogin(company) {
-            document.getElementById('display-title').innerHTML = company.company_name;
-            document.documentElement.style.setProperty('--primary', company.theme_color);
+            document.getElementById('display-title').innerHTML = company.company_name.toUpperCase();
+            document.documentElement.style.setProperty('--primary', company.theme_color || '#3b82f6');
             document.getElementById('status-text').innerText = "Portal Verified • Secure Access";
             document.getElementById('search-section').style.display = "none";
             document.getElementById('login-section').style.display = "block";
@@ -221,14 +212,15 @@
             const p = document.getElementById('pass').value;
 
             if (u === activeCompany.admin_user && p === activeCompany.admin_pass) {
-                alert("Access Granted!");
+                // SAVE SESSION DATA FOR OTHER PAGES
+                localStorage.setItem('jmcy_cid', activeCompany.portal_id);
+                localStorage.setItem('jmcy_user', u);
+                localStorage.setItem('jmcy_role', 'ADMIN');
+                
+                window.location.href = "inventory.html";
             } else {
                 showNotification("Invalid Admin Credentials.");
             }
-        });
-
-        document.getElementById('portalSearch').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') lookupCompany();
         });
     </script>
 </body>
