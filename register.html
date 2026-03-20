@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | JmcyFlow by Jmcy Web Solutions</title>
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --accent: #38bdf8;
+            --success: #22c55e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .reg-card {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 450px;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h2 { font-size: 1.8rem; margin-bottom: 5px; letter-spacing: -1px; }
+        .header p { color: var(--text-dim); font-size: 0.9rem; }
+        .header span { color: var(--accent); font-weight: bold; }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-size: 0.85rem; margin-bottom: 8px; color: var(--accent); font-weight: 600; }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            background: #0f172a;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+
+        .btn-reg {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-reg:hover:not(:disabled) { background: #2563eb; transform: translateY(-2px); }
+        .btn-reg:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .footer-link { text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-dim); }
+        .footer-link a { color: var(--accent); text-decoration: none; font-weight: 600; }
+
+        @media (max-width: 480px) {
+            .reg-card { padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="reg-card">
+        <div class="header">
+            <h2>Jmcy<span>Flow</span></h2>
+            <p>Registration by <span>Jmcy Web Solutions</span></p>
+            <p style="margin-top: 10px; font-size: 0.8rem; color: #fbbf24;">✨ Includes 1-Month Free Trial</p>
+        </div>
+
+        <form id="regForm">
+            <div class="form-group">
+                <label>Company Name</label>
+                <input type="text" id="compName" placeholder="Acme Logistics" required>
+            </div>
+
+            <div class="form-group">
+                <label>Portal ID (Unique link for your company)</label>
+                <input type="text" id="compID" placeholder="acme-flow" required>
+            </div>
+
+            <div class="form-group">
+                <label>Admin Username</label>
+                <input type="text" id="adminUser" placeholder="admin_user" required>
+            </div>
+
+            <div class="form-group">
+                <label>Admin Password</label>
+                <input type="password" id="adminPass" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-reg">Create My Portal</button>
+        </form>
+
+        <div class="footer-link">
+            Already have a portal? <a href="portal.html">Login Here</a>
+        </div>
+    </div>
+
+    <script>
+        // --- Supabase Configuration ---
+        const SUPABASE_URL = "https://pehffyqlssrqogosfsab.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const regForm = document.getElementById('regForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        regForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Disable button to prevent double submission
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Provisioning Portal...";
+
+            // 1. Prepare Data
+            const companyId = document.getElementById('compID').value.toLowerCase().trim();
+            const companyName = document.getElementById('compName').value;
+            const adminUser = document.getElementById('adminUser').value;
+            const adminPass = document.getElementById('adminPass').value;
+            
+            // Calculate Trial Expiry (Current Date + 30 Days)
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + 30);
+
+            try {
+                // 2. Insert into Supabase 'companies' table
+                const { data, error } = await supabase
+                    .from('companies')
+                    .insert([
+                        { 
+                            portal_id: companyId, 
+                            company_name: companyName,
+                            admin_user: adminUser,
+                            admin_pass: adminPass,
+                            trial_expires: expiryDate.toISOString(),
+                            theme_color: "#3b82f6" 
+                        }
+                    ]);
+
+                if (error) {
+                    if (error.code === "23505") {
+                        throw new Error("This Portal ID is already taken. Try another name.");
+                    }
+                    throw error;
+                }
+
+                // 3. Success
+                alert("Success! Your JmcyFlow portal is ready.");
+                window.location.href = `portal.html?id=${companyId}`;
+
+            } catch (err) {
+                alert("Error: " + err.message);
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Create My Portal";
+            }
+        });
+    </script>
+</body>
+</html>

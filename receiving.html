@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Batch Receiving | EasiStock</title>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Receiving | JmcyFlow Preview</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
@@ -15,287 +13,172 @@
             --success: #10b981;
             --danger: #ef4444;
             --border-main: #cbd5e1;
-            --sidebar-width-desktop: 110px;
+            --sidebar-width-desktop: 80px;
         }
 
         /* --- GLOBAL LAYOUT --- */
-        html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; }
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%); display: flex; flex-direction: column; }
+        * { box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: #f1f5f9; }
+        body { font-family: 'Inter', sans-serif; display: flex; flex-direction: column; }
 
-        .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 1000; }
-        .nav-logo-btn { background: var(--accent); color: white; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 0px #0056aa; }
+        /* Navbar */
+        .navbar { height: 50px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 12px; flex-shrink: 0; border-bottom: 2px solid var(--accent); }
+        .nav-logo-area { display: flex; align-items: center; gap: 8px; }
+        #company-name-text { color: white; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        .user-info { display: flex; flex-direction: column; align-items: flex-end; margin-right: 15px; cursor: pointer; padding: 5px; border-radius: 8px; }
-        .user-label { font-size: 0.55rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; }
-        .user-name { font-size: 0.75rem; color: white; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
-        .online-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
+        .user-info { display: flex; flex-direction: column; align-items: flex-end; margin-right: 10px; }
+        .user-label { font-size: 0.5rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; }
+        .user-name { font-size: 0.65rem; color: white; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 3px; }
+        .online-dot { width: 5px; height: 5px; background: var(--success); border-radius: 50%; }
 
-        .main-content { flex: 1; display: flex; flex-direction: column; padding: 10px; overflow: hidden; gap: 10px; }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* --- SIDEBAR / TOGGLE NAV --- */
-        .action-bar-container { display: flex; justify-content: center; flex-shrink: 0; }
-        .toggle-group { display: flex; width: 100%; max-width: 550px; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); }
-        .btn-toggle { flex: 1; padding: 10px 0; border: none; border-right: 1px solid rgba(255,255,255,0.15); cursor: pointer; color: rgba(255,255,255,0.6); background: var(--primary); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; display: none; flex-direction: column; align-items: center; gap: 4px; transition: all 0.3s ease; }
-        .btn-toggle.active { background: var(--accent) !important; color: white !important; display: flex !important; }
+        /* Action Bar (Nav) */
+        .action-bar-container { padding: 8px; background: #f1f5f9; flex-shrink: 0; }
+        .toggle-group { display: flex; border-radius: 8px; overflow: hidden; border: 1px solid var(--primary); background: var(--primary); }
+        .btn-toggle { 
+            flex: 1; padding: 8px 0; border: none; border-right: 1px solid rgba(255,255,255,0.1); 
+            color: rgba(255,255,255,0.6); background: var(--primary); 
+            font-size: 0.6rem; font-weight: 700; text-transform: uppercase; 
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+        }
+        .btn-toggle.active { background: var(--accent) !important; color: white !important; }
 
-        /* --- DESKTOP VIEW ADJUSTMENTS --- */
+        /* Desktop Adjustments */
         @media (min-width: 1024px) {
-            .main-content { flex-direction: row; padding: 0; gap: 0; }
-            .right-panel { order: 1; flex: 1; padding: 25px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
-            
-            .action-bar-container { order: 2; width: var(--sidebar-width-desktop); height: 100%; background: var(--primary); padding: 0; flex-direction: column; border-left: 2px solid rgba(255,255,255,0.1); }
-            .toggle-group { flex-direction: column; height: 100%; border-radius: 0; border: none; max-width: none; }
-            .btn-toggle { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 35px 5px; width: 100%; }
-            .btn-toggle span:first-child { font-size: 1.8rem; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-            .btn-toggle span:last-child { font-size: 0.65rem; opacity: 0; transform: translateY(10px); transition: all 0.3s ease; margin-top: 5px; }
-            .btn-toggle:hover span:last-child { opacity: 1; transform: translateY(0); color: #fff; }
-            .btn-toggle:hover span:first-child { transform: scale(1.1) translateY(-5px); }
-            .btn-toggle:hover { background: rgba(255,255,255,0.08); }
-
-            /* Desktop Form Grid */
-            .input-card { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
-            .btn-add { margin-top: 24px !important; }
+            .main-content { flex-direction: row-reverse; }
+            .action-bar-container { width: var(--sidebar-width-desktop); height: 100%; padding: 0; }
+            .toggle-group { flex-direction: column; height: 100%; border-radius: 0; border: none; }
+            .btn-toggle { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 20px 5px; }
+            .btn-toggle span:first-child { font-size: 1.2rem; }
+            .right-panel { padding: 20px !important; display: grid; grid-template-columns: 380px 1fr; gap: 20px; align-items: start; }
+            #save-btn { grid-column: span 2; }
         }
 
         /* --- UI COMPONENTS --- */
-        .input-card { background: white; border-radius: 12px; border: 2px solid var(--primary); padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .right-panel { flex: 1; display: flex; flex-direction: column; overflow: auto; padding: 0 8px 8px 8px; gap: 8px; }
+        .input-card { background: white; border-radius: 8px; border: 1px solid #cbd5e1; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .full-width { grid-column: span 2; }
         
-        label { display: block; font-size: 0.6rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 4px; }
-        input { width: 100%; padding: 12px; border: 1.5px solid var(--border-main); border-radius: 8px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; outline: none; box-sizing: border-box; }
+        label { display: block; font-size: 0.55rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 2px; }
+        input { width: 100%; padding: 8px; border: 1px solid var(--border-main); border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; outline: none; }
         input:focus { border-color: var(--accent); }
-        input[readonly] { background-color: #f8fafc; color: #64748b; border-style: dashed; }
+        input[readonly] { background-color: #f8fafc; color: #64748b; }
         
-        .scan-container { display: flex; gap: 5px; }
-        .btn-scan { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 0 15px; cursor: pointer; font-size: 1.2rem; }
+        .scan-container { display: flex; gap: 4px; }
+        .btn-scan { background: var(--primary); color: white; border: none; border-radius: 6px; padding: 0 12px; cursor: pointer; }
 
-        .table-container { flex: 1; background: white; border-radius: 12px; border: 2px solid var(--primary); display: flex; flex-direction: column; overflow: hidden; min-height: 200px; }
-        .table-header { background: #f1f5f9; padding: 12px; font-weight: 800; font-size: 0.7rem; color: var(--primary); border-bottom: 2px solid var(--primary); text-transform: uppercase; }
-        .scroll-area { flex: 1; overflow: auto; }
+        .table-container { background: white; border-radius: 8px; border: 1px solid #cbd5e1; display: flex; flex-direction: column; overflow: hidden; min-height: 200px; }
+        .table-header { background: #f1f5f9; padding: 8px; font-weight: 800; font-size: 0.6rem; color: var(--primary); border-bottom: 1px solid #cbd5e1; text-transform: uppercase; }
+        
+        .scroll-area { flex: 1; overflow: auto; max-height: 250px; }
         table { width: 100%; border-collapse: collapse; }
-        thead th { position: sticky; top: 0; background: #f8fafc; padding: 12px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; border-bottom: 1px solid var(--border-main); text-align: left; z-index: 10; }
-        tbody td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
+        thead th { position: sticky; top: 0; background: #f8fafc; padding: 8px; font-size: 0.55rem; font-weight: 800; text-transform: uppercase; border-bottom: 1px solid var(--border-main); text-align: left; z-index: 10; }
+        tbody td { padding: 8px; border-bottom: 1px solid #f1f5f9; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
 
-        .summary-bar { background: #f1f5f9; padding: 12px 20px; border-top: 2px solid var(--primary); display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 800; }
-        .btn { border: none; border-radius: 10px; padding: 15px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: all 0.2s; }
-        .btn-add { background: var(--primary); color: white; width: 100%; margin-top: 10px; }
-        .btn-submit { background: var(--success); color: white; width: 100%; box-shadow: 0 4px 0 #059669; font-size: 0.9rem; }
-        .btn-submit:active { transform: translateY(2px); box-shadow: none; }
-        .btn-submit:disabled { background: #94a3b8; box-shadow: none; cursor: not-allowed; }
+        .summary-bar { background: #f8fafc; padding: 10px; border-top: 1px solid #cbd5e1; display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 800; }
         
-        .qty-badge { background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 6px; font-weight: 800; }
-        #reader { width: 100%; display: none; margin-bottom: 10px; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); }
+        .btn { border: none; border-radius: 6px; padding: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
+        .btn-add { background: var(--primary); color: white; width: 100%; margin-top: 8px; font-size: 0.75rem; }
+        .btn-submit { background: var(--success); color: white; width: 100%; font-size: 0.8rem; box-shadow: 0 3px 0 #059669; margin-top: 10px; margin-bottom: 20px; }
+        
+        .qty-badge { background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; }
     </style>
 </head>
 <body>
 
 <header class="navbar">
-    <button class="nav-logo-btn" onclick="goHome()">EasiStock</button>
+    <div class="nav-logo-area">
+        <span id="company-name-text">JMCYFLOW</span>
+    </div>
     <div style="display:flex; align-items:center;">
-        <div class="user-info" onclick="location.href='profile.html'">
-            <span class="user-label" id="user-role-label">Loading...</span>
-            <span class="user-name"><div class="online-dot"></div><span id="active-user">---</span></span>
+        <div class="user-info">
+            <span class="user-label">Administrator</span>
+            <span class="user-name"><div class="online-dot"></div><span>Demo User</span></span>
         </div>
-        <button style="background:none; border:none; color:#ef4444; font-weight:800; cursor:pointer;" onclick="handleLogout()">LOGOUT ⏻</button>
+        <button style="background:none; border:none; color:#ef4444; font-weight:800; cursor:pointer; font-size: 0.6rem;">EXIT</button>
     </div>
 </header>
 
 <main class="main-content">
     <div class="action-bar-container">
-        <div class="toggle-group" id="perm-nav">
-            <button class="btn-toggle" data-page="inventory.html" onclick="location.href='inventory.html'"><span>📋</span><span>Inventory</span></button>
-            <button class="btn-toggle active" data-page="receiving.html" onclick="location.href='receiving.html'"><span>🚚</span><span>Receiving</span></button>
-            <button class="btn-toggle" data-page="orders.html" onclick="location.href='orders.html'"><span>💰</span><span>Sales</span></button>
-            <button class="btn-toggle" data-page="transfer.html" onclick="location.href='transfer.html'"><span>🔄</span><span>Transfer</span></button>
-            <button class="btn-toggle" data-page="return.html" onclick="location.href='return.html'"><span>↩️</span><span>Return</span></button>
+        <div class="toggle-group">
+            <button class="btn-toggle"><span>📋</span><span>Stock</span></button>
+            <button class="btn-toggle active"><span>🚚</span><span>Recv</span></button>
+            <button class="btn-toggle"><span>💰</span><span>Sales</span></button>
+            <button class="btn-toggle"><span>🔄</span><span>Trans</span></button>
+            <button class="btn-toggle"><span>↩️</span><span>Retn</span></button>
         </div>
     </div>
 
     <div class="right-panel">
-        <div id="reader"></div>
-
         <div class="input-card">
             <div class="form-grid">
                 <div class="form-group">
-                    <label>Transaction Date</label>
-                    <input type="date" id="recv-date" onchange="generateRef()">
+                    <label>Recv Date</label>
+                    <input type="date" value="2026-03-21">
                 </div>
                 <div class="form-group">
-                    <label>System Ref #</label>
-                    <input type="text" id="delivery-ref" readonly>
+                    <label>System Ref</label>
+                    <input type="text" value="RCV-260321-482" readonly>
                 </div>
                 <div class="form-group full-width">
-                    <label>Supplier DR / Invoice Number</label>
+                    <label>DR / Invoice #</label>
                     <div class="scan-container">
-                        <input type="text" id="dr-number" placeholder="SCAN OR TYPE DR#">
-                        <button class="btn-scan" onclick="toggleScanner()">📷</button>
+                        <input type="text" placeholder="SCAN OR TYPE DR">
+                        <button class="btn-scan">📷</button>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Find Item (SKU/NAME)</label>
-                    <input list="items-list" id="item-search" placeholder="START TYPING..." onchange="handleSelection()">
-                    <datalist id="items-list"></datalist>
+                <div class="form-group full-width">
+                    <label>Search Item</label>
+                    <input type="text" placeholder="SKU OR ITEM NAME...">
                 </div>
-                <div class="form-group">
-                    <label>Receive Quantity</label>
-                    <input type="number" id="add-qty" placeholder="0" inputmode="numeric">
+                <div class="form-group full-width">
+                    <label>Receive Qty</label>
+                    <input type="number" placeholder="0">
                 </div>
             </div>
-            <button class="btn btn-add" onclick="addToBatch()">Add to Batch List ↓</button>
+            <button class="btn btn-add">Add to List ↓</button>
         </div>
 
         <div class="table-container">
-            <div class="table-header">Pending Items in Batch</div>
+            <div class="table-header">Pending Items (Mock Preview)</div>
             <div class="scroll-area">
                 <table>
                     <thead>
                         <tr>
                             <th>SKU</th>
-                            <th>Item Description</th>
+                            <th>Description</th>
                             <th style="text-align: center;">Qty</th>
-                            <th style="text-align: center;">Action</th>
+                            <th style="text-align: center;">X</th>
                         </tr>
                     </thead>
-                    <tbody id="batch-body"></tbody>
+                    <tbody>
+                        <tr>
+                            <td style="font-family:monospace; color:var(--accent);">SKU-1002</td>
+                            <td style="font-size: 0.65rem;">SAMSUNG MONITOR 24"</td>
+                            <td style="text-align:center;"><span class="qty-badge">+10</span></td>
+                            <td style="text-align:center; color:red; font-weight:bold;">×</td>
+                        </tr>
+                        <tr>
+                            <td style="font-family:monospace; color:var(--accent);">SKU-5521</td>
+                            <td style="font-size: 0.65rem;">LOGITECH MOUSE G304</td>
+                            <td style="text-align:center;"><span class="qty-badge">+25</span></td>
+                            <td style="text-align:center; color:red; font-weight:bold;">×</td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
             <div class="summary-bar">
-                <span>Unique SKUs: <span id="total-items">0</span></span>
-                <span>TOTAL QTY: <span id="total-qty">0</span></span>
+                <span>SKUs: 2</span>
+                <span>TOTAL QTY: 35</span>
             </div>
         </div>
 
-        <button class="btn btn-submit" id="save-btn" onclick="processBatch()">Confirm & Post Receiving Batch</button>
+        <button class="btn btn-submit">Confirm & Post Receiving</button>
     </div>
 </main>
 
-<script>
-    /* ... Keep all your existing JS logic here, it remains unchanged ... */
-    const _supabase = supabase.createClient('https://crruounuhtfzyssyhgcc.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg');
-    
-    let masterInventory = [];
-    let selectedItem = null;
-    let batchItems = [];
-    let html5QrCode = null;
-
-    const activeUser = localStorage.getItem('activeAdmin');
-    const userRole = localStorage.getItem('userRole');
-    const userPermissions = JSON.parse(localStorage.getItem('userPermissions') || '[]');
-
-    function init() {
-        if (!activeUser) { location.href = 'index.html'; return; }
-        applyPermissions();
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('recv-date').value = today;
-        generateRef();
-        loadInventory();
-    }
-
-    function applyPermissions() {
-        document.getElementById('active-user').innerText = activeUser;
-        document.getElementById('user-role-label').innerText = userRole === 'admin' ? 'System Admin' : 'Staff Member';
-        document.querySelectorAll('.btn-toggle').forEach(btn => {
-            const page = btn.getAttribute('data-page');
-            if (userRole === 'admin' || userPermissions.includes(page)) {
-                btn.style.display = 'flex';
-            }
-        });
-    }
-
-    function generateRef() {
-        const dateInput = document.getElementById('recv-date').value;
-        const datePart = dateInput.replace(/-/g, "").slice(2);
-        document.getElementById('delivery-ref').value = `RCV-${datePart}-${Math.floor(100 + Math.random() * 899)}`;
-    }
-
-    async function loadInventory() {
-        const { data } = await _supabase.from('inventory').select('*').order('item_name');
-        masterInventory = data || [];
-        document.getElementById('items-list').innerHTML = masterInventory.map(i => `<option value="${i.item_name} [${i.sku || 'N/A'}]">`).join('');
-    }
-
-    function handleSelection() {
-        const val = document.getElementById('item-search').value;
-        selectedItem = masterInventory.find(i => `${i.item_name} [${i.sku || 'N/A'}]` === val);
-    }
-
-    function addToBatch() {
-        const qty = parseInt(document.getElementById('add-qty').value);
-        if (!selectedItem || !qty || qty <= 0) return alert("Invalid selection or quantity");
-        batchItems.push({ ...selectedItem, receiveQty: qty });
-        renderTable();
-        document.getElementById('item-search').value = "";
-        document.getElementById('add-qty').value = "";
-        selectedItem = null;
-    }
-
-    function renderTable() {
-        const tbody = document.getElementById('batch-body');
-        tbody.innerHTML = batchItems.map((item, idx) => `
-            <tr>
-                <td style="font-family:monospace; color:var(--accent); font-weight:800;">${item.sku || 'N/A'}</td>
-                <td style="font-weight:700;">${item.item_name}</td>
-                <td style="text-align:center;"><span class="qty-badge">+${item.receiveQty}</span></td>
-                <td style="text-align:center;"><button style="color:var(--danger); background:none; border:none; font-weight:800; cursor:pointer;" onclick="removeItem(${idx})">REMOVE</button></td>
-            </tr>
-        `).reverse().join('');
-        document.getElementById('total-items').innerText = batchItems.length;
-        document.getElementById('total-qty').innerText = batchItems.reduce((sum, i) => sum + i.receiveQty, 0);
-    }
-
-    function removeItem(idx) {
-        batchItems.splice(idx, 1);
-        renderTable();
-    }
-
-    async function processBatch() {
-        const dr = document.getElementById('dr-number').value.trim().toUpperCase();
-        const ref = document.getElementById('delivery-ref').value;
-        if (!dr || batchItems.length === 0) return alert("Required: DR# and items in batch");
-
-        const btn = document.getElementById('save-btn');
-        btn.disabled = true; btn.innerText = "POSTING TO DATABASE...";
-
-        try {
-            for (const item of batchItems) {
-                const { data: cur } = await _supabase.from('inventory').select('quantity').eq('id', item.id).single();
-                await _supabase.from('inventory').update({ quantity: (cur.quantity || 0) + item.receiveQty }).eq('id', item.id);
-                await _supabase.from('inventory_transactions').insert([{
-                    reference_id: ref, sku: item.sku, item_name: item.item_name,
-                    qty_change: item.receiveQty, location: item.location, uom: item.uom, notes: `DR# ${dr}`
-                }]);
-            }
-            await _supabase.from('activity_logs').insert([{
-                type: 'RECEIVING', reference_id: ref, performed_by: activeUser,
-                summary: `${batchItems.length} ITEMS RECEIVED (DR# ${dr})`
-            }]);
-            alert("BATCH POSTED SUCCESSFULLY");
-            window.location.reload();
-        } catch (e) {
-            alert("Error: " + e.message);
-            btn.disabled = false; btn.innerText = "Post Receiving Batch";
-        }
-    }
-
-    function toggleScanner() {
-        const r = document.getElementById('reader');
-        if (r.style.display === 'block') {
-            html5QrCode.stop().then(() => { r.style.display = 'none'; html5QrCode = null; });
-        } else {
-            r.style.display = 'block';
-            html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 200 }, (text) => {
-                document.getElementById('dr-number').value = text.toUpperCase();
-                toggleScanner();
-            }).catch(err => { alert("Camera error: " + err); r.style.display = 'none'; });
-        }
-    }
-
-    function handleLogout() { localStorage.clear(); location.href = 'index.html'; }
-    function goHome() { window.location.href = (userRole === 'admin') ? 'dashboard.html' : 'inventory.html'; }
-
-    init();
-</script>
 </body>
 </html>

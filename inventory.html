@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Inventory | EasiStock Master</title>
+    <title>Inventory | JmcyFlow</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -15,155 +15,123 @@
             --warning: #f59e0b;
             --danger: #ef4444;
             --excel-border: #cbd5e1;
-            --sidebar-width-desktop: 110px; /* Slightly wider for full words */
+            --sidebar-width-desktop: 80px;
         }
 
-        html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; }
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%); display: flex; flex-direction: column; }
+        /* Essential Reset for Mobile Fit */
+        * { box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: #f1f5f9; }
+        body { font-family: 'Inter', sans-serif; display: flex; flex-direction: column; }
 
-        .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 1000; }
+        /* Compact Navbar */
+        .navbar { height: 50px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 12px; flex-shrink: 0; z-index: 1000; border-bottom: 2px solid var(--accent); }
+        .nav-logo-area { display: flex; align-items: center; gap: 8px; }
+        #company-logo-img { height: 24px; max-width: 100px; object-fit: contain; display: none; }
+        #company-name-text { color: white; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        .nav-logo-btn { 
-            background: var(--accent); color: white; font-weight: 800; font-size: 0.9rem; 
-            text-transform: uppercase; padding: 8px 16px; border-radius: 8px; border: none;
-            cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 0px #0056aa;
-        }
-        
-        .user-info { display: flex; flex-direction: column; align-items: flex-end; margin-right: 15px; cursor: pointer; padding: 5px; border-radius: 8px; }
-        .user-label { font-size: 0.55rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; }
-        .user-name { font-size: 0.75rem; color: white; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
-        .online-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
+        .user-info { display: flex; flex-direction: column; align-items: flex-end; margin-right: 10px; }
+        .user-label { font-size: 0.5rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; }
+        .user-name { font-size: 0.65rem; color: white; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 3px; }
+        .online-dot { width: 5px; height: 5px; background: var(--success); border-radius: 50%; }
 
-        .main-content { flex: 1; display: flex; flex-direction: column; padding: 10px; overflow: hidden; }
+        /* Layout Structure */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* MOBILE VIEW */
-        .action-bar-container { padding: 5px 0 15px 0; display: flex; justify-content: center; flex-shrink: 0; }
-        .toggle-group { display: flex; width: 100%; max-width: 550px; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); }
-        
+        /* Mobile Action Bar (Bottom/Top) */
+        .action-bar-container { padding: 8px; background: #f1f5f9; flex-shrink: 0; }
+        .toggle-group { display: flex; border-radius: 8px; overflow: hidden; border: 1px solid var(--primary); background: var(--primary); }
         .btn-toggle { 
-            flex: 1; padding: 10px 0; border: none; border-right: 1px solid rgba(255,255,255,0.15); 
+            flex: 1; padding: 8px 0; border: none; border-right: 1px solid rgba(255,255,255,0.1); 
             cursor: pointer; color: rgba(255,255,255,0.6); background: var(--primary); 
-            font-size: 0.65rem; font-weight: 800; text-transform: uppercase; 
-            display: none; flex-direction: column; align-items: center; gap: 4px; transition: all 0.3s ease;
+            font-size: 0.6rem; font-weight: 700; text-transform: uppercase; 
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
         }
-        .btn-toggle.active { background: var(--accent) !important; color: white !important; display: flex !important; }
+        .btn-toggle.active { background: var(--accent) !important; color: white !important; }
 
-        /* DESKTOP VIEW - FULL WORDS & RIGHT SIDEBAR */
-        @media (min-width: 1024px) {
-            .main-content { flex-direction: row; padding: 0; }
-            .right-panel { order: 1; flex: 1; padding: 25px; }
+        /* Right Panel (Search + Table) */
+        .right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 0 8px 8px 8px; }
+        .search-container { margin-bottom: 8px; position: relative; flex-shrink: 0; }
+        .search-input { width: 100%; padding: 10px 10px 10px 35px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.85rem; font-weight: 600; outline: none; }
+        .search-icon { position: absolute; left: 12px; top: 10px; color: var(--primary); font-size: 0.9rem; }
 
-            .action-bar-container { 
-                order: 2; 
-                width: var(--sidebar-width-desktop); 
-                height: 100%; 
-                background: var(--primary); 
-                padding: 0; 
-                flex-direction: column; 
-                border-left: 2px solid rgba(255,255,255,0.1); 
-            }
-            
-            .toggle-group { flex-direction: column; height: 100%; border-radius: 0; border: none; }
-
-            .btn-toggle { 
-                border-right: none; 
-                border-bottom: 1px solid rgba(255,255,255,0.05); 
-                padding: 35px 5px; /* Added slight side padding */
-                width: 100%; 
-            }
-
-            .btn-toggle span:first-child {
-                font-size: 1.8rem;
-                transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            }
-
-            /* Reveal Full Word Label on Hover */
-            .btn-toggle span:last-child {
-                font-size: 0.65rem; /* Smaller font for long words like "Receiving" */
-                opacity: 0;
-                transform: translateY(10px);
-                transition: all 0.3s ease;
-                margin-top: 5px;
-            }
-
-            .btn-toggle:hover span:last-child {
-                opacity: 1;
-                transform: translateY(0);
-                color: #fff;
-            }
-
-            .btn-toggle:hover span:first-child {
-                transform: scale(1.1) translateY(-5px);
-            }
-            
-            .btn-toggle:hover { background: rgba(255,255,255,0.08); }
-        }
-
-        /* Table & Search Panel */
-        .right-panel { display: flex; flex-direction: column; overflow: hidden; }
-        .search-container { margin-bottom: 12px; width: 100%; position: relative; flex-shrink: 0; }
-        .search-input { width: 100%; padding: 15px 50px; border-radius: 12px; border: 2px solid var(--primary); font-size: 1rem; font-weight: 700; box-sizing: border-box; outline: none; text-transform: uppercase; }
-        .search-icon { position: absolute; left: 18px; top: 15px; color: var(--primary); font-size: 1.2rem; }
-
-        .table-scroll-area { flex: 1; overflow: auto; background: white; border: 2px solid var(--primary); border-radius: 12px; }
-        table { border-collapse: collapse; width: max-content; min-width: 100%; }
+        /* Table Area */
+        .table-scroll-area { flex: 1; overflow: auto; background: white; border: 1px solid #cbd5e1; border-radius: 8px; }
+        table { border-collapse: collapse; width: max-content; }
         
-        thead th { position: sticky; top: 0; z-index: 20; background: #f1f5f9; height: 50px; font-size: 0.75rem; font-weight: 800; border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border); color: var(--primary); text-transform: uppercase; }
-        .sticky-col { position: sticky; left: 0; z-index: 30; background: #f1f5f9 !important; width: 50px !important; border-right: 2px solid var(--primary) !important; }
+        thead th { position: sticky; top: 0; z-index: 20; background: #f8fafc; height: 35px; font-size: 0.6rem; font-weight: 800; border-bottom: 2px solid var(--primary); border-right: 1px solid var(--excel-border); color: var(--primary); text-transform: uppercase; padding: 0 8px; }
+        .sticky-col { position: sticky; left: 0; z-index: 30; background: #f1f5f9 !important; border-right: 2px solid var(--primary) !important; }
+        .sticky-col-2 { position: sticky; left: 40px; z-index: 30; background: white !important; border-right: 1px solid var(--excel-border) !important; }
 
-        tbody td { height: 52px; padding: 0 10px; border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); font-size: 0.85rem; text-align: center; white-space: nowrap; font-weight: 600; color: #334155; text-transform: uppercase; }
-        tbody tr:hover { background-color: #f8fafc; }
-        tbody tr.selected-row { background-color: var(--accent) !important; }
-        tbody tr.selected-row td { color: white !important; }
+        tbody td { height: 40px; padding: 0 8px; border-bottom: 1px solid var(--excel-border); border-right: 1px solid var(--excel-border); font-size: 0.75rem; text-align: center; white-space: nowrap; font-weight: 600; color: #1e293b; text-transform: uppercase; }
+        tbody tr:hover { background-color: #f0f7ff; }
+        
+        .badge { padding: 3px 6px; border-radius: 4px; font-size: 0.55rem; font-weight: 900; color: white; }
+        .bg-healthy { background: var(--success); }
+        .bg-low { background: var(--warning); }
+        .bg-out { background: var(--danger); }
 
-        .pagination-footer { height: 65px; background: white; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--primary); border-radius: 0 0 12px 12px; flex-shrink: 0; }
-        .nav-btns { width: 100px; height: 42px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 0.8rem; }
+        /* Footer */
+        .pagination-footer { height: 50px; background: white; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; flex-shrink: 0; }
+        .nav-btns { padding: 6px 15px; background: var(--primary); color: white; border: none; border-radius: 6px; font-size: 0.7rem; font-weight: 800; }
+
+        /* Desktop Adjustments */
+        @media (min-width: 1024px) {
+            .main-content { flex-direction: row-reverse; }
+            .action-bar-container { width: var(--sidebar-width-desktop); height: 100%; padding: 0; }
+            .toggle-group { flex-direction: column; height: 100%; border-radius: 0; border: none; }
+            .btn-toggle { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 20px 5px; }
+            .btn-toggle span:first-child { font-size: 1.2rem; }
+            .right-panel { padding: 20px; }
+        }
     </style>
 </head>
 <body>
 
     <div class="navbar">
-        <button id="nav-logo" class="nav-logo-btn" onclick="goHome()">EasiStock</button>
+        <div class="nav-logo-area" onclick="goHome()">
+            <img id="company-logo-img" src="" alt="Logo">
+            <span id="company-name-text">JMCYFLOW</span>
+        </div>
         <div style="display:flex; align-items:center;">
-            <div class="user-info" onclick="location.href='profile.html'">
-                <span class="user-label" id="user-role-label">Loading...</span>
-                <span class="user-name"><div class="online-dot"></div><span id="active-user">---</span></span>
+            <div class="user-info">
+                <span class="user-label" id="user-role-label">Staff</span>
+                <span class="user-name"><div class="online-dot"></div><span id="active-user-name">---</span></span>
             </div>
-            <button style="background:none; border:none; color:#ef4444; font-weight:800; cursor:pointer;" onclick="handleLogout()">LOGOUT ⏻</button>
+            <button style="background:none; border:none; color:#ef4444; font-weight:800; cursor:pointer; font-size: 0.6rem;" onclick="handleLogout()">EXIT</button>
         </div>
     </div>
 
     <div class="main-content">
         <div class="action-bar-container">
-            <div class="toggle-group" id="perm-nav">
-                <button class="btn-toggle active" data-page="inventory.html" onclick="location.href='inventory.html'"><span>📋</span><span>Inventory</span></button>
-                <button class="btn-toggle" data-page="receiving.html" onclick="location.href='receiving.html'"><span>🚚</span><span>Receiving</span></button>
-                <button class="btn-toggle" data-page="orders.html" onclick="location.href='orders.html'"><span>💰</span><span>Sales</span></button>
-                <button class="btn-toggle" data-page="transfer.html" onclick="location.href='transfer.html'"><span>🔄</span><span>Transfer</span></button>
-                <button class="btn-toggle" data-page="return.html" onclick="location.href='return.html'"><span>↩️</span><span>Return</span></button>
+            <div class="toggle-group">
+                <button class="btn-toggle active" onclick="location.href='inventory.html'"><span>📋</span><span>Stock</span></button>
+                <button class="btn-toggle" onclick="location.href='receiving.html'"><span>🚚</span><span>Recv</span></button>
+                <button class="btn-toggle" onclick="location.href='sales.html'"><span>💰</span><span>Sales</span></button>
+                <button class="btn-toggle" onclick="location.href='transfer.html'"><span>🔄</span><span>Trans</span></button>
+                <button class="btn-toggle" onclick="location.href='return.html'"><span>↩️</span><span>Retn</span></button>
             </div>
         </div>
 
         <div class="right-panel">
             <div class="search-container">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="searchInput" class="search-input" placeholder="SEARCH (SKU, DESCRIPTION, LOCATION...)" oninput="handleSearch()">
+                <input type="text" id="searchInput" class="search-input" placeholder="SEARCH SKU/NAME..." oninput="handleSearch()">
             </div>
 
             <div class="table-scroll-area">
                 <table>
                     <thead>
                         <tr>
-                            <th class="sticky-col">#</th>
-                            <th style="width:100px;">Status</th>
-                            <th style="width:120px;">Category</th>
-                            <th style="width:110px;">Location</th>
-                            <th style="width:130px;">Item Code</th>
-                            <th style="width:250px;">Item Description</th>
-                            <th style="width:120px;">Brand</th>
-                            <th style="width:80px;">Stocks</th>
-                            <th style="width:70px;">Uom</th>
-                            <th style="width:110px;">Unit Price</th>
+                            <th class="sticky-col" style="width:40px;">#</th>
+                            <th class="sticky-col-2" style="width:70px;">Status</th>
+                            <th style="width:100px;">Category</th>
+                            <th style="width:100px;">Location</th>
+                            <th style="width:120px;">SKU</th>
+                            <th style="width:250px;">Description</th>
+                            <th style="width:100px;">Brand</th>
+                            <th style="width:70px;">Qty</th>
+                            <th style="width:60px;">UOM</th>
+                            <th style="width:100px;">Price</th>
                         </tr>
                     </thead>
                     <tbody id="inventory-body"></tbody>
@@ -171,8 +139,8 @@
             </div>
 
             <div class="pagination-footer">
-                <div id="page-info" style="font-size: 0.8rem; font-weight: 800; color: var(--primary);">Loading...</div>
-                <div style="gap:10px; display:flex;">
+                <div id="page-info" style="font-size: 0.65rem; font-weight: 800; color: var(--primary);">Page 1</div>
+                <div style="gap:5px; display:flex;">
                     <button class="nav-btns" id="prevBtn" onclick="changePage(currentPage - 1)">PREV</button>
                     <button class="nav-btns" id="nextBtn" onclick="changePage(currentPage + 1)">NEXT</button>
                 </div>
@@ -181,62 +149,77 @@
     </div>
 
     <script>
-        // ... Supabase logic stays exactly as you had it ...
-        const _supabase = supabase.createClient('https://crruounuhtfzyssyhgcc.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg');
-        let currentPage = 1, currentSearchQuery = "";
-        const activeUser = localStorage.getItem('activeAdmin');
-        const userRole = localStorage.getItem('userRole');
-        const userPermissions = JSON.parse(localStorage.getItem('userPermissions') || '[]');
+        const SUPABASE_URL = 'https://pehffyqlssrqogosfsab.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        function applyPermissions() {
-            if (!activeUser) { location.href = 'index.html'; return; }
-            document.getElementById('active-user').innerText = activeUser;
-            document.getElementById('user-role-label').innerText = userRole === 'admin' ? 'System Admin' : 'Staff Member';
-            document.querySelectorAll('.btn-toggle').forEach(btn => {
-                const page = btn.getAttribute('data-page');
-                if (userRole === 'admin' || userPermissions.includes(page)) { btn.style.display = 'flex'; }
-            });
+        let currentPage = 1, currentSearchQuery = "";
+        const companyId = localStorage.getItem('jmcy_cid');
+        const activeUser = localStorage.getItem('jmcy_user');
+        const userRole = localStorage.getItem('jmcy_role');
+
+        const placeholderRows = Array.from({ length: 15 }, (_, i) => ({
+            sku: `SKU-${100 + i}`,
+            item_name: `SAMPLE ITEM DESCRIPTION ${i + 1}`,
+            category: 'TOOLS',
+            location: `A-${i}`,
+            brand: 'BRAND',
+            quantity: i === 0 ? 0 : (i < 3 ? 2 : 50),
+            min_qty: 5,
+            uom: 'PCS',
+            unit_price: 150.00
+        }));
+
+        async function initBranding() {
+            document.getElementById('active-user-name').innerText = activeUser || "USER";
+            if (!companyId) return;
+            const { data } = await _supabase.from('companies').select('company_name, company_logo').eq('id', companyId).single();
+            if (data) {
+                if (data.company_logo) {
+                    document.getElementById('company-logo-img').src = data.company_logo;
+                    document.getElementById('company-logo-img').style.display = 'block';
+                    document.getElementById('company-name-text').style.display = 'none';
+                } else {
+                    document.getElementById('company-name-text').innerText = data.company_name;
+                }
+            }
         }
-        function goHome() { window.location.href = (userRole === 'admin') ? 'dashboard.html' : 'inventory.html'; }
+
         async function fetchInventory() {
-            const tbody = document.getElementById('inventory-body');
             try {
-                let query = _supabase.from('inventory').select('*', { count: 'exact' });
-                if (currentSearchQuery) query = query.or(`item_name.ilike.%${currentSearchQuery}%,sku.ilike.%${currentSearchQuery}%,brand.ilike.%${currentSearchQuery}%,location.ilike.%${currentSearchQuery}%`);
-                const from = (currentPage - 1) * 25;
-                const { data, count, error } = await query.order('location').range(from, from + 24);
-                if (error) throw error;
-                renderTable(data || [], count || 0);
-            } catch (err) { tbody.innerHTML = `<tr><td colspan="10" style="padding:20px; color:red;">Error: ${err.message}</td></tr>`; }
+                let { data, count, error } = await _supabase.from('inventory').select('*', { count: 'exact' }).eq('company_id', companyId).range((currentPage-1)*25, (currentPage*25)-1);
+                if (!data || data.length === 0) { renderTable(placeholderRows, 15); } 
+                else { renderTable(data, count); }
+            } catch (err) { renderTable(placeholderRows, 15); }
         }
-        function renderTable(data, total) {
+
+        function renderTable(data, totalCount) {
             const tbody = document.getElementById('inventory-body');
-            if (data.length === 0) { tbody.innerHTML = `<tr><td colspan="10" style="padding:20px;">No items found.</td></tr>`; return; }
-            tbody.innerHTML = data.map((item, i) => {
+            tbody.innerHTML = data.map((item, index) => {
                 const qty = item.quantity || 0;
-                const min = item.min_qty || 10;
-                const price = item.unit_price ? parseFloat(item.unit_price).toLocaleString(undefined, {minimumFractionDigits: 2}) : '0.00';
-                let statusBadge = qty <= 0 ? '<span class="status-badge bg-out">OUT</span>' : (qty < min ? '<span class="status-badge bg-low">LOW</span>' : '<span class="status-badge bg-healthy">GOOD</span>');
-                return `<tr onclick="selectRow(this)">
-                    <td class="sticky-col">${((currentPage-1)*25)+i+1}</td>
-                    <td>${statusBadge}</td><td>${item.category || '-'}</td><td>${item.location || '-'}</td>
-                    <td style="font-family:monospace; font-weight:800; color:var(--accent);">${item.sku || '-'}</td>
-                    <td style="text-align:left; font-weight:700;">${item.item_name || '-'}</td>
-                    <td>${item.brand || '-'}</td><td style="font-weight:800;">${qty}</td>
-                    <td><span style="font-size:0.6rem; background:#64748b; color:white; padding:2px 4px; border-radius:3px;">${item.uom || 'PCS'}</span></td>
-                    <td style="color:var(--success); font-weight:800;">₱${price}</td></tr>`;
+                const status = qty <= 0 ? 'bg-out">OUT' : (qty < (item.min_qty || 5) ? 'bg-low">LOW' : 'bg-healthy">OK');
+                return `<tr>
+                    <td class="sticky-col">${index + 1}</td>
+                    <td class="sticky-col-2"><span class="badge ${status}</span></td>
+                    <td>${item.category || '-'}</td>
+                    <td>${item.location || '-'}</td>
+                    <td style="color:var(--accent);">${item.sku || '-'}</td>
+                    <td style="text-align:left;">${item.item_name || '-'}</td>
+                    <td>${item.brand || '-'}</td>
+                    <td>${qty}</td>
+                    <td>${item.uom || 'PCS'}</td>
+                    <td>₱${parseFloat(item.unit_price || 0).toFixed(2)}</td>
+                </tr>`;
             }).join('');
-            const totalPages = Math.ceil(total / 25) || 1;
-            document.getElementById('page-info').innerText = `Page ${currentPage}/${totalPages} (${total} SKUs)`;
-            document.getElementById('prevBtn').disabled = (currentPage === 1);
-            document.getElementById('nextBtn').disabled = (currentPage >= totalPages);
+            document.getElementById('page-info').innerText = `Page ${currentPage} (${totalCount} Total)`;
         }
-        function handleSearch() { currentSearchQuery = document.getElementById('searchInput').value; currentPage = 1; fetchInventory(); }
-        function changePage(p) { if(p > 0) { currentPage = p; fetchInventory(); document.querySelector('.table-scroll-area').scrollTop = 0; } }
-        function handleLogout() { localStorage.clear(); location.href = 'index.html'; }
-        function selectRow(el) { document.querySelectorAll('#inventory-body tr').forEach(r => r.classList.remove('selected-row')); el.classList.add('selected-row'); }
-        applyPermissions();
-        fetchInventory();
+
+        function handleSearch() { fetchInventory(); }
+        function changePage(p) { if(p > 0) { currentPage = p; fetchInventory(); } }
+        function goHome() { window.location.href = userRole === 'admin' ? 'dashboard.html' : 'inventory.html'; }
+        function handleLogout() { localStorage.clear(); location.href = 'login.html'; }
+
+        window.onload = () => { initBranding(); fetchInventory(); };
     </script>
 </body>
 </html>

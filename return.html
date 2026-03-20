@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Stock Return | EasiStock</title>
+    <title>Stock Return | JmcyFlow</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -15,98 +15,92 @@
             --warning: #f59e0b;
             --danger: #ef4444;
             --border-main: #cbd5e1;
-            --sidebar-width-desktop: 110px;
+            --sidebar-width-desktop: 80px;
         }
 
         /* --- GLOBAL LAYOUT --- */
-        html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; }
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%); display: flex; flex-direction: column; }
+        * { box-sizing: border-box; }
+        html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; background: #f1f5f9; }
+        body { font-family: 'Inter', sans-serif; display: flex; flex-direction: column; }
 
-        .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 1000; }
-        .nav-logo-btn { background: var(--accent); color: white; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 0px #0056aa; }
+        .navbar { height: 55px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; flex-shrink: 0; border-bottom: 3px solid var(--warning); }
+        #company-name-text { color: white; font-weight: 900; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
         
-        .user-info { display: flex; flex-direction: column; align-items: flex-end; margin-right: 15px; cursor: pointer; padding: 5px; border-radius: 8px; }
-        .user-label { font-size: 0.55rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; }
-        .user-name { font-size: 0.75rem; color: white; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
+        .user-info { display: flex; flex-direction: column; align-items: flex-end; margin-right: 10px; }
+        .user-label { font-size: 0.5rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; }
+        .user-name { font-size: 0.65rem; color: white; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
         .online-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
 
-        .main-content { flex: 1; display: flex; flex-direction: column; padding: 10px; overflow: hidden; gap: 10px; }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* --- SIDEBAR / TOGGLE NAV --- */
-        .action-bar-container { display: flex; justify-content: center; flex-shrink: 0; }
-        .toggle-group { display: flex; width: 100%; max-width: 550px; border-radius: 12px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); }
-        .btn-toggle { flex: 1; padding: 10px 0; border: none; border-right: 1px solid rgba(255,255,255,0.15); cursor: pointer; color: rgba(255,255,255,0.6); background: var(--primary); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; display: none; flex-direction: column; align-items: center; gap: 4px; transition: all 0.3s ease; }
-        .btn-toggle.active { background: var(--accent) !important; color: white !important; display: flex !important; }
+        .action-bar-container { padding: 8px; background: #f1f5f9; flex-shrink: 0; }
+        .toggle-group { display: flex; border-radius: 10px; overflow: hidden; background: var(--primary); border: 1px solid var(--primary); }
+        .btn-toggle { 
+            flex: 1; padding: 10px 0; border: none; border-right: 1px solid rgba(255,255,255,0.1); 
+            color: rgba(255,255,255,0.5); background: var(--primary); cursor: pointer;
+            font-size: 0.6rem; font-weight: 700; text-transform: uppercase; 
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+        }
+        .btn-toggle.active { background: var(--accent) !important; color: white !important; }
 
-        /* --- DESKTOP VIEW ADJUSTMENTS --- */
+        /* Content Panel */
+        .right-panel { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 10px; gap: 10px; }
+        
         @media (min-width: 1024px) {
-            .main-content { flex-direction: row; padding: 0; gap: 0; }
-            .right-panel { order: 1; flex: 1; padding: 25px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
-            
-            .action-bar-container { order: 2; width: var(--sidebar-width-desktop); height: 100%; background: var(--primary); padding: 0; flex-direction: column; border-left: 2px solid rgba(255,255,255,0.1); }
-            .toggle-group { flex-direction: column; height: 100%; border-radius: 0; border: none; max-width: none; }
-            .btn-toggle { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 35px 5px; width: 100%; }
-            .btn-toggle span:first-child { font-size: 1.8rem; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-            .btn-toggle span:last-child { font-size: 0.65rem; opacity: 0; transform: translateY(10px); transition: all 0.3s ease; margin-top: 5px; }
-            .btn-toggle:hover span:last-child { opacity: 1; transform: translateY(0); color: #fff; }
-            .btn-toggle:hover span:first-child { transform: scale(1.1) translateY(-5px); }
-            .btn-toggle:hover { background: rgba(255,255,255,0.08); }
-
-            .input-card { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
-            .btn-add { margin-top: 24px !important; }
+            .main-content { flex-direction: row-reverse; }
+            .action-bar-container { width: var(--sidebar-width-desktop); height: 100%; padding: 0; }
+            .toggle-group { flex-direction: column; height: 100%; border-radius: 0; }
+            .btn-toggle { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 25px 5px; }
+            .btn-toggle span:first-child { font-size: 1.3rem; }
+            .right-panel { padding: 30px; display: grid; grid-template-columns: 450px 1fr; gap: 20px; align-items: start; }
+            #save-btn { grid-column: span 2; }
         }
 
-        /* --- UI COMPONENTS --- */
-        .input-card { background: white; border-radius: 12px; border: 2px solid var(--primary); padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .input-card { background: white; border-radius: 12px; border: 1px solid var(--border-main); padding: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .full-width { grid-column: span 2; }
         
-        label { display: block; font-size: 0.6rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 4px; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1.5px solid var(--border-main); border-radius: 8px; font-size: 0.85rem; font-weight: 700; outline: none; box-sizing: border-box; font-family: inherit; }
-        textarea { height: 50px; resize: none; text-transform: uppercase; }
-        input[readonly] { background-color: #f8fafc; color: #64748b; border-style: dashed; }
+        label { display: block; font-size: 0.55rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 4px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border-main); border-radius: 8px; font-size: 0.8rem; font-weight: 700; outline: none; text-transform: uppercase; }
+        textarea { height: 60px; resize: none; font-family: inherit; }
 
-        .table-container { flex: 1; background: white; border-radius: 12px; border: 2px solid var(--primary); display: flex; flex-direction: column; overflow: hidden; min-height: 200px; }
-        .table-header { background: #fef3c7; padding: 12px; font-weight: 800; font-size: 0.7rem; color: #92400e; border-bottom: 2px solid var(--warning); text-transform: uppercase; }
-        
+        .table-container { background: white; border-radius: 12px; border: 1px solid var(--border-main); display: flex; flex-direction: column; overflow: hidden; min-height: 250px; }
+        .table-header { background: #fffbeb; padding: 12px; font-weight: 800; font-size: 0.65rem; color: #92400e; border-bottom: 1px solid var(--warning); }
         .scroll-area { flex: 1; overflow: auto; }
         table { width: 100%; border-collapse: collapse; }
-        thead th { position: sticky; top: 0; background: #f8fafc; padding: 12px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; border-bottom: 1px solid var(--border-main); text-align: left; z-index: 20; }
-        tbody td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; font-weight: 600; }
+        thead th { position: sticky; top: 0; background: #fef3c7; padding: 10px; font-size: 0.6rem; border-bottom: 2px solid var(--warning); text-align: left; z-index: 10; }
+        tbody td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 0.75rem; font-weight: 600; }
 
-        .summary-bar { background: #f1f5f9; padding: 12px 20px; border-top: 2px solid var(--primary); display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 800; }
+        .summary-bar { background: #92400e; color: white; padding: 15px; display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 800; }
         
-        .btn { border: none; border-radius: 10px; padding: 15px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: all 0.2s; }
-        .btn-add { background: var(--primary); color: white; width: 100%; margin-top: 10px; }
-        .btn-submit { background: var(--warning); color: white; width: 100%; box-shadow: 0 4px 0 #d97706; font-size: 0.9rem; }
-        .btn-submit:active { transform: translateY(2px); box-shadow: none; }
-        .btn-submit:disabled { background: #94a3b8; box-shadow: none; cursor: not-allowed; }
+        .badge-rtn { display: inline-block; background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; border: 1px solid #fde68a; }
 
-        .qty-badge { background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 6px; font-weight: 800; display: inline-block; }
-        .reason-tag { font-size: 0.6rem; background: #f1f5f9; color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: 800; border: 1px solid var(--border-main); }
+        .btn { border: none; border-radius: 8px; padding: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
+        .btn-add { background: var(--primary); color: white; width: 100%; margin-top: 10px; }
+        .btn-submit { background: var(--warning); color: white; width: 100%; font-size: 0.85rem; box-shadow: 0 4px 0 #d97706; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <header class="navbar">
-    <button class="nav-logo-btn" onclick="goHome()">EasiStock</button>
+    <span id="company-name-text">JMCYFLOW</span>
     <div style="display:flex; align-items:center;">
-        <div class="user-info" onclick="location.href='profile.html'">
-            <span class="user-label" id="user-role-label">Loading...</span>
-            <span class="user-name"><div class="online-dot"></div><span id="active-user">---</span></span>
+        <div class="user-info">
+            <span class="user-label" id="user-role-label">System Admin</span>
+            <span class="user-name"><div class="online-dot"></div><span id="active-user">Admin</span></span>
         </div>
-        <button style="background:none; border:none; color:#ef4444; font-weight:800; cursor:pointer;" onclick="handleLogout()">LOGOUT ⏻</button>
+        <button style="background:none; border:none; color:#ef4444; font-weight:800; cursor:pointer; font-size:0.65rem;" onclick="handleLogout()">LOGOUT</button>
     </div>
 </header>
 
 <main class="main-content">
     <div class="action-bar-container">
-        <div class="toggle-group" id="perm-nav">
-            <button class="btn-toggle" data-page="inventory.html" onclick="location.href='inventory.html'"><span>📋</span><span>Inventory</span></button>
-            <button class="btn-toggle" data-page="receiving.html" onclick="location.href='receiving.html'"><span>🚚</span><span>Receiving</span></button>
-            <button class="btn-toggle" data-page="orders.html" onclick="location.href='orders.html'"><span>💰</span><span>Sales</span></button>
-            <button class="btn-toggle" data-page="transfer.html" onclick="location.href='transfer.html'"><span>🔄</span><span>Transfer</span></button>
-            <button class="btn-toggle active" data-page="return.html" onclick="location.href='return.html'"><span>↩️</span><span>Return</span></button>
+        <div class="toggle-group">
+            <button class="btn-toggle" onclick="location.href='inventory.html'"><span>📋</span><span>Stock</span></button>
+            <button class="btn-toggle" onclick="location.href='receiving.html'"><span>🚚</span><span>Recv</span></button>
+            <button class="btn-toggle" onclick="location.href='orders.html'"><span>💰</span><span>Sales</span></button>
+            <button class="btn-toggle" onclick="location.href='transfer.html'"><span>🔄</span><span>Trans</span></button>
+            <button class="btn-toggle active"><span>↩️</span><span>Retn</span></button>
         </div>
     </div>
 
@@ -114,70 +108,68 @@
         <div class="input-card">
             <div class="form-grid">
                 <div class="form-group">
-                    <label>Transaction Date</label>
-                    <input type="date" id="return-date" onchange="generateRef()">
+                    <label>Return Date</label>
+                    <input type="date" id="return-date">
                 </div>
                 <div class="form-group">
-                    <label>Return Reference</label>
+                    <label>Ref #</label>
                     <input type="text" id="return-ref" readonly>
                 </div>
                 <div class="form-group">
-                    <label>Reason for Return</label>
-                    <select id="return-reason">
-                        <option value="DEFECTIVE ITEM">DEFECTIVE ITEM</option>
-                        <option value="WRONG ITEM DELIVERED">WRONG ITEM DELIVERED</option>
-                        <option value="EXPIRED STOCK">EXPIRED STOCK</option>
-                        <option value="CUSTOMER REFUSAL">CUSTOMER REFUSAL</option>
-                        <option value="CANCELLED ORDER">CANCELLED ORDER</option>
+                    <label>Return Flow</label>
+                    <select id="return-flow">
+                        <option value="CUSTOMER">FROM CUSTOMER (STOCK IN)</option>
+                        <option value="SUPPLIER">TO SUPPLIER (STOCK OUT)</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Return Direction</label>
-                    <select id="return-type">
-                        <option value="CUSTOMER RETURN">FROM CUSTOMER (STOCK IN)</option>
-                        <option value="SUPPLIER RETURN">TO SUPPLIER (STOCK OUT)</option>
+                    <label>Primary Reason</label>
+                    <select id="return-reason">
+                        <option value="DEFECTIVE">DEFECTIVE ITEM</option>
+                        <option value="WRONG_ITEM">WRONG ITEM SENT</option>
+                        <option value="EXPIRED">EXPIRED STOCK</option>
+                        <option value="CANCELLED">CANCELLED ORDER</option>
                     </select>
                 </div>
                 <div class="form-group full-width">
-                    <label>Internal Notes / Discrepancy Details</label>
-                    <textarea id="return-notes" placeholder="DESCRIBE THE ISSUE, BATCH NUMBERS, OR ACTION TAKEN..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Search Product</label>
-                    <input list="items-list" id="item-search" placeholder="SKU OR ITEM NAME..." onchange="handleSelection()">
+                    <label>Item Selection</label>
+                    <input list="items-list" id="item-search" placeholder="SKU OR NAME..." onchange="handleSelection()">
                     <datalist id="items-list"></datalist>
                 </div>
                 <div class="form-group">
-                    <label>Return Quantity</label>
-                    <input type="number" id="return-qty" placeholder="0" inputmode="numeric">
+                    <label>Quantity</label>
+                    <input type="number" id="return-qty" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>Condition Note</label>
+                    <input type="text" id="return-note" placeholder="EX: OPENED BOX, NO SEAL">
                 </div>
             </div>
-            <button class="btn btn-add" onclick="addToBatch()">Add to Batch List ↓</button>
+            <button class="btn btn-add" onclick="addToBatch()">Add to Return List ↓</button>
         </div>
 
         <div class="table-container">
-            <div class="table-header">Pending Return Batch Preview</div>
+            <div class="table-header">Return Batch Items</div>
             <div class="scroll-area">
                 <table>
                     <thead>
                         <tr>
-                            <th>SKU</th>
-                            <th>Description</th>
-                            <th>Reason / Status</th>
+                            <th>SKU / Item</th>
+                            <th>Reason</th>
                             <th style="text-align: center;">Qty</th>
-                            <th style="text-align: center;">Action</th>
+                            <th style="text-align: center;">X</th>
                         </tr>
                     </thead>
                     <tbody id="batch-body"></tbody>
                 </table>
             </div>
             <div class="summary-bar">
-                <span>Total Items: <span id="total-items">0</span></span>
-                <span>Summed Qty: <span id="total-qty">0</span></span>
+                <span>Unique: <span id="total-items">0</span></span>
+                <span>TOTAL QTY: <span id="total-qty">0</span></span>
             </div>
         </div>
 
-        <button class="btn btn-submit" id="save-btn" onclick="processReturn()">Confirm & Post Stock Return</button>
+        <button class="btn btn-submit" id="save-btn" onclick="processReturn()">Confirm & Post Returns</button>
     </div>
 </main>
 
@@ -187,112 +179,96 @@
     let masterInventory = [];
     let selectedItem = null;
     let batchItems = [];
-
+    const companyID = localStorage.getItem('companyID');
     const activeUser = localStorage.getItem('activeAdmin');
     const userRole = localStorage.getItem('userRole');
-    const userPermissions = JSON.parse(localStorage.getItem('userPermissions') || '[]');
 
-    function init() {
+    async function init() {
         if (!activeUser) { location.href = 'index.html'; return; }
-        applyPermissions();
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('return-date').value = today;
-        generateRef();
+        document.getElementById('return-date').value = new Date().toISOString().split('T')[0];
+        document.getElementById('return-ref').value = `RTN-${Date.now().toString().slice(-6)}`;
+        document.getElementById('active-user').innerText = activeUser;
+        document.getElementById('user-role-label').innerText = userRole.toUpperCase();
         loadInventory();
     }
 
-    function applyPermissions() {
-        document.getElementById('active-user').innerText = activeUser;
-        document.getElementById('user-role-label').innerText = userRole === 'admin' ? 'System Admin' : 'Staff Member';
-        document.querySelectorAll('.btn-toggle').forEach(btn => {
-            const page = btn.getAttribute('data-page');
-            if (userRole === 'admin' || userPermissions.includes(page)) {
-                btn.style.display = 'flex';
-            }
-        });
-    }
-
-    function generateRef() {
-        const datePart = document.getElementById('return-date').value.replace(/-/g, "").slice(2);
-        document.getElementById('return-ref').value = `RTN-${datePart}-${Math.floor(100 + Math.random() * 899)}`;
-    }
-
     async function loadInventory() {
-        const { data } = await _supabase.from('inventory').select('*').order('item_name');
+        const { data } = await _supabase.from('inventory').select('*').eq('company_id', companyID);
         masterInventory = data || [];
         document.getElementById('items-list').innerHTML = masterInventory.map(i => 
-            `<option value="${i.item_name} [${i.location}]">`
+            `<option value="${i.sku} | ${i.item_name} [${i.location || 'MAIN'}]">`
         ).join('');
     }
 
     function handleSelection() {
-        const val = document.getElementById('item-search').value;
-        selectedItem = masterInventory.find(i => `${i.item_name} [${i.location}]` === val);
+        const val = document.getElementById('item-search').value.split(' | ')[0];
+        selectedItem = masterInventory.find(i => i.sku === val);
     }
 
     function addToBatch() {
         const qty = parseInt(document.getElementById('return-qty').value);
         const reason = document.getElementById('return-reason').value;
-        const note = document.getElementById('return-notes').value.trim();
-        if (!selectedItem || !qty || qty <= 0) return alert("Select item and quantity!");
+        const note = document.getElementById('return-note').value;
+        
+        if (!selectedItem || isNaN(qty) || qty <= 0) return alert("Select item and quantity.");
 
-        batchItems.push({ ...selectedItem, returnQty: qty, reason: reason, note: note });
+        batchItems.push({ ...selectedItem, returnQty: qty, reason, note });
         renderTable();
         document.getElementById('item-search').value = "";
         document.getElementById('return-qty').value = "";
-        selectedItem = null;
     }
 
     function renderTable() {
         const tbody = document.getElementById('batch-body');
         tbody.innerHTML = batchItems.map((item, idx) => `
             <tr>
-                <td style="font-family:monospace; color:var(--accent); font-weight:800;">${item.sku || 'N/A'}</td>
-                <td><strong>${item.item_name}</strong><br><small style="color:#64748b">LOC: ${item.location}</small></td>
-                <td><span class="reason-tag">${item.reason}</span>${item.note ? '<br><small style="color:#475569">' + item.note + '</small>' : ''}</td>
-                <td style="text-align:center;"><span class="qty-badge">${item.returnQty}</span></td>
-                <td style="text-align:center;"><button style="color:var(--danger); background:none; border:none; font-weight:800; cursor:pointer;" onclick="removeItem(${idx})">REMOVE</button></td>
+                <td><strong>${item.sku}</strong><br><small>${item.item_name}</small></td>
+                <td><span class="badge-rtn">${item.reason}</span><br><small>${item.note || ''}</small></td>
+                <td style="text-align:center;">${item.returnQty}</td>
+                <td style="text-align:center;"><button onclick="removeItem(${idx})" style="border:none; background:none; color:red; cursor:pointer">✕</button></td>
             </tr>
-        `).reverse().join('');
+        `).join('');
         document.getElementById('total-items').innerText = batchItems.length;
-        document.getElementById('total-qty').innerText = batchItems.reduce((s, i) => s + i.returnQty, 0);
+        document.getElementById('total-qty').innerText = batchItems.reduce((sum, i) => sum + i.returnQty, 0);
     }
 
     function removeItem(idx) { batchItems.splice(idx, 1); renderTable(); }
 
     async function processReturn() {
-        if (batchItems.length === 0) return alert("Add items first.");
-        const type = document.getElementById('return-type').value;
-        const ref = document.getElementById('return-ref').value;
+        const flow = document.getElementById('return-flow').value;
         const btn = document.getElementById('save-btn');
-        btn.disabled = true; btn.innerText = "UPDATING LEDGER...";
+        btn.disabled = true; btn.innerText = "POSTING...";
 
         try {
             for (const item of batchItems) {
-                const { data: cur } = await _supabase.from('inventory').select('quantity').eq('id', item.id).single();
-                const adjustment = type === 'CUSTOMER RETURN' ? item.returnQty : -item.returnQty;
-                await _supabase.from('inventory').update({ quantity: (cur.quantity || 0) + adjustment }).eq('id', item.id);
-                
-                const logNotes = `${type} | ${item.reason} | ${item.note}`.toUpperCase();
+                // If CUSTOMER, qty is + (back into stock). If SUPPLIER, qty is - (out to supplier).
+                const adjustment = flow === 'CUSTOMER' ? item.returnQty : -item.returnQty;
+
+                // Update stock
+                await _supabase.from('inventory').update({ quantity: item.quantity + adjustment }).eq('id', item.id);
+
+                // Log Transaction with Staff ID
                 await _supabase.from('inventory_transactions').insert([{
-                    reference_id: ref, sku: item.sku, item_name: item.item_name,
-                    qty_change: adjustment, location: item.location, notes: logNotes
+                    company_id: companyID,
+                    type: 'RETURN',
+                    reference_id: document.getElementById('return-ref').value,
+                    sku: item.sku,
+                    item_name: item.item_name,
+                    qty_change: adjustment,
+                    performed_by: activeUser,
+                    user_role: userRole,
+                    notes: `RETURN: ${flow} | REASON: ${item.reason} | NOTE: ${item.note}`.toUpperCase()
                 }]);
             }
-            await _supabase.from('activity_logs').insert([{
-                type: 'RETURN', reference_id: ref, performed_by: activeUser,
-                summary: `${batchItems.length} ITEMS PROCESSED (${type} - ${ref})`.toUpperCase()
-            }]);
-            alert("RETURNS POSTED SUCCESSFULLY");
-            window.location.reload();
-        } catch (e) { 
-            alert("Error: " + e.message); 
-            btn.disabled = false; btn.innerText = "Confirm & Post Return"; 
+            alert("Return Session Processed!");
+            location.reload();
+        } catch (err) {
+            alert(err.message);
+            btn.disabled = false;
         }
     }
 
     function handleLogout() { localStorage.clear(); location.href = 'index.html'; }
-    function goHome() { window.location.href = (userRole === 'admin') ? 'dashboard.html' : 'inventory.html'; }
     init();
 </script>
 </body>

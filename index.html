@@ -3,260 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | EasiStock</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>JmcyFlow | 30-Day Free Trial | Jmcy Web Solutions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
-        
+        :root {
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --accent: #38bdf8;
+            --trial-gold: #fbbf24;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
         body {
-            margin: 0; 
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
-            height: 100vh; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            overflow: hidden;
+            background-color: var(--dark-bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
         }
 
-        .login-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 40px; 
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-            width: 90%; 
-            max-width: 380px; 
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        /* Logo Transition */
-        .logo-container img {
-            width: 120px; 
-            height: auto;
-            margin-bottom: 10px;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            border-radius: 15px;
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .logo-container img:hover {
-            transform: scale(1.1) rotate(2deg);
-        }
-
-        /* Brand Title Transition */
-        .brand-title {
-            margin-top: 0;
-            margin-bottom: 30px; 
-            color: #0f172a; 
-            font-size: 2rem; 
-            font-weight: 800;
-            letter-spacing: -1px;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
-            cursor: default;
-        }
-
-        .brand-title:hover {
-            letter-spacing: 2px;
-            color: #0081ff;
-        }
-
-        .password-wrapper {
-            position: relative;
-            width: 100%;
-        }
-
-        input {
-            width: 100%; 
-            padding: 14px 16px; 
-            margin: 8px 0;
-            border: 2px solid #e2e8f0; 
-            border-radius: 12px; 
-            box-sizing: border-box;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #0081ff;
-            background: white;
-        }
-
-        /* Transition for password reveal text */
-        #password.revealed {
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0.5; transform: translateY(-2px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .toggle-btn {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
+        /* --- NAVIGATION --- */
+        nav {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 5px;
-            user-select: none;
-            padding: 5px 8px;
-            border-radius: 8px;
-            transition: all 0.2s ease;
+            padding: 15px 5%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
-        .toggle-btn:hover {
-            background: rgba(0, 129, 255, 0.1);
+        .logo-container { display: flex; flex-direction: column; }
+        .logo { font-size: 1.4rem; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+        .logo span { color: var(--accent); }
+        .tagline { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-top: 4px; }
+
+        .nav-links { display: flex; align-items: center; }
+        .nav-links a { color: var(--text-main); text-decoration: none; margin-left: 20px; font-size: 0.85rem; transition: 0.3s; }
+        .btn-portal { background: var(--primary); padding: 8px 18px; border-radius: 6px; font-weight: 600; }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 120px 8% 60px 8%;
+            background: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
         }
 
-        .toggle-btn span {
-            font-size: 0.7rem;
-            font-weight: 800;
+        .trial-badge {
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--trial-gold);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border: 1px solid var(--trial-gold);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #64748b;
         }
 
-        .btn-login {
-            width: 100%; 
-            padding: 16px; 
-            background: #0f172a;
-            color: white; 
-            border: none; 
-            border-radius: 12px;
-            cursor: pointer; 
-            font-weight: 800; 
-            margin-top: 20px;
-            font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: transform 0.2s active, background 0.3s;
-        }
+        .hero h1 { font-size: clamp(2.2rem, 8vw, 4.5rem); margin-bottom: 20px; letter-spacing: -2px; line-height: 1.1; font-weight: 800; }
+        .hero h1 span { color: var(--accent); }
+        .hero p { max-width: 650px; color: var(--text-dim); font-size: clamp(1rem, 4vw, 1.2rem); margin-bottom: 40px; }
 
-        .btn-login:hover { background: #1e293b; }
-        .btn-login:active { transform: scale(0.98); }
+        .cta-group { display: flex; gap: 15px; width: 100%; justify-content: center; }
+        .cta-btn { padding: 16px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; transition: 0.3s; text-align: center; }
+        .primary { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
+        .secondary { border: 1px solid rgba(255,255,255,0.2); color: white; }
 
-        .divider {
-            margin-top: 25px; 
-            font-size: 0.65rem; 
-            color: #64748b; 
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        /* --- FEATURES --- */
+        .features { padding: 80px 8%; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        .f-card { background: var(--card-bg); padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
+        .f-card h3 { color: var(--accent); margin-bottom: 12px; font-size: 1.3rem; }
+
+        /* --- TRIAL INFO --- */
+        .trial-info { padding: 80px 8%; text-align: center; background: #111827; }
+        .trial-info h2 { font-size: clamp(1.8rem, 5vw, 2.5rem); margin-bottom: 15px; }
+        .trial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 30px; margin-top: 40px; }
+
+        footer { text-align: center; padding: 50px 20px; color: var(--text-dim); border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
+
+        /* --- MOBILE ADJUSTMENTS --- */
+        @media (max-width: 768px) {
+            nav { padding: 15px 5%; }
+            .nav-links a:not(.btn-portal) { display: none; } /* Hide text links, keep Portal button */
+            
+            .hero { padding-top: 100px; padding-bottom: 40px; }
+            .cta-group { flex-direction: column; max-width: 300px; }
+            .cta-btn { width: 100%; padding: 14px; }
+            
+            .features { padding: 40px 5%; }
+            .trial-info { padding: 60px 5%; }
+            
+            .logo { font-size: 1.2rem; }
         }
     </style>
 </head>
 <body>
 
-    <div class="login-container">
+    <nav>
         <div class="logo-container">
-            <img src="logo.jpg" alt="LOGO">
+            <div class="logo">Jmcy<span>Flow</span></div>
+            <div class="tagline">By Jmcy Web Solutions</div>
         </div>
+        <div class="nav-links">
+            <a href="#features">Solutions</a>
+            <a href="register.html" class="btn-portal">Start Trial</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="trial-badge">✨ 1-Month Free Trial</div>
+        <h1>Master Your <span>Inventory Flow.</span></h1>
+        <p>A high-performance multi-company portal engine designed for security and total brand control.</p>
         
-        <div class="brand-title">EasiStock</div>
-        
-        <input type="text" id="username" placeholder="USERNAME" style="text-transform: uppercase;">
-        
-        <div class="password-wrapper">
-            <input type="password" id="password" placeholder="PASSWORD">
-            <div class="toggle-btn" id="toggleAction">
-                <span id="toggleText">Show</span>
-                <div class="icon" id="toggleIcon">🚫</div>
+        <div class="cta-group">
+            <a href="register.html" class="cta-btn primary">Start Free Month</a>
+            <a href="portal.html" class="cta-btn secondary">Enter Portal</a>
+        </div>
+    </header>
+
+    <section id="features" class="features">
+        <div class="f-card">
+            <h3>🏢 Enterprise Scaling</h3>
+            <p>Seamlessly host unlimited clients. Each company receives a unique digital vault for their stock data.</p>
+        </div>
+        <div class="f-card">
+            <h3>🎨 White-Label</h3>
+            <p>Every portal is a blank canvas. Let your clients define their identity with custom colors and logos.</p>
+        </div>
+        <div class="f-card">
+            <h3>🔒 Modern Security</h3>
+            <p>Built with robust isolation logic to ensure total privacy between company environments.</p>
+        </div>
+    </section>
+
+    <section class="trial-info">
+        <h2>Your First Month is on <strong>Jmcy Web Solutions</strong></h2>
+        <div class="trial-grid">
+            <div class="t-step">
+                <h4>Step 1</h4>
+                <p>Register your company and secure your Portal ID.</p>
+            </div>
+            <div class="t-step">
+                <h4>Step 2</h4>
+                <p>Customize dashboard colors and upload your logo.</p>
+            </div>
+            <div class="t-step">
+                <h4>Step 3</h4>
+                <p>Enjoy 30 days of unlimited tracking.</p>
             </div>
         </div>
-        
-        <button class="btn-login" onclick="signIn()">Enter System</button>
-        
-        <div class="divider">Secured Portal v3.0</div>
-    </div>
+    </section>
 
-    <script>
-        const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <footer>
+        <p>Developed by <strong>Jmcy Web Solutions</strong></p>
+        <p style="font-size: 0.7rem; margin-top: 10px;">&copy; 2026 JmcyFlow Systems. All Rights Reserved.</p>
+    </footer>
 
-        const passwordField = document.getElementById('password');
-        const toggleAction = document.getElementById('toggleAction');
-        const toggleText = document.getElementById('toggleText');
-        const toggleIcon = document.getElementById('toggleIcon');
-
-        toggleAction.addEventListener('click', () => {
-            const isVisible = passwordField.type === 'text';
-            
-            // Re-trigger reveal animation
-            passwordField.classList.remove('revealed');
-            void passwordField.offsetWidth; // Trigger reflow
-            passwordField.classList.add('revealed');
-
-            if (isVisible) {
-                passwordField.type = 'password';
-                toggleText.textContent = 'Show';
-                toggleIcon.textContent = '🚫';
-                toggleText.style.color = '#64748b';
-            } else {
-                passwordField.type = 'text';
-                toggleText.textContent = 'Hide';
-                toggleIcon.textContent = '👁️';
-                toggleText.style.color = '#0081ff';
-            }
-        });
-
-        async function signIn() {
-            const userIn = document.getElementById('username').value.trim().toUpperCase();
-            const passIn = document.getElementById('password').value.trim();
-            
-            if (!userIn || !passIn) {
-                alert("Missing Credentials");
-                return;
-            }
-
-            try {
-                const { data, error } = await _supabase
-                    .from('staff_accounts')
-                    .select('*')
-                    .eq('username', userIn);
-
-                if (error) {
-                    alert("System Error: " + error.message);
-                    return;
-                }
-
-                if (!data || data.length === 0) {
-                    alert("User not found.");
-                    return;
-                }
-
-                const userData = data[0];
-
-                if (userData.password === passIn) {
-                    localStorage.setItem('activeAdmin', userData.username);
-                    localStorage.setItem('userRole', userData.role);
-                    localStorage.setItem('userPermissions', JSON.stringify(userData.permissions || []));
-
-                    if (userData.role === 'admin') {
-                        window.location.href = 'dashboard.html';
-                    } else {
-                        window.location.href = 'inventory.html';
-                    }
-                } else {
-                    alert("Wrong Password.");
-                }
-            } catch (err) {
-                alert("An unexpected error occurred.");
-            }
-        }
-
-        document.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') signIn();
-        });
-    </script>
 </body>
 </html>
