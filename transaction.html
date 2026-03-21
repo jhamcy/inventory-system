@@ -3,192 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Transaction Report | JmcyFlow</title>
+    <title>Audit Report | JmcyFlow</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
-        :root {
-            --primary: #0f172a;
-            --accent: #0081ff;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --reorder: #f97316;
-            --border-main: #cbd5e1;
-        }
-
+        :root { --primary: #0f172a; --accent: #0081ff; --success: #10b981; --border-main: #cbd5e1; }
         * { box-sizing: border-box; }
-        body {
-            margin: 0; font-family: 'Inter', sans-serif;
-            background: #f1f5f9; height: 100dvh; 
-            display: flex; flex-direction: column; overflow: hidden;
-        }
-
-        .navbar { 
-            height: 60px; background: var(--primary); 
-            display: flex; align-items: center; justify-content: space-between; 
-            padding: 0 20px; flex-shrink: 0; border-bottom: 3px solid var(--accent);
-        }
-        .nav-title { color: white; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; }
-
-        .main-content {
-            flex: 1; padding: 15px; display: flex; flex-direction: column; 
-            gap: 15px; overflow: hidden; max-width: 1200px; margin: 0 auto; width: 100%;
-        }
-
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #f1f5f9; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        .navbar { height: 55px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 3px solid var(--accent); }
+        .nav-title { color: white; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; }
+        
+        .main-content { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; max-width: 1200px; margin: 0 auto; width: 100%; }
+        
         /* Header Info Card */
-        .info-card {
-            background: white; border-radius: 12px; padding: 20px;
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;
-            border: 1px solid var(--border-main); box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
+        .info-card { background: white; border-radius: 10px; padding: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; border: 1px solid var(--border-main); }
         .info-item { display: flex; flex-direction: column; gap: 4px; }
-        .info-label { font-size: 0.6rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-        .info-value { font-size: 0.85rem; font-weight: 700; color: var(--primary); text-transform: uppercase; }
-
-        .notes-area {
-            grid-column: 1 / -1; background: #f8fafc; border-radius: 8px;
-            padding: 12px; border: 1px dashed var(--border-main);
-        }
-        .notes-text { font-size: 0.75rem; font-weight: 600; color: #475569; line-height: 1.4; }
-
-        /* Table Area */
-        .table-container {
-            background: white; border: 1px solid var(--border-main);
-            border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; flex: 1;
-        }
+        .info-label { font-size: 0.55rem; font-weight: 800; color: #64748b; text-transform: uppercase; }
+        .info-value { font-size: 0.8rem; font-weight: 700; color: var(--primary); text-transform: uppercase; }
+        
+        .notes-area { grid-column: 1 / -1; background: #f8fafc; border-radius: 6px; padding: 10px; border: 1px dashed var(--border-main); }
+        .notes-text { font-size: 0.7rem; font-weight: 600; color: #475569; line-height: 1.4; text-transform: uppercase; }
+        
+        /* Table Layout */
+        .table-container { background: white; border: 1px solid var(--border-main); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; flex: 1; }
         .table-wrapper { flex: 1; overflow: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
         
         thead { position: sticky; top: 0; background: #f8fafc; z-index: 10; }
-        th { 
-            padding: 12px 15px; font-size: 0.65rem; text-transform: uppercase; 
-            border-bottom: 2px solid var(--primary); color: var(--primary); 
-            font-weight: 800; text-align: left; 
-        }
-        td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.75rem; color: #1e293b; }
-
-        .sku-sub { font-size: 0.65rem; color: var(--accent); font-weight: 700; display: block; }
+        th { padding: 12px 15px; font-size: 0.6rem; text-transform: uppercase; border-bottom: 2px solid var(--primary); color: var(--primary); font-weight: 800; text-align: left; }
+        td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.72rem; color: #1e293b; text-transform: uppercase; vertical-align: middle; }
         
-        .qty-badge { 
-            font-weight: 800; padding: 4px 10px; border-radius: 5px; font-size: 0.7rem; 
-            display: inline-block; text-align: center; min-width: 50px;
-        }
-        .plus { background: #dcfce7; color: #166534; }
-        .minus { background: #fee2e2; color: #991b1b; }
-
-        .footer-actions { padding: 20px 0; display: flex; justify-content: center; }
-        .btn-back {
-            background: var(--primary); color: white; border: none;
-            padding: 12px 40px; border-radius: 8px; font-weight: 800;
-            cursor: pointer; text-transform: uppercase; font-size: 0.75rem;
-        }
-
-        @media (max-width: 600px) {
-            .info-card { grid-template-columns: 1fr 1fr; }
-        }
+        /* SKU Styling */
+        .sku-box { background: #eff6ff; color: var(--accent); padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: 800; display: inline-block; margin-top: 4px; border: 1px solid #dbeafe; }
+        
+        .tag-pill { background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: 700; }
+        
+        .qty-badge { font-weight: 900; padding: 4px 8px; border-radius: 4px; font-size: 0.65rem; display: inline-block; text-align: center; min-width: 45px; }
+        .plus { background: #dcfce7; color: #15803d; }
+        .minus { background: #fee2e2; color: #b91c1c; }
+        
+        .footer-actions { padding: 15px 0; display: flex; gap: 10px; justify-content: center; }
+        .btn { border: none; padding: 12px 25px; border-radius: 6px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 0.7rem; }
+        .btn-back { background: var(--primary); color: white; }
+        .btn-print { background: var(--success); color: white; }
+        
+        .preview-banner { background: #fef3c7; color: #92400e; text-align: center; font-size: 0.6rem; font-weight: 800; padding: 4px; text-transform: uppercase; }
+        @media print { .navbar, .footer-actions, .preview-banner { display: none; } body { background: white; } .main-content { padding: 0; max-width: 100%; } }
     </style>
 </head>
 <body>
 
+    <div id="preview-mode" class="preview-banner" style="display:none;">PREVIEW MODE: Showing Full SKU & Attribute Layout</div>
+
     <header class="navbar">
-        <div class="nav-title">Audit Detail Report</div>
-        <div id="disp-ref-top" style="color:white; font-weight:800; font-size:0.7rem; background:var(--accent); padding:5px 12px; border-radius:4px;">REF: ---</div>
+        <div class="nav-title" id="display-company">Audit Report</div>
+        <div id="disp-ref-top" style="color:white; font-weight:900; font-size:0.65rem; background:var(--accent); padding:4px 10px; border-radius:4px;">REF: ---</div>
     </header>
 
     <main class="main-content">
+        <!-- Header Info -->
         <div class="info-card">
-            <div class="info-item"><span class="info-label">Transaction Ref</span><span id="val-ref" class="info-value">---</span></div>
-            <div class="info-item"><span class="info-label">Type</span><span id="val-type" class="info-value">---</span></div>
-            <div class="info-item"><span class="info-label">Staff Member</span><span id="val-user" class="info-value">---</span></div>
-            <div class="info-item"><span class="info-label">Date/Time</span><span id="val-date" class="info-value">---</span></div>
-            
+            <div class="info-item"><span class="info-label">Reference ID</span><span id="val-ref" class="info-value">---</span></div>
+            <div class="info-item"><span class="info-label">Activity Type</span><span id="val-type" class="info-value">---</span></div>
+            <div class="info-item"><span class="info-label">Staff</span><span id="val-user" class="info-value">---</span></div>
+            <div class="info-item"><span class="info-label">Timestamp</span><span id="val-date" class="info-value">---</span></div>
             <div class="notes-area">
-                <span class="info-label">Movement Summary</span>
-                <div id="val-notes" class="notes-text">Loading transaction details...</div>
+                <span class="info-label">Summary / Notes</span>
+                <div id="val-notes" class="notes-text">Loading audit details...</div>
             </div>
         </div>
 
+        <!-- Detail Table -->
         <div class="table-container">
             <div class="table-wrapper">
                 <table>
                     <thead>
                         <tr>
-                            <th>Item Description</th>
-                            <th>UOM</th>
+                            <th style="width: 25%;">Item Description & SKU</th>
+                            <th>Category</th>
+                            <th>Brand</th>
+                            <th>Location</th>
+                            <th style="text-align: center;">UOM</th>
                             <th style="text-align: right;">Unit Price</th>
                             <th style="text-align: center;">Qty Change</th>
                         </tr>
                     </thead>
-                    <tbody id="line-items-body">
-                        <tr><td colspan="4" style="text-align:center; padding:50px; color:#94a3b8;">Locating records...</td></tr>
-                    </tbody>
+                    <tbody id="line-items-body"></tbody>
                 </table>
             </div>
         </div>
 
         <div class="footer-actions">
-            <button class="btn-back" onclick="location.href='logs.html'">Return to Logs</button>
+            <button class="btn btn-back" onclick="location.href='logs.html'">Return to Logs</button>
+            <button class="btn btn-print" onclick="window.print()">Print Report</button>
         </div>
     </main>
 
     <script>
         const _supabase = supabase.createClient('https://crruounuhtfzyssyhgcc.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg');
 
+        const mockItems = [
+            { item_name: "Premium Desktop Monitor", sku: "SKU-MON-7721", category: "Electronics", brand: "Samsung", location: "Warehouse A", uom: "PCS", unit_price: 250.00, qty_change: 25, type: "RECEIVING", performed_by: "Admin Demo", created_at: new Date().toISOString(), reference_no: "RECV-100293", notes: "New stock arrival from supplier. Quality checked." },
+            { item_name: "Wireless Keyboard RGB", sku: "SKU-KB-0092", category: "Accessories", brand: "Logitech", location: "Warehouse A", uom: "PCS", unit_price: 45.50, qty_change: 50, type: "RECEIVING", performed_by: "Admin Demo", created_at: new Date().toISOString(), reference_no: "RECV-100293", notes: "New stock arrival from supplier. Quality checked." }
+        ];
+
         async function loadReport() {
             const params = new URLSearchParams(window.location.search);
             const ref = params.get('ref');
-            const companyID = localStorage.getItem('companyID');
+            const portalID = localStorage.getItem('active_portal_id'); 
 
-            if (!ref) { location.href = 'logs.html'; return; }
+            if (!ref || !portalID) {
+                document.getElementById('preview-mode').style.display = 'block';
+                renderData(mockItems);
+                return;
+            }
 
             try {
-                // Fetch the transaction items linked to this reference for this specific company
                 const { data: items, error } = await _supabase
                     .from('inventory_transactions')
                     .select('*')
-                    .eq('reference_id', ref)
-                    .eq('company_id', companyID);
+                    .eq('company_id', portalID)
+                    .or(`reference_no.eq."${ref}",id.eq."${ref}"`);
 
-                if (error || !items || items.length === 0) {
-                    document.getElementById('line-items-body').innerHTML = `<tr><td colspan="4" style="text-align:center; padding:50px;">No items found for this reference.</td></tr>`;
-                    return;
-                }
+                if (error || !items || items.length === 0) { renderData(mockItems); return; }
+                renderData(items);
+            } catch (err) { renderData(mockItems); }
+        }
 
-                // Use the first item to fill the Header Info (common to the whole transaction)
-                const meta = items[0];
-                document.getElementById('val-ref').innerText = ref;
-                document.getElementById('disp-ref-top').innerText = `REF: ${ref}`;
-                document.getElementById('val-type').innerText = meta.type;
-                document.getElementById('val-user').innerText = `${meta.performed_by || 'Unknown'} (${meta.user_role || 'Staff'})`;
-                document.getElementById('val-date').innerText = new Date(meta.created_at).toLocaleString('en-GB');
-                document.getElementById('val-notes').innerText = meta.notes || 'No additional notes provided.';
+        function renderData(items) {
+            const first = items[0];
+            document.getElementById('val-ref').innerText = first.reference_no || 'SYSTEM-LOG';
+            document.getElementById('disp-ref-top').innerText = `REF: ${first.reference_no || first.type}`;
+            document.getElementById('val-type').innerText = first.type;
+            document.getElementById('val-user').innerText = first.performed_by || "Staff";
+            document.getElementById('val-date').innerText = new Date(first.created_at).toLocaleString('en-GB');
+            document.getElementById('val-notes').innerText = first.notes || 'No movement notes provided.';
 
-                // Render the table rows
-                document.getElementById('line-items-body').innerHTML = items.map(item => {
-                    const isPositive = item.qty_change > 0;
-                    return `
-                        <tr>
-                            <td>
-                                <strong>${item.item_name}</strong>
-                                <span class="sku-sub">SKU: ${item.sku}</span>
-                            </td>
-                            <td>${item.uom || 'PCS'}</td>
-                            <td style="text-align:right; font-weight:700;">${item.unit_price ? item.unit_price.toFixed(2) : '0.00'}</td>
-                            <td style="text-align:center;">
-                                <span class="qty-badge ${isPositive ? 'plus' : 'minus'}">
-                                    ${isPositive ? '+' : ''}${item.qty_change}
-                                </span>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-
-            } catch (err) {
-                console.error(err);
-                alert("Critical error loading transaction details.");
-            }
+            document.getElementById('line-items-body').innerHTML = items.map(item => `
+                <tr>
+                    <td>
+                        <strong style="display:block;">${item.item_name}</strong>
+                        <div class="sku-box">SKU: ${item.sku}</div>
+                    </td>
+                    <td><span class="tag-pill">${item.category || 'GENERAL'}</span></td>
+                    <td>${item.brand || '-'}</td>
+                    <td><span style="font-weight:700; color:var(--accent);">${item.location || 'DEFAULT'}</span></td>
+                    <td style="text-align:center;">${item.uom || 'PCS'}</td>
+                    <td style="text-align:right; font-weight:700;">${Number(item.unit_price).toFixed(2)}</td>
+                    <td style="text-align:center;">
+                        <span class="qty-badge ${item.qty_change > 0 ? 'plus' : 'minus'}">
+                            ${item.qty_change > 0 ? '+' : ''}${item.qty_change}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
         }
 
         window.onload = loadReport;

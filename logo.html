@@ -68,7 +68,6 @@
             font-weight: 500;
         }
 
-        /* --- PREVIEW SECTION --- */
         .preview-label {
             font-size: 0.6rem;
             font-weight: 800;
@@ -93,15 +92,14 @@
         }
 
         #logoPreview img { 
-            max-width: 180px; 
-            max-height: 80px; 
+            max-width: 100%; 
+            max-height: 100px; 
             object-fit: contain;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
         }
 
         .no-logo-text { color: #94a3b8; font-size: 0.7rem; font-weight: 600; }
 
-        /* --- INPUT SECTION --- */
         .input-group { text-align: left; margin-bottom: 25px; }
         label { font-size: 0.7rem; font-weight: 800; color: var(--primary); margin-left: 5px; margin-bottom: 5px; display: block; }
         
@@ -110,7 +108,7 @@
             padding: 15px; 
             border: 2px solid #e2e8f0; 
             border-radius: 12px; 
-            font-size: 0.9rem; 
+            font-size: 0.85rem; 
             box-sizing: border-box;
             transition: 0.2s;
             font-family: inherit;
@@ -120,7 +118,6 @@
             border-color: var(--accent); 
             outline: none; 
             background: #f0f7ff;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
 
         .btn-save { 
@@ -135,36 +132,19 @@
             text-transform: uppercase;
             cursor: pointer; 
             transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
         }
 
-        .btn-save:hover { background: #1e293b; transform: translateY(-2px); }
-        .btn-save:active { transform: translateY(0); }
+        .btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .back-link { 
             margin-top: 25px; 
-            font-size: 0.75rem; 
+            font-size: 0.7rem; 
             color: #64748b; 
             cursor: pointer; 
             font-weight: 700;
             display: inline-block;
-            transition: 0.2s;
+            text-transform: uppercase;
         }
-        .back-link:hover { color: var(--primary); }
-
-        /* --- LOADING STATE --- */
-        .loading-spinner {
-            width: 20px; height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-            display: none;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -172,24 +152,23 @@
 <div class="config-card">
     <div class="badge">Identity Settings</div>
     <h2>Company Logo</h2>
-    <p class="subtitle">This logo will appear on the main login screen and reports.</p>
+    <p class="subtitle">Update the branding for your login screen and portal.</p>
 
     <span class="preview-label">Live Preview</span>
     <div class="preview-container" id="logoPreview">
-        <span class="no-logo-text">No logo detected</span>
+        <span class="no-logo-text">Loading current branding...</span>
     </div>
 
     <div class="input-group">
-        <label>Direct Image URL</label>
-        <input type="text" id="logoUrl" placeholder="https://example.com/logo.png" autocomplete="off">
+        <label>Direct Image URL (PNG/JPG)</label>
+        <input type="text" id="logoUrl" placeholder="https://imgur.com/your-logo.png" autocomplete="off">
     </div>
 
     <button class="btn-save" id="saveBtn" onclick="saveLogo()">
-        <div class="loading-spinner" id="spinner"></div>
-        <span>Save Branding</span>
+        Save Branding
     </button>
     
-    <span class="back-link" onclick="location.href='dashboard.html'">← Return to Dashboard</span>
+    <span class="back-link" onclick="location.href='dashboard.html'">← Back to Dashboard</span>
 </div>
 
 <script>
@@ -198,15 +177,18 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const companyId = localStorage.getItem('jmcy_cid');
+    const role = localStorage.getItem('jmcy_role');
     const logoInput = document.getElementById('logoUrl');
     const previewDiv = document.getElementById('logoPreview');
-    const saveBtn = document.getElementById('saveBtn');
-    const spinner = document.getElementById('spinner');
 
-    // 1. Load existing logo on start
-    async function loadCurrentLogo() {
-        if(!companyId) return;
-        
+    // 1. Initial Check & Load
+    async function init() {
+        if (!companyId || role !== 'OWNER') {
+            alert("Unauthorized Access.");
+            location.href = 'login.html';
+            return;
+        }
+
         const { data, error } = await _supabase
             .from('companies')
             .select('company_logo')
@@ -216,36 +198,14 @@
         if (data && data.company_logo) {
             logoInput.value = data.company_logo;
             updatePreview(data.company_logo);
-        }
-    }
-
-    // 2. Save logic
-    async function saveLogo() {
-        const url = logoInput.value.trim();
-        if(!url) return alert("Please provide a valid image URL first.");
-
-        // Show loading
-        saveBtn.disabled = true;
-        spinner.style.display = "block";
-
-        const { error } = await _supabase
-            .from('companies')
-            .update({ company_logo: url })
-            .eq('id', companyId);
-
-        if(!error) {
-            alert("Identity Updated Successfully!");
-            location.href = 'dashboard.html';
         } else {
-            alert("Error: " + error.message);
-            saveBtn.disabled = false;
-            spinner.style.display = "none";
+            updatePreview(null);
         }
     }
 
-    // 3. Helper: Live Preview
+    // 2. Live Preview Helper
     function updatePreview(val) {
-        if(val) {
+        if(val && val.trim() !== "") {
             previewDiv.innerHTML = `<img src="${val}" onerror="this.parentElement.innerHTML='<span class=\'no-logo-text\'>Invalid Image URL</span>'">`;
             previewDiv.style.borderStyle = "solid";
             previewDiv.style.borderColor = "var(--accent)";
@@ -256,9 +216,36 @@
         }
     }
 
+    // 3. Save Logic
+    async function saveLogo() {
+        const url = logoInput.value.trim();
+        const btn = document.getElementById('saveBtn');
+        
+        if(!url) return alert("Please provide a logo URL.");
+
+        btn.disabled = true;
+        btn.innerText = "Saving...";
+
+        const { error } = await _supabase
+            .from('companies')
+            .update({ company_logo: url })
+            .eq('id', companyId);
+
+        if(!error) {
+            // Update localStorage so other pages see the change immediately
+            localStorage.setItem('jmcy_logo', url);
+            alert("Branding successfully updated!");
+            location.href = 'dashboard.html';
+        } else {
+            alert("Error: " + error.message);
+            btn.disabled = false;
+            btn.innerText = "Save Branding";
+        }
+    }
+
     logoInput.addEventListener('input', (e) => updatePreview(e.target.value));
 
-    window.onload = loadCurrentLogo;
+    window.onload = init;
 </script>
 </body>
 </html>

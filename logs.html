@@ -23,56 +23,55 @@
         html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; background: #f1f5f9; }
         body { font-family: 'Inter', sans-serif; display: flex; flex-direction: column; }
 
-        .navbar { height: 55px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; flex-shrink: 0; border-bottom: 3px solid var(--accent); }
-        #company-name-text { color: white; font-weight: 900; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        .navbar { height: 50px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 12px; flex-shrink: 0; border-bottom: 2px solid var(--accent); }
+        #company-name-text { color: white; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; }
 
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
+        /* Navigation Rail */
         .action-bar-container { padding: 8px; background: #f1f5f9; flex-shrink: 0; }
-        .toggle-group { display: flex; border-radius: 10px; overflow: hidden; background: var(--primary); border: 1px solid var(--primary); }
+        .toggle-group { display: flex; border-radius: 8px; overflow: hidden; background: var(--primary); border: 1px solid var(--primary); }
         .btn-toggle { 
-            flex: 1; padding: 10px 0; border: none; border-right: 1px solid rgba(255,255,255,0.1); 
+            flex: 1; padding: 8px 0; border: none; border-right: 1px solid rgba(255,255,255,0.1); 
             color: rgba(255,255,255,0.5); background: var(--primary); cursor: pointer;
-            font-size: 0.6rem; font-weight: 700; text-transform: uppercase; 
-            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            font-size: 0.55rem; font-weight: 700; text-transform: uppercase; 
+            display: flex; flex-direction: column; gap: 2px; align-items: center;
         }
         .btn-toggle.active { background: var(--accent) !important; color: white !important; }
 
-        .right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 10px; }
-        .log-card { background: white; border-radius: 12px; border: 1px solid var(--border-main); display: flex; flex-direction: column; height: 100%; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 8px; }
+        .log-card { background: white; border-radius: 8px; border: 1px solid var(--border-main); display: flex; flex-direction: column; height: 100%; overflow: hidden; }
         
         .filter-area { padding: 12px; border-bottom: 1px solid var(--border-main); background: #f8fafc; }
         .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .search-wrapper { grid-column: span 2; }
         
         input, select { 
-            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-main);
+            width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-main);
             font-size: 0.75rem; font-weight: 700; outline: none; text-transform: uppercase;
         }
 
         .grid-area { flex: 1; overflow: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        thead th { position: sticky; top: 0; background: #f1f5f9; font-size: 0.6rem; font-weight: 800; border-bottom: 2px solid var(--primary); text-transform: uppercase; z-index: 20; padding: 12px 10px; text-align: left; }
+        thead th { position: sticky; top: 0; background: #f8fafc; font-size: 0.55rem; font-weight: 800; border-bottom: 1px solid var(--border-main); text-transform: uppercase; z-index: 20; padding: 12px 10px; text-align: left; color: #64748b; }
         
-        /* Interactive Row Styling */
-        tbody tr { cursor: pointer; transition: background 0.2s; }
-        tbody tr:hover { background: #f1f5f9; }
-        
-        tbody td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 0.75rem; font-weight: 600; vertical-align: middle; }
+        tbody tr { cursor: pointer; transition: background 0.1s; }
+        tbody tr:hover { background: #f8fafc; }
+        tbody td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
 
-        .badge { padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 0.6rem; color: white; text-transform: uppercase; }
-        .role-badge { font-size: 0.55rem; background: #e2e8f0; color: #475569; padding: 2px 5px; border-radius: 3px; margin-left: 5px; }
-        .summary-text { font-size: 0.65rem; color: #64748b; display: block; margin-top: 2px; }
+        .badge { padding: 3px 6px; border-radius: 4px; font-weight: 800; font-size: 0.55rem; color: white; }
+        .role-badge { font-size: 0.5rem; background: #e2e8f0; color: #475569; padding: 2px 4px; border-radius: 3px; margin-left: 5px; }
+        .summary-text { font-size: 0.6rem; color: #64748b; display: block; margin-top: 2px; font-weight: 400; }
 
-        .bulk-footer { padding: 12px; border-top: 1px solid var(--border-main); display: flex; justify-content: space-between; align-items: center; background: white; }
+        .bulk-footer { padding: 10px 15px; border-top: 1px solid var(--border-main); display: flex; justify-content: space-between; align-items: center; background: white; }
         #log-count { font-size: 0.7rem; font-weight: 800; color: var(--primary); }
-        .btn-exit { padding: 8px 15px; background: var(--primary); color: white; border-radius: 6px; font-weight: 800; text-decoration: none; font-size: 0.7rem; }
 
         @media (min-width: 1024px) {
             .main-content { flex-direction: row-reverse; }
             .action-bar-container { width: var(--sidebar-width-desktop); height: 100%; padding: 0; }
             .toggle-group { flex-direction: column; height: 100%; border-radius: 0; }
-            .btn-toggle { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 25px 5px; }
+            .btn-toggle { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 18px 5px; }
+            .btn-toggle span:first-child { font-size: 1.2rem; }
             .filter-grid { grid-template-columns: 2fr 1fr 1fr 1fr; }
             .search-wrapper { grid-column: span 1; }
             .right-panel { padding: 20px; }
@@ -82,8 +81,11 @@
 <body>
 
 <header class="navbar">
-    <span id="company-name-text">JMCYFLOW LOGS</span>
-    <button onclick="location.href='inventory.html'" style="background:var(--accent); color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:800; font-size:0.6rem; cursor:pointer;">BACK TO STOCK</button>
+    <span id="company-name-text">JMCYFLOW AUDIT</span>
+    <div style="display:flex; align-items:center; gap: 10px;">
+        <span id="active-user" style="color:white; font-size:0.65rem; font-weight:700;">---</span>
+        <button onclick="location.href='inventory.html'" style="background:var(--accent); color:white; border:none; padding:5px 12px; border-radius:4px; font-weight:800; font-size:0.6rem; cursor:pointer;">STOCK LIST</button>
+    </div>
 </header>
 
 <main class="main-content">
@@ -91,9 +93,10 @@
         <div class="toggle-group">
             <button class="btn-toggle" onclick="location.href='inventory.html'"><span>📋</span><span>Stock</span></button>
             <button class="btn-toggle" onclick="location.href='receiving.html'"><span>🚚</span><span>Recv</span></button>
-            <button class="btn-toggle" onclick="location.href='orders.html'"><span>💰</span><span>Sales</span></button>
+            <button class="btn-toggle" onclick="location.href='order.html'"><span>📦</span><span>Outslip</span></button>
             <button class="btn-toggle" onclick="location.href='transfer.html'"><span>🔄</span><span>Trans</span></button>
             <button class="btn-toggle" onclick="location.href='return.html'"><span>↩️</span><span>Retn</span></button>
+            <button class="btn-toggle active"><span>📜</span><span>Logs</span></button>
         </div>
     </div>
 
@@ -102,14 +105,17 @@
             <div class="filter-area">
                 <div class="filter-grid">
                     <div class="search-wrapper">
-                        <input type="text" id="mainSearch" placeholder="SEARCH REF OR DETAILS..." onkeyup="applyFilters()">
+                        <input type="text" id="mainSearch" placeholder="SEARCH SKU, REF, OR USER..." onkeyup="applyFilters()">
                     </div>
                     <select id="typeFilter" onchange="applyFilters()">
-                        <option value="ALL">ALL ACTIVITIES</option>
-                        <option value="RECEIVING">RECEIVING</option>
-                        <option value="SALE">SALES</option>
-                        <option value="TRANSFER">TRANSFERS</option>
-                        <option value="RETURN">RETURNS</option>
+                        <option value="ALL">ALL TYPES</option>
+                        <option value="RECEIVING">🚚 RECEIVING</option>
+                        <option value="SALE">📦 OUTSLIP</option>
+                        <option value="TRANSFER">🔄 TRANSFER</option>
+                        <option value="RETURN">↩️ RETURN</option>
+                        <option value="ADD">➕ REGISTRATION</option>
+                        <option value="ADJ">⚖️ ADJUSTMENT</option>
+                        <option value="EDIT">✏️ UPDATE</option>
                     </select>
                     <input type="date" id="dateFrom" onchange="applyFilters()">
                     <input type="date" id="dateTo" onchange="applyFilters()">
@@ -120,36 +126,36 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 100px;">Date</th>
-                            <th style="width: 100px;">Type</th>
-                            <th>Reference & Activity (Click to View)</th>
-                            <th style="width: 150px;">Performed By</th>
+                            <th style="width: 100px;">Timestamp</th>
+                            <th style="width: 110px;">Type</th>
+                            <th>Reference & Detail Summary</th>
+                            <th style="width: 140px;">User</th>
                         </tr>
                     </thead>
                     <tbody id="logs-body">
-                        <tr><td colspan="4" style="text-align:center; padding:40px; color:#94a3b8;">Scanning database...</td></tr>
+                        <tr><td colspan="4" style="text-align:center; padding:40px; color:#94a3b8;">Loading audit history...</td></tr>
                     </tbody>
                 </table>
             </div>
 
             <div class="bulk-footer">
                 <div id="log-count">0 ENTRIES</div>
-                <button onclick="resetFilters()" style="background:none; border:none; color:var(--accent); font-weight:800; cursor:pointer; font-size:0.7rem;">RESET FILTERS</button>
-                <a href="inventory.html" class="btn-exit">EXIT</a>
+                <button onclick="resetFilters()" style="background:none; border:none; color:var(--accent); font-weight:800; cursor:pointer; font-size:0.7rem;">CLEAR FILTERS</button>
             </div>
         </div>
     </div>
 </main>
 
 <script>
-    const _supabase = supabase.createClient('https://crruounuhtfzyssyhgcc.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg');
+    const _supabase = supabase.createClient('https://pehffyqlssrqogosfsab.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s');
 
     let allLogs = [];
-    const companyID = localStorage.getItem('companyID');
+    const companyID = localStorage.getItem('jmcy_cid');
+    const activeUser = localStorage.getItem('jmcy_user') || "GUEST";
 
     async function init() {
-        if (!localStorage.getItem('activeAdmin')) { location.href = 'index.html'; return; }
-        fetchLogs();
+        document.getElementById('active-user').innerText = activeUser.toUpperCase();
+        if(companyID) fetchLogs();
     }
 
     async function fetchLogs() {
@@ -159,13 +165,11 @@
             .eq('company_id', companyID)
             .order('created_at', { ascending: false });
 
-        if (error) { console.error(error); return; }
+        if (error) return;
 
-        // Logic to group by reference_id if you only want one row per transaction session
-        // For now, we show individual movements, which is safer for auditing
         allLogs = data.map(log => ({
             ...log,
-            shortDate: new Date(log.created_at).toLocaleDateString('en-GB'),
+            displayTime: new Date(log.created_at).toLocaleString('en-GB', { hour12: false }).replace(',', ''),
             rawDate: log.created_at.split('T')[0]
         }));
 
@@ -174,25 +178,24 @@
 
     function renderTable(list) {
         const tbody = document.getElementById('logs-body');
-        document.getElementById('log-count').innerText = `${list.length} ENTRIES FOUND`;
+        document.getElementById('log-count').innerText = `${list.length} ENTRIES`;
 
         if (list.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px;">No matching records.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px;">No results found.</td></tr>';
             return;
         }
 
         tbody.innerHTML = list.map(log => `
-            <tr onclick="location.href='transaction.html?ref=${encodeURIComponent(log.reference_id)}'">
-                <td style="color:#64748b; font-size:0.7rem;">${log.shortDate}</td>
+            <tr onclick="location.href='transaction.html?ref=${encodeURIComponent(log.reference_no || log.id)}'">
+                <td style="color:#64748b; font-size:0.65rem;">${log.displayTime}</td>
                 <td><span class="badge" style="background:${getTypeColor(log.type)}">${log.type}</span></td>
                 <td>
-                    <strong>${log.reference_id}</strong>
-                    <span class="summary-text">${log.notes || log.item_name}</span>
+                    <div style="font-weight:800;">${log.reference_no || 'SYSTEM-ADJ'}</div>
+                    <span class="summary-text">${log.notes || log.item_name || 'N/A'}</span>
                 </td>
                 <td>
                     <div style="display:flex; align-items:center;">
-                        <strong>${(log.performed_by || 'Unknown').toUpperCase()}</strong>
-                        <span class="role-badge">${(log.user_role || 'Staff').toUpperCase()}</span>
+                        <span>${(log.performed_by || 'Unknown')}</span>
                     </div>
                 </td>
             </tr>
@@ -201,11 +204,14 @@
 
     function getTypeColor(type) {
         switch(type) {
-            case 'RECEIVING': return '#059669';
-            case 'SALE': return '#6366f1';
-            case 'TRANSFER': return '#0ea5e9';
-            case 'RETURN': return '#f59e0b';
-            default: return '#64748b';
+            case 'RECEIVING': return 'var(--success)';
+            case 'SALE': return 'var(--accent)';
+            case 'TRANSFER': return '#8b5cf6';
+            case 'RETURN': return 'var(--warning)';
+            case 'ADD': return '#06b6d4';
+            case 'ADJ': return '#f43f5e';
+            case 'EDIT': return '#64748b';
+            default: return '#94a3b8';
         }
     }
 
@@ -216,7 +222,8 @@
         const to = document.getElementById('dateTo').value;
 
         const filtered = allLogs.filter(log => {
-            const matchesSearch = (log.reference_id + (log.notes || '') + log.item_name).toUpperCase().includes(search);
+            const content = (log.reference_no + (log.notes || '') + log.sku + log.performed_by).toUpperCase();
+            const matchesSearch = content.includes(search);
             const matchesType = type === 'ALL' || log.type === type;
             let matchesDate = true;
             if (from && log.rawDate < from) matchesDate = false;

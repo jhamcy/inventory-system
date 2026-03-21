@@ -50,6 +50,7 @@
 
         .permission-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: #f1f5f9; padding: 10px; border-radius: 8px; margin-top: 5px; }
         .perm-item { display: flex; align-items: center; gap: 6px; font-size: 0.55rem; font-weight: 800; color: var(--primary); background: white; padding: 8px; border-radius: 5px; border: 1px solid var(--border-main); cursor: pointer; transition: 0.2s; }
+        .perm-item input { width: auto; padding: 0; margin: 0; }
         .perm-item:has(input:checked) { border-color: var(--accent); background: #eff6ff; color: var(--accent); }
         
         .btn-action { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: 800; text-transform: uppercase; cursor: pointer; margin-top: 10px; transition: 0.2s; }
@@ -107,8 +108,8 @@
                     <input type="text" id="pass-in" placeholder="PASSWORD">
                     
                     <select id="role-in">
-                        <option value="staff">STAFF MEMBER</option>
-                        <option value="admin">ADMINISTRATOR</option>
+                        <option value="STAFF">STAFF MEMBER</option>
+                        <option value="OWNER">ADMINISTRATOR</option>
                     </select>
                     
                     <div style="font-size: 0.6rem; font-weight: 800; color: var(--accent); margin-top: 10px;">ACTION PRIVILEGES:</div>
@@ -123,7 +124,7 @@
 
                     <button id="btn-save" class="btn-action btn-save" onclick="saveUser()">Create Account</button>
                     <button id="btn-update" class="btn-action btn-update" onclick="updateUser()">Update Details</button>
-                    <button id="btn-cancel" class="btn-action btn-cancel" onclick="resetForm()">Cancel</button>
+                    <button id="btn-cancel" class="btn-action btn-cancel" onclick="resetForm()" style="display:none;">Cancel Edit</button>
                 </div>
             </div>
         </div>
@@ -154,20 +155,19 @@
     const _KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s';
     
     let _sb;
-    let editingUser = null;
+    let editingUserId = null; // Use DB internal ID or username
     let previewMode = false;
 
-    // --- INITIALIZE & AUTH CHECK ---
     function init() {
-        if (typeof supabase !== 'undefined') {
-            _sb = supabase.createClient(_URL, _KEY);
-        }
+        _sb = supabase.createClient(_URL, _KEY);
         
         const role = localStorage.getItem('jmcy_role');
-        if (!role) {
+        const cid = localStorage.getItem('jmcy_cid');
+
+        if (!role || !cid) {
             previewMode = true;
-            document.getElementById('page-header').innerHTML += ' <span class="preview-tag">PREVIEW</span>';
-        } else if (role !== 'admin') {
+            document.getElementById('page-header').innerHTML += ' <span class="preview-tag">LAYOUT PREVIEW</span>';
+        } else if (role !== 'OWNER') {
             window.location.href = 'inventory.html';
             return;
         }
@@ -175,19 +175,22 @@
         loadTable();
     }
 
-    // --- DATA LOADING ---
     async function loadTable() {
         let staffList = [];
 
         if (previewMode) {
-            // Mock data for layout viewing
             staffList = [
-                { staff_id: 'JMCY-001', full_name: 'DEMO ADMIN', username: 'ADMIN_MASTER', password: '****', role: 'admin', permissions: ['perm_users', 'perm_logs'] },
-                { staff_id: 'JMCY-002', full_name: 'JUAN DELA CRUZ', username: 'JUAN_STAFF', password: '123', role: 'staff', permissions: ['perm_add', 'perm_edit'] }
+                { staff_id: 'JMCY-001', full_name: 'DEMO OWNER', username: 'ADMIN', password: '123', role: 'OWNER', permissions: ['perm_users', 'perm_logs', 'perm_add', 'perm_edit'] },
+                { staff_id: 'JMCY-002', full_name: 'JUAN DELA CRUZ', username: 'JUAN_STAFF', password: '456', role: 'STAFF', permissions: ['perm_add', 'perm_edit'] }
             ];
         } else {
             const cid = localStorage.getItem('jmcy_cid');
-            const { data, error } = await _sb.from('staff_accounts').select('*').eq('company_id', cid).order('username');
+            const { data, error } = await _sb
+                .from('staff_members')
+                .select('*')
+                .eq('company_id', cid)
+                .order('full_name');
+            
             if (error) { console.error(error); return; }
             staffList = data;
         }
@@ -198,67 +201,68 @@
     function renderTable(data) {
         const tbody = document.getElementById('user-table-body');
         tbody.innerHTML = data.map(u => `
-            <tr onclick="activateEditMode(${JSON.stringify(u).replace(/"/g, '&quot;')})">
+            <tr onclick='activateEditMode(${JSON.stringify(u)})'>
                 <td style="color:#64748b;">#${u.staff_id || '---'}</td>
                 <td>${u.full_name}</td>
                 <td style="color:var(--accent); font-weight:800;">${u.username}</td>
                 <td class="pass-code">${u.password}</td>
-                <td><span class="role-badge ${u.role === 'admin' ? 'role-admin' : ''}">${u.role}</span></td>
+                <td><span class="role-badge ${u.role === 'OWNER' ? 'role-admin' : ''}">${u.role}</span></td>
                 <td>
-                    ${u.username !== 'ADMIN_MASTER' ? `<button style="color:var(--danger); background:none; border:none; font-weight:800; cursor:pointer;" onclick="event.stopPropagation(); delUser('${u.username}')">DEL</button>` : '🔒'}
+                    <button style="color:var(--danger); background:none; border:none; font-weight:800; cursor:pointer;" onclick="event.stopPropagation(); delUser('${u.username}')">DEL</button>
                 </td>
             </tr>
         `).join('');
     }
 
-    // --- FORM ACTIONS ---
     function activateEditMode(user) {
-        editingUser = user.username;
+        editingUserId = user.username;
         document.getElementById('form-title').innerText = "Edit: " + user.username;
         document.getElementById('id-in').value = user.staff_id || "";
         document.getElementById('name-in').value = user.full_name || "";
         document.getElementById('user-in').value = user.username;
-        document.getElementById('user-in').disabled = true;
         document.getElementById('pass-in').value = user.password;
         document.getElementById('role-in').value = user.role;
         
-        const userPerms = user.permissions || [];
+        // Sync permissions checkboxes
+        const pList = user.permissions || [];
         document.querySelectorAll('#perm-list input').forEach(cb => {
-            cb.checked = userPerms.includes(cb.value);
+            cb.checked = pList.includes(cb.value);
         });
         
         document.getElementById('btn-save').style.display = 'none';
         document.getElementById('btn-update').style.display = 'block';
+        document.getElementById('btn-cancel').style.display = 'block';
     }
 
     function resetForm() {
-        editingUser = null;
+        editingUserId = null;
         document.getElementById('form-title').innerText = "Account Registration";
-        document.getElementById('user-in').disabled = false;
-        document.querySelectorAll('input').forEach(i => i.value = "");
+        document.querySelectorAll('.form-grid input').forEach(i => i.value = "");
         document.querySelectorAll('#perm-list input').forEach(cb => cb.checked = false);
         document.getElementById('btn-save').style.display = 'block';
         document.getElementById('btn-update').style.display = 'none';
+        document.getElementById('btn-cancel').style.display = 'none';
     }
 
     async function saveUser() {
-        if (previewMode) return alert("Preview Mode: Database writing disabled.");
+        if (previewMode) return alert("Preview Mode: Cannot save to database.");
         
         const payload = getFormData();
-        if(!payload.username || !payload.password) return alert("Missing required fields");
-        
-        payload.company_id = localStorage.getItem('jmcy_cid'); // Link to company
-        
-        const { error } = await _sb.from('staff_accounts').insert([payload]);
+        if(!payload.username || !payload.password) return alert("Fill required fields!");
+
+        payload.company_id = localStorage.getItem('jmcy_cid');
+
+        const { error } = await _sb.from('staff_members').insert([payload]);
         if(error) alert(error.message);
         else { resetForm(); loadTable(); }
     }
 
     async function updateUser() {
-        if (previewMode) return alert("Preview Mode: Database writing disabled.");
+        if (previewMode) return alert("Preview Mode: Cannot update database.");
         
         const payload = getFormData();
-        const { error } = await _sb.from('staff_accounts').update(payload).eq('username', editingUser);
+        const { error } = await _sb.from('staff_members').update(payload).eq('username', editingUserId);
+        
         if(error) alert(error.message);
         else { resetForm(); loadTable(); }
     }
@@ -274,12 +278,13 @@
         };
     }
 
-    async function delUser(name) {
-        if (previewMode) return alert("Preview Mode: Deletion disabled.");
-        if(!confirm(`Permanent delete for ${name}?`)) return;
+    async function delUser(username) {
+        if (previewMode) return alert("Preview Mode: Cannot delete.");
+        if(!confirm(`Delete user ${username}?`)) return;
         
-        await _sb.from('staff_accounts').delete().eq('username', name);
-        loadTable();
+        const { error } = await _sb.from('staff_members').delete().eq('username', username);
+        if(error) alert(error.message);
+        else loadTable();
     }
 
     window.onload = init;
