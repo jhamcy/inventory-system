@@ -20,7 +20,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background-color: var(--dark-bg); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
         
-        /* Toast Notification */
         #notification {
             position: fixed;
             top: 20px;
@@ -34,9 +33,6 @@
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 1000;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         #notification.show { transform: translateX(0); }
         .ntf-success { background: var(--success); border-left: 5px solid #065f46; }
@@ -74,7 +70,6 @@
             <p style="color: var(--text-dim); font-size: 0.8rem;">Professional Invoice Setup</p>
         </div>
         <form id="regForm">
-            
             <div class="section-label">Business Identity</div>
             <div class="form-group">
                 <label>Company Name</label>
@@ -113,7 +108,7 @@
 
             <div class="section-label">Account & Security</div>
             <div class="form-group">
-                <label>Portal ID (Unique URL)</label>
+                <label>Portal ID (Your unique workspace URL)</label>
                 <input type="text" id="compID" placeholder="MY-BUSINESS-URL" style="text-transform: uppercase;" required>
             </div>
             <div class="grid-2">
@@ -138,13 +133,7 @@
             const ntf = document.getElementById('notification');
             ntf.innerText = message;
             ntf.className = type === 'success' ? 'ntf-success show' : 'ntf-error show';
-            
-            if(type === 'success') {
-                // Keep success visible slightly longer for redirect
-                setTimeout(() => ntf.classList.remove('show'), 3500);
-            } else {
-                setTimeout(() => ntf.classList.remove('show'), 3000);
-            }
+            setTimeout(() => ntf.classList.remove('show'), 3500);
         }
 
         function previewLogo(input) {
@@ -165,7 +154,6 @@
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             const logoFile = document.getElementById('logoFile').files[0];
-            
             const portalId = document.getElementById('compID').value.toUpperCase().trim();
             const adminUser = document.getElementById('adminUser').value.trim().toUpperCase();
             const adminPass = document.getElementById('adminPass').value.toUpperCase();
@@ -175,63 +163,44 @@
 
             try {
                 let logoUrl = "";
-
                 if (logoFile) {
                     const fileExt = logoFile.name.split('.').pop();
                     const fileName = `${portalId}-${Date.now()}.${fileExt}`;
                     const filePath = `logos/${fileName}`;
-
-                    const { data: uploadData, error: uploadError } = await _supabase.storage
-                        .from('public') 
-                        .upload(filePath, logoFile);
-
-                    if (!uploadError) {
-                        const { data: publicUrlData } = _supabase.storage.from('public').getPublicUrl(filePath);
-                        logoUrl = publicUrlData.publicUrl;
-                    }
+                    await _supabase.storage.from('public').upload(filePath, logoFile);
+                    const { data: publicUrlData } = _supabase.storage.from('public').getPublicUrl(filePath);
+                    logoUrl = publicUrlData.publicUrl;
                 }
-
-                const companyPayload = {
-                    portal_id: portalId,
-                    company_name: document.getElementById('compName').value.trim(),
-                    company_address: document.getElementById('compAddr').value.trim(),
-                    tin_number: document.getElementById('compTIN').value.trim(),
-                    contact_number: document.getElementById('compContact').value.trim(),
-                    business_email: document.getElementById('compEmail').value.trim(),
-                    logo_url: logoUrl
-                };
 
                 const { data: companyData, error: companyError } = await _supabase
-                    .from('companies')
-                    .insert([companyPayload])
-                    .select()
-                    .single();
+                    .from('companies').insert([{
+                        portal_id: portalId,
+                        company_name: document.getElementById('compName').value.trim(),
+                        company_address: document.getElementById('compAddr').value.trim(),
+                        tin_number: document.getElementById('compTIN').value.trim(),
+                        contact_number: document.getElementById('compContact').value.trim(),
+                        business_email: document.getElementById('compEmail').value.trim(),
+                        logo_url: logoUrl
+                    }]).select().single();
                 
-                if(companyError) { 
-                    throw new Error("Registration Failed: " + companyError.message);
-                }
+                if(companyError) throw new Error("Registration Failed: " + companyError.message);
 
-                const staffPayload = {
+                const { error: staffError } = await _supabase.from('staff_members').insert([{
                     company_id: companyData.id,
                     full_name: "SYSTEM OWNER",
                     username: adminUser,
                     password: adminPass,
                     role: "OWNER"
-                };
+                }]);
 
-                const { error: staffError } = await _supabase
-                    .from('staff_members')
-                    .insert([staffPayload]);
+                if(staffError) throw new Error("Portal ready, but admin account failed.");
 
-                if(staffError) {
-                    throw new Error("Portal ready, but admin setup failed. Please contact support.");
-                } else {
-                    showNotify("Registration Successful! Redirecting to your portal...", "success");
-                    // Wait 2 seconds so they can see the notification
-                    setTimeout(() => {
-                        window.location.href = `portal.html?id=${portalId}`; 
-                    }, 2000);
-                }
+                showNotify("Success! Redirecting to Portal Verification...", "success");
+                
+                // STEP 1: MOVE TO PORTAL.HTML
+                setTimeout(() => {
+                    window.location.href = `portal.html`; 
+                }, 2000);
 
             } catch (error) {
                 showNotify(error.message, "error");
