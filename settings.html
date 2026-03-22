@@ -2,36 +2,92 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ADMIN SETTINGS | JMCYFLOW</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #0f172a; --accent: #3b82f6; --bg: #f8fafc; --border: #e2e8f0; --text: #1e293b; --danger: #ef4444; }
+        :root { --primary: #0f172a; --accent: #3b82f6; --bg: #f1f5f9; --border: #e2e8f0; --text: #1e293b; --danger: #ef4444; }
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
         
-        body { margin: 0; background: var(--bg); color: var(--text); }
-        .nav { height: 60px; background: white; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-        .back-link { color: var(--accent); text-decoration: none; font-size: 0.8rem; font-weight: 700; }
-
-        .container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+        body { margin: 0; background: var(--bg); color: var(--text); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
         
-        .card { background: white; border-radius: 16px; border: 1px solid var(--border); padding: 30px; margin-bottom: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        h2 { font-size: 1.1rem; font-weight: 800; margin-top: 0; display: flex; align-items: center; gap: 10px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
-        p { font-size: 0.85rem; color: #64748b; margin-top: -10px; margin-bottom: 25px; }
+        .nav { 
+            height: 60px; 
+            background: var(--primary); 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 0 20px; 
+            border-bottom: 2px solid var(--accent);
+            flex-shrink: 0;
+            z-index: 1000;
+        }
+        
+        .nav-title { color: white; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
 
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .form-group { margin-bottom: 18px; }
-        label { font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; display: block; text-transform: uppercase; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; outline: none; background: #fcfcfd; transition: 0.2s; }
-        input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .back-link { 
+            color: white; 
+            text-decoration: none; 
+            font-size: 0.6rem; 
+            font-weight: 800; 
+            border: 2px solid var(--accent); 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            background: rgba(59, 130, 246, 0.1);
+            text-transform: uppercase;
+        }
 
-        .btn { padding: 12px 24px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; font-size: 0.85rem; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-save { background: var(--primary); color: white; width: 100%; justify-content: center; }
-        .btn-save:hover { background: #1e293b; transform: translateY(-1px); }
+        .container { flex: 1; overflow-y: auto; padding: 20px; }
+        .wrapper { max-width: 700px; margin: 0 auto; }
+        
+        .card { background: white; border-radius: 12px; border: 2px solid var(--primary); padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2 { font-size: 1rem; font-weight: 800; margin: 0 0 10px 0; display: flex; align-items: center; gap: 10px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
+        p { font-size: 0.75rem; color: #64748b; margin-top: -5px; margin-bottom: 25px; font-weight: 600; }
 
-        .status-pill { font-size: 0.65rem; padding: 4px 10px; border-radius: 20px; font-weight: 800; background: #dcfce7; color: #166534; }
-        .logout-btn { background:none; border:none; color:var(--danger); font-weight:800; cursor:pointer; font-size:0.7rem; text-transform: uppercase; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group { margin-bottom: 15px; }
+        label { font-size: 0.7rem; font-weight: 800; color: var(--primary); margin-bottom: 6px; display: block; text-transform: uppercase; }
+        
+        input, textarea { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #cbd5e1; 
+            border-radius: 8px; 
+            font-size: 0.85rem; 
+            font-weight: 700;
+            outline: none; 
+            background: #f8fafc; 
+            transition: 0.2s; 
+            text-transform: uppercase;
+        }
+        input:focus, textarea:focus { border-color: var(--accent); background: white; }
+
+        .btn-save { 
+            background: var(--primary); 
+            color: white; 
+            width: 100%; 
+            padding: 16px; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: 800; 
+            font-size: 0.85rem; 
+            cursor: pointer; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.2s;
+        }
+        .btn-save:hover { background: #1e293b; }
+        
+        .info-box {
+            background: #f0f9ff;
+            border-left: 4px solid var(--accent);
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
 
         @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
     </style>
@@ -39,74 +95,95 @@
 <body>
 
 <nav class="nav">
-    <div style="display: flex; align-items: center; gap: 20px;">
-        <a href="dashboard.html" class="back-link">← RETURN TO DASHBOARD</a>
-        <div id="sync-pill" class="status-pill">● CONNECTED</div>
-    </div>
-    <button onclick="logout()" class="logout-btn">LOGOUT ⏻</button>
+    <div class="nav-title">System Configuration</div>
+    <a href="dashboard.html" class="back-link">BACK TO DASHBOARD</a>
 </nav>
 
 <div class="container">
-    <div class="card">
-        <h2>🏢 Business Profile</h2>
-        <p>This information appears on your BIR-compliant sales invoices.</p>
-        
-        <div class="form-group">
-            <label>Registered Business Name</label>
-            <input type="text" id="biz-name" placeholder="e.g. JMCY Flow Trading">
+    <div class="wrapper">
+        <div class="info-box" id="portal-display">
+            PORTAL ID: LOADING...
         </div>
 
-        <div class="grid">
+        <div class="card">
+            <h2>🏢 Business Profile</h2>
+            <p>Maintain your BIR-compliant company details for system-generated documents.</p>
+            
             <div class="form-group">
-                <label>TIN Number</label>
-                <input type="text" id="biz-tin" placeholder="000-000-000-000">
+                <label>Registered Business Name</label>
+                <input type="text" id="biz-name" placeholder="E.G. JMCY FLOW TRADING">
             </div>
-            <div class="form-group">
-                <label>Business Style</label>
-                <input type="text" id="biz-style" placeholder="e.g. Retail/Wholesale">
-            </div>
-        </div>
 
-        <div class="form-group">
-            <label>Registered Address</label>
-            <textarea id="biz-addr" rows="2" placeholder="Building, Street, City, ZIP"></textarea>
-        </div>
+            <div class="grid">
+                <div class="form-group">
+                    <label>TIN Number</label>
+                    <input type="text" id="biz-tin" placeholder="000-000-000-000">
+                </div>
+                <div class="form-group">
+                    <label>Business Style</label>
+                    <input type="text" id="biz-style" placeholder="E.G. RETAIL / WHOLESALE">
+                </div>
+            </div>
 
-        <div class="grid">
             <div class="form-group">
-                <label>Contact Number</label>
-                <input type="text" id="biz-phone" placeholder="0917-000-0000">
+                <label>Registered Address</label>
+                <textarea id="biz-addr" rows="3" placeholder="BUILDING, STREET, CITY, ZIP"></textarea>
             </div>
-            <div class="form-group">
-                <label>Email Address</label>
-                <input type="email" id="biz-email" placeholder="admin@jmcyflow.com">
+
+            <div class="grid">
+                <div class="form-group">
+                    <label>Contact Number</label>
+                    <input type="text" id="biz-phone" placeholder="09XX-XXX-XXXX">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="biz-email" style="text-transform: none;" placeholder="admin@jmcyflow.com">
+                </div>
             </div>
+            
+            <button class="btn-save" id="save-btn" onclick="saveSettings()">💾 SAVE PROFILE CHANGES</button>
         </div>
-        
-        <button class="btn btn-save" onclick="saveSettings()">💾 SAVE PROFILE CHANGES</button>
     </div>
 </div>
 
 <script>
-    const _sb = supabase.createClient('https://pehffyqlssrqogosfsab.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s');
+    const _URL = 'https://pehffyqlssrqogosfsab.supabase.co';
+    const _KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s';
+    const _sb = supabase.createClient(_URL, _KEY);
     
+    // We pull the unique ID assigned during the portal login
     const companyId = localStorage.getItem('jmcy_cid');
+    const userRole = localStorage.getItem('jmcy_role');
 
     window.onload = async () => {
-        if(!companyId) {
-            alert("No Company ID found. Please login.");
-            window.location.href = "login.html";
+        if(!companyId || !userRole) {
+            window.location.href = "portal.html";
             return;
         }
+
+        // Security check for Admin roles
+        if (userRole !== 'OWNER' && userRole !== 'ADMINISTRATOR' && userRole !== 'ADMIN') {
+            window.location.href = "inventory.html";
+            return;
+        }
+
+        document.getElementById('portal-display').innerText = `PORTAL ID: ${companyId}`;
         loadCurrentData();
     };
 
     async function loadCurrentData() {
+        // Specifically fetching the record where 'id' matches our stored Portal ID
         const { data, error } = await _sb
             .from('companies')
             .select('*')
             .eq('id', companyId)
             .single();
+
+        if (error) {
+            console.error("Data Fetch Error:", error);
+            alert("Could not pull company data. Please check connection.");
+            return;
+        }
 
         if (data) {
             document.getElementById('biz-name').value = data.company_name || '';
@@ -119,17 +196,17 @@
     }
 
     async function saveSettings() {
-        const btn = document.querySelector('.btn-save');
-        btn.innerText = "UPDATING...";
+        const btn = document.getElementById('save-btn');
+        btn.innerText = "⏳ SAVING...";
+        btn.disabled = true;
         
         const updates = {
-            company_name: document.getElementById('biz-name').value,
-            tin_number: document.getElementById('biz-tin').value,
-            business_style: document.getElementById('biz-style').value,
-            company_address: document.getElementById('biz-addr').value,
+            company_name: document.getElementById('biz-name').value.toUpperCase(),
+            tin_number: document.getElementById('biz-tin').value.toUpperCase(),
+            business_style: document.getElementById('biz-style').value.toUpperCase(),
+            company_address: document.getElementById('biz-addr').value.toUpperCase(),
             contact_number: document.getElementById('biz-phone').value,
-            email: document.getElementById('biz-email').value,
-            updated_at: new Date()
+            email: document.getElementById('biz-email').value.toLowerCase(),
         };
 
         const { error } = await _sb
@@ -138,19 +215,15 @@
             .eq('id', companyId);
 
         if(!error) {
-            alert("Settings Updated Successfully!");
-            btn.innerText = "💾 SAVE PROFILE CHANGES";
+            alert("Business Profile Updated Successfully!");
+            // Update the local storage company name in case it was changed
+            localStorage.setItem('jmcy_company_name', updates.company_name);
         } else {
-            alert("Error: " + error.message);
-            btn.innerText = "💾 SAVE PROFILE CHANGES";
+            alert("Update Failed: " + error.message);
         }
-    }
-
-    function logout() {
-        if(confirm("Logout from Admin Panel?")) {
-            localStorage.clear();
-            window.location.href = "login.html";
-        }
+        
+        btn.innerText = "💾 SAVE PROFILE CHANGES";
+        btn.disabled = false;
     }
 </script>
 

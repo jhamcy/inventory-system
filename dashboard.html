@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Admin Dashboard | JmcyFlow</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -120,7 +120,7 @@
                     <div class="dash-card" onclick="navTo('logs.html')" style="border-bottom: 6px solid var(--report);">
                         <span>📜</span><h3>History</h3><p>Audit Trail</p>
                     </div>
-                    <div class="dash-card" onclick="navTo('setting.html')" style="border-bottom: 6px solid var(--primary);">
+                    <div class="dash-card" onclick="navTo('settings.html')" style="border-bottom: 6px solid var(--primary);">
                         <span>⚙️</span><h3>Settings</h3><p>Biz Profile</p>
                     </div>
                     <div class="dash-card" onclick="navTo('user.html')" style="border-bottom: 6px solid var(--user-manage);">
@@ -151,14 +151,12 @@
             const cid = localStorage.getItem('jmcy_cid');
             const compName = localStorage.getItem('jmcy_company_name');
 
-            // Force redirect if no session data exists
             if (!user || !cid) {
                 window.location.href = 'portal.html';
                 return;
             }
 
-            // Security check: Only Owner and Admin can access dashboard
-            if (role !== 'OWNER' && role !== 'ADMIN') {
+            if (role !== 'OWNER' && role !== 'ADMINISTRATOR' && role !== 'ADMIN') {
                 window.location.href = 'inventory.html';
                 return;
             }
