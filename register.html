@@ -158,7 +158,7 @@
             const adminUser = document.getElementById('adminUser').value.trim().toUpperCase();
             const adminPass = document.getElementById('adminPass').value.toUpperCase();
             const companyName = document.getElementById('compName').value.trim();
-            const businessAddress = document.getElementById('compAddr').value.trim();
+            const companyAddress = document.getElementById('compAddr').value.trim();
             
             btn.disabled = true;
             btn.innerText = "Building your portal...";
@@ -183,18 +183,18 @@
                     logoUrl = publicUrlData.publicUrl;
                 }
 
-                // STEP 1: Insert into companies table using the new SQL column names
+                // STEP 1: Insert into companies table using company_address
                 const { data: companyData, error: companyError } = await _supabase
                     .from('companies').insert([{
                         portal_id: portalId,
                         company_name: companyName,
-                        bussiness_address: businessAddress, // Updated
-                        owner_name: "SYSTEM OWNER",          // Updated
+                        company_address: companyAddress, 
+                        owner_name: "SYSTEM OWNER",          
                         tin_number: document.getElementById('compTIN').value.trim(),
                         contact_number: document.getElementById('compContact').value.trim(),
                         business_email: document.getElementById('compEmail').value.trim(),
-                        admin_user: adminUser,               // Updated
-                        admin_pass: adminPass,               // Updated
+                        admin_user: adminUser,               
+                        admin_pass: adminPass,               
                         logo_url: logoUrl
                     }]).select().single();
                 
