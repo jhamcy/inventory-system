@@ -26,10 +26,21 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        #logo-container { margin-bottom: 15px; display: flex; justify-content: center; min-height: 20px; }
-        #logo-container img { max-width: 140px; max-height: 80px; object-fit: contain; }
+        /* Logo Styling */
+        #logo-container { margin-bottom: 20px; display: flex; justify-content: center; min-height: 40px; }
+        #logo-container img { max-width: 180px; max-height: 100px; object-fit: contain; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3)); }
 
-        .brand-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 5px; text-transform: uppercase; color: white; }
+        /* Text Adjustments */
+        .brand-title { 
+            font-size: 1.8rem; /* Increased size */
+            font-weight: 800; 
+            margin-bottom: 8px; 
+            text-transform: uppercase; 
+            color: white; 
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+        
         .portal-label { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; display: block; font-weight: 700; }
 
         .form-group { text-align: left; margin-bottom: 20px; }
@@ -58,9 +69,12 @@
 <body>
 
     <div class="login-card" id="loginCard">
+        <!-- Logo appears here first -->
         <div id="logo-container"></div>
-        <div class="brand-title" id="companyName">Jmcy<span>Flow</span></div>
-        <span class="portal-label" id="portalIdDisplay">Initializing...</span>
+        
+        <!-- Company Name second -->
+        <div class="brand-title" id="companyName">Initializing...</div>
+        <span class="portal-label" id="portalIdDisplay">Locating Node...</span>
         
         <div class="form-group">
             <label>Username</label>
@@ -72,11 +86,11 @@
             <input type="password" id="password" placeholder="••••••••">
         </div>
         
-        <button class="btn-login" id="loginBtn" onclick="handleLogin()">Sign In</button>
-        <div id="errorBox" class="error-msg">Invalid Credentials</div>
+        <button class="btn-login" id="loginBtn" onclick="handleLogin()">Authorize Access</button>
+        <div id="errorBox" class="error-msg">Access Denied: Invalid Credentials.</div>
         
         <p style="margin-top: 25px; font-size: 0.55rem; color: #475569; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
-            Authorized Access Only | JmcyFlow v3.0
+            SECURE MANAGED INSTANCE • 2026
         </p>
     </div>
 
@@ -101,6 +115,11 @@
                 document.getElementById('companyName').innerText = data.company_name;
                 document.getElementById('portalIdDisplay').innerText = `NODE: ${data.portal_id.toUpperCase()}`;
                 
+                // Show Logo if available
+                if (data.logo_url) {
+                    document.getElementById('logo-container').innerHTML = `<img src="${data.logo_url}" alt="Logo">`;
+                }
+
                 if(data.theme_color) document.documentElement.style.setProperty('--primary', data.theme_color);
                 
                 localStorage.setItem('jmcy_portal_id', data.portal_id);
@@ -121,7 +140,6 @@
             btn.innerText = "AUTHENTICATING...";
             errBox.style.display = "none";
 
-            // Logic changed to target 'staff_members' table
             const { data: user, error } = await _sb.from('staff_members')
                 .select('*')
                 .eq('company_id', activeCompany.id)
@@ -130,13 +148,11 @@
                 .single();
 
             if (user) {
-                // Aligned storage keys with your Management page (user.html)
                 localStorage.setItem('jmcy_role', user.role);
                 localStorage.setItem('jmcy_username', user.username);
                 localStorage.setItem('jmcy_fullname', user.full_name);
                 localStorage.setItem('jmcy_cid', activeCompany.id); 
                 
-                // Redirection Logic matching your roles
                 if (user.role === 'OWNER') {
                     window.location.href = 'dashboard.html';
                 } else if (user.role === 'SALES STAFF') {
@@ -149,7 +165,7 @@
             } else {
                 errBox.style.display = "block";
                 btn.disabled = false;
-                btn.innerText = "Sign In";
+                btn.innerText = "Authorize Access";
             }
         }
     </script>
