@@ -26,19 +26,19 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        /* Improved Logo Styling */
+        /* Logo at the top */
         #logo-container { 
             margin-bottom: 20px; 
             display: flex; 
             justify-content: center; 
             align-items: center;
-            min-height: 80px; /* Space reserved for logo */
+            min-height: 80px; 
         }
         #logo-container img { 
-            max-width: 200px; 
-            max-height: 100px; 
+            max-width: 220px; 
+            max-height: 110px; 
             object-fit: contain; 
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3)); 
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4)); 
         }
 
         .brand-title { 
@@ -48,7 +48,6 @@
             text-transform: uppercase; 
             color: white; 
             letter-spacing: -0.5px;
-            line-height: 1.2;
         }
         
         .portal-label { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; display: block; font-weight: 700; }
@@ -56,15 +55,12 @@
         .form-group { text-align: left; margin-bottom: 20px; }
         label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--primary); margin-bottom: 8px; text-transform: uppercase; }
         
-        /* Input Forced Uppercase */
         input {
             width: 100%; padding: 14px; background: rgba(15, 23, 42, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;
             color: white; font-size: 1rem; box-sizing: border-box; outline: none;
-            text-transform: uppercase; /* Visual uppercase */
+            text-transform: uppercase; /* UI Uppercase */
         }
-
-        input::placeholder { text-transform: none; } /* Keeps placeholder readable */
 
         input:focus { border-color: var(--primary); background: rgba(15, 23, 42, 0.9); }
 
@@ -81,16 +77,16 @@
 </head>
 <body>
 
-    <div class="login-card" id="loginCard">
-        <!-- Logo appears here first -->
+    <div class="login-card">
+        <!-- The Logo will automatically appear here -->
         <div id="logo-container"></div>
         
-        <div class="brand-title" id="companyName">Loading...</div>
-        <span class="portal-label" id="portalIdDisplay">Verifying Node...</span>
+        <div class="brand-title" id="companyName">SYSTEM LOADING</div>
+        <span class="portal-label" id="portalIdDisplay">CONNECTING...</span>
         
         <div class="form-group">
             <label>Username</label>
-            <input type="text" id="username" placeholder="ENTER USERNAME" autocomplete="off" oninput="this.value = this.value.toUpperCase()">
+            <input type="text" id="username" placeholder="ENTER USERNAME" oninput="this.value = this.value.toUpperCase()">
         </div>
 
         <div class="form-group">
@@ -107,23 +103,25 @@
     </div>
 
     <script>
+        // Supabase Init
         const _sb = supabase.createClient('https://pehffyqlssrqogosfsab.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s');
 
         let activeCompany = null;
 
+        // Auto-run when the page opens
         window.onload = async () => {
             const urlParams = new URLSearchParams(window.location.search);
             let portalId = urlParams.get('id');
 
             if (!portalId) {
-                document.getElementById('companyName').innerText = "ERROR";
-                document.getElementById('portalIdDisplay').innerText = "PORTAL ID MISSING";
+                document.getElementById('companyName').innerText = "LINK EXPIRED";
+                document.getElementById('portalIdDisplay').innerText = "MISSING PORTAL ID";
                 return;
             }
 
             portalId = portalId.trim().toUpperCase();
 
-            // Fetch company details
+            // Fetch company by Portal ID
             const { data, error } = await _sb.from('companies').select('*').eq('portal_id', portalId).single();
 
             if (data) {
@@ -131,23 +129,15 @@
                 document.getElementById('companyName').innerText = data.company_name;
                 document.getElementById('portalIdDisplay').innerText = `NODE: ${data.portal_id}`;
                 
-                // Fix: Ensure Logo URL is handled correctly
+                // Show logo if it exists in DB
                 if (data.logo_url) {
-                    const img = new Image();
-                    img.src = data.logo_url;
-                    img.onload = () => {
-                        document.getElementById('logo-container').innerHTML = `<img src="${data.logo_url}" alt="Company Logo">`;
-                    };
-                    img.onerror = () => {
-                        console.error("Logo failed to load. Check Storage RLS policies.");
-                    };
+                    document.getElementById('logo-container').innerHTML = `<img src="${data.logo_url}" alt="Logo">`;
                 }
 
                 if(data.theme_color) document.documentElement.style.setProperty('--primary', data.theme_color);
-                localStorage.setItem('jmcy_portal_id', data.portal_id);
             } else {
-                document.getElementById('companyName').innerText = "OFFLINE";
-                document.getElementById('portalIdDisplay').innerText = "INVALID PORTAL ID";
+                document.getElementById('companyName').innerText = "NOT FOUND";
+                document.getElementById('portalIdDisplay').innerText = "INVALID INSTANCE";
             }
         };
 
@@ -160,7 +150,7 @@
             if (!activeCompany || !userIn || !passIn) return;
 
             btn.disabled = true;
-            btn.innerText = "AUTHENTICATING...";
+            btn.innerText = "VERIFYING...";
             errBox.style.display = "none";
 
             const { data: user, error } = await _sb.from('staff_members')
@@ -171,12 +161,9 @@
                 .single();
 
             if (user) {
-                localStorage.setItem('jmcy_role', user.role);
-                localStorage.setItem('jmcy_username', user.username);
-                localStorage.setItem('jmcy_fullname', user.full_name);
                 localStorage.setItem('jmcy_cid', activeCompany.id); 
+                localStorage.setItem('jmcy_role', user.role);
                 
-                // Redirect based on role
                 const routes = {
                     'OWNER': 'dashboard.html',
                     'SALES STAFF': 'sales.html',
