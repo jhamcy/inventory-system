@@ -167,8 +167,21 @@
                     const fileExt = logoFile.name.split('.').pop();
                     const fileName = `${portalId}-${Date.now()}.${fileExt}`;
                     const filePath = `logos/${fileName}`;
-                    await _supabase.storage.from('public').upload(filePath, logoFile);
-                    const { data: publicUrlData } = _supabase.storage.from('public').getPublicUrl(filePath);
+                    
+                    // UPDATED BUCKET NAME TO: jmcyflow
+                    const { data: uploadData, error: uploadError } = await _supabase.storage
+                        .from('jmcyflow') 
+                        .upload(filePath, logoFile, {
+                            cacheControl: '3600',
+                            upsert: true
+                        });
+
+                    if (uploadError) {
+                        console.error("Storage Error:", uploadError);
+                        throw new Error("Logo Upload Failed: " + uploadError.message);
+                    }
+
+                    const { data: publicUrlData } = _supabase.storage.from('jmcyflow').getPublicUrl(filePath);
                     logoUrl = publicUrlData.publicUrl;
                 }
 
@@ -183,7 +196,7 @@
                         logo_url: logoUrl
                     }]).select().single();
                 
-                if(companyError) throw new Error("Registration Failed: " + companyError.message);
+                if(companyError) throw new Error("Database Error: " + companyError.message);
 
                 const { error: staffError } = await _supabase.from('staff_members').insert([{
                     company_id: companyData.id,
@@ -193,11 +206,10 @@
                     role: "OWNER"
                 }]);
 
-                if(staffError) throw new Error("Portal ready, but admin account failed.");
+                if(staffError) throw new Error("Admin Setup Error: " + staffError.message);
 
                 showNotify("Success! Redirecting to Portal Verification...", "success");
                 
-                // STEP 1: MOVE TO PORTAL.HTML
                 setTimeout(() => {
                     window.location.href = `portal.html`; 
                 }, 2000);
