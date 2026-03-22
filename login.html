@@ -26,9 +26,20 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        /* Logo Styling */
-        #logo-container { margin-bottom: 20px; display: flex; justify-content: center; min-height: 40px; }
-        #logo-container img { max-width: 180px; max-height: 100px; object-fit: contain; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3)); }
+        /* Improved Logo Styling */
+        #logo-container { 
+            margin-bottom: 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            min-height: 80px; /* Space reserved for logo */
+        }
+        #logo-container img { 
+            max-width: 200px; 
+            max-height: 100px; 
+            object-fit: contain; 
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3)); 
+        }
 
         .brand-title { 
             font-size: 1.8rem; 
@@ -45,13 +56,15 @@
         .form-group { text-align: left; margin-bottom: 20px; }
         label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--primary); margin-bottom: 8px; text-transform: uppercase; }
         
+        /* Input Forced Uppercase */
         input {
             width: 100%; padding: 14px; background: rgba(15, 23, 42, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;
             color: white; font-size: 1rem; box-sizing: border-box; outline: none;
-            /* Forced Uppercase Visual */
-            text-transform: uppercase; 
+            text-transform: uppercase; /* Visual uppercase */
         }
+
+        input::placeholder { text-transform: none; } /* Keeps placeholder readable */
 
         input:focus { border-color: var(--primary); background: rgba(15, 23, 42, 0.9); }
 
@@ -63,26 +76,26 @@
         }
 
         .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
-
         .error-msg { color: #f87171; font-size: 0.75rem; margin-top: 15px; display: none; font-weight: 600; }
     </style>
 </head>
 <body>
 
     <div class="login-card" id="loginCard">
+        <!-- Logo appears here first -->
         <div id="logo-container"></div>
         
-        <div class="brand-title" id="companyName">Initializing...</div>
-        <span class="portal-label" id="portalIdDisplay">Locating Node...</span>
+        <div class="brand-title" id="companyName">Loading...</div>
+        <span class="portal-label" id="portalIdDisplay">Verifying Node...</span>
         
         <div class="form-group">
             <label>Username</label>
-            <input type="text" id="username" placeholder="Enter username" autocomplete="off">
+            <input type="text" id="username" placeholder="ENTER USERNAME" autocomplete="off" oninput="this.value = this.value.toUpperCase()">
         </div>
 
         <div class="form-group">
             <label>Password</label>
-            <input type="password" id="password" placeholder="••••••••">
+            <input type="password" id="password" placeholder="••••••••" oninput="this.value = this.value.toUpperCase()">
         </div>
         
         <button class="btn-login" id="loginBtn" onclick="handleLogin()">Authorize Access</button>
@@ -103,13 +116,14 @@
             let portalId = urlParams.get('id');
 
             if (!portalId) {
+                document.getElementById('companyName').innerText = "ERROR";
                 document.getElementById('portalIdDisplay').innerText = "PORTAL ID MISSING";
                 return;
             }
 
-            // Clean and force the ID to uppercase for the search
             portalId = portalId.trim().toUpperCase();
 
+            // Fetch company details
             const { data, error } = await _sb.from('companies').select('*').eq('portal_id', portalId).single();
 
             if (data) {
@@ -117,15 +131,23 @@
                 document.getElementById('companyName').innerText = data.company_name;
                 document.getElementById('portalIdDisplay').innerText = `NODE: ${data.portal_id}`;
                 
+                // Fix: Ensure Logo URL is handled correctly
                 if (data.logo_url) {
-                    document.getElementById('logo-container').innerHTML = `<img src="${data.logo_url}" alt="Logo">`;
+                    const img = new Image();
+                    img.src = data.logo_url;
+                    img.onload = () => {
+                        document.getElementById('logo-container').innerHTML = `<img src="${data.logo_url}" alt="Company Logo">`;
+                    };
+                    img.onerror = () => {
+                        console.error("Logo failed to load. Check Storage RLS policies.");
+                    };
                 }
 
                 if(data.theme_color) document.documentElement.style.setProperty('--primary', data.theme_color);
-                
                 localStorage.setItem('jmcy_portal_id', data.portal_id);
             } else {
-                document.getElementById('portalIdDisplay').innerText = "INVALID PORTAL";
+                document.getElementById('companyName').innerText = "OFFLINE";
+                document.getElementById('portalIdDisplay').innerText = "INVALID PORTAL ID";
             }
         };
 
@@ -154,15 +176,13 @@
                 localStorage.setItem('jmcy_fullname', user.full_name);
                 localStorage.setItem('jmcy_cid', activeCompany.id); 
                 
-                if (user.role === 'OWNER') {
-                    window.location.href = 'dashboard.html';
-                } else if (user.role === 'SALES STAFF') {
-                    window.location.href = 'sales.html';
-                } else if (user.role === 'WAREHOUSE STAFF') {
-                    window.location.href = 'inventory.html';
-                } else {
-                    window.location.href = 'dashboard.html';
-                }
+                // Redirect based on role
+                const routes = {
+                    'OWNER': 'dashboard.html',
+                    'SALES STAFF': 'sales.html',
+                    'WAREHOUSE STAFF': 'inventory.html'
+                };
+                window.location.href = routes[user.role] || 'dashboard.html';
             } else {
                 errBox.style.display = "block";
                 btn.disabled = false;
