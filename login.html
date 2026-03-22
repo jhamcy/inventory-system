@@ -27,51 +27,70 @@
         }
 
         #logo-container { 
-            margin-bottom: 20px; 
+            margin-bottom: 10px; 
             display: flex; 
             justify-content: center; 
             align-items: center;
-            min-height: 100px; 
+            min-height: 80px; 
         }
         #logo-container img { 
-            max-width: 220px; 
-            max-height: 110px; 
+            max-width: 180px; 
+            max-height: 90px; 
             object-fit: contain; 
             filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4)); 
         }
 
         .brand-title { 
-            font-size: 1.8rem; 
+            font-size: 1.6rem; 
             font-weight: 800; 
-            margin-bottom: 8px; 
+            margin-bottom: 5px; 
             text-transform: uppercase; 
             color: white; 
             letter-spacing: -0.5px;
         }
         
-        .portal-label { font-size: 0.65rem; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; display: block; font-weight: 700; }
+        .portal-label { font-size: 0.6rem; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; display: block; font-weight: 700; opacity: 0.8; }
 
-        .form-group { text-align: left; margin-bottom: 20px; }
-        label { display: block; font-size: 0.7rem; font-weight: 700; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; }
+        .form-group { text-align: left; margin-bottom: 15px; }
+        label { display: block; font-size: 0.65rem; font-weight: 700; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; }
         
         input {
-            width: 100%; padding: 14px; background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;
-            color: white; font-size: 1rem; box-sizing: border-box; outline: none;
-            text-transform: uppercase; 
+            width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px;
+            color: white; font-size: 0.95rem; box-sizing: border-box; outline: none;
+            text-transform: uppercase;
         }
 
-        input:focus { border-color: var(--primary); background: rgba(15, 23, 42, 0.9); }
+        input:focus { border-color: var(--primary); background: rgba(15, 23, 42, 0.9); border-width: 2px; }
 
         .btn-login {
-            width: 100%; padding: 16px; background: var(--primary);
-            color: white; border: none; border-radius: 12px;
+            width: 100%; padding: 15px; background: var(--primary);
+            color: white; border: none; border-radius: 10px;
             font-weight: 800; cursor: pointer; transition: 0.3s;
             text-transform: uppercase; letter-spacing: 1px; margin-top: 10px;
         }
 
+        .btn-login:hover { filter: brightness(1.1); transform: translateY(-1px); }
         .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
-        .error-msg { color: #f87171; font-size: 0.75rem; margin-top: 15px; display: none; font-weight: 600; }
+
+        /* Return Button Styling */
+        .btn-return {
+            display: inline-block;
+            margin-top: 15px;
+            color: #94a3b8;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+        .btn-return:hover { color: var(--primary); }
+
+        .error-msg { color: #f87171; font-size: 0.7rem; margin-top: 12px; display: none; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -79,23 +98,27 @@
     <div class="login-card">
         <div id="logo-container"></div>
         
-        <div class="brand-title" id="companyName">...</div>
-        <span class="portal-label" id="portalIdDisplay">CONNECTING TO NODE</span>
+        <div class="brand-title" id="companyName">SYSTEM CONNECTING</div>
+        <span class="portal-label" id="portalIdDisplay">PLEASE WAIT...</span>
         
         <div class="form-group">
-            <label>Username</label>
-            <input type="text" id="username" placeholder="ENTER USERNAME" oninput="this.value = this.value.toUpperCase()">
+            <label>User Identity</label>
+            <input type="text" id="username" placeholder="USERNAME" oninput="this.value = this.value.toUpperCase()">
         </div>
 
         <div class="form-group">
-            <label>Password</label>
+            <label>Access Key</label>
             <input type="password" id="password" placeholder="••••••••" oninput="this.value = this.value.toUpperCase()">
         </div>
         
         <button class="btn-login" id="loginBtn" onclick="handleLogin()">Authorize Access</button>
-        <div id="errorBox" class="error-msg">Access Denied: Invalid Credentials.</div>
         
-        <p style="margin-top: 25px; font-size: 0.55rem; color: #475569; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+        <!-- Added Return Button -->
+        <button class="btn-return" onclick="window.location.href='portal.html'">← Back to Portal Search</button>
+
+        <div id="errorBox" class="error-msg">⚠️ ACCESS DENIED: INVALID CREDENTIALS</div>
+        
+        <p style="margin-top: 25px; font-size: 0.5rem; color: #475569; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
             SECURE MANAGED INSTANCE • 2026
         </p>
     </div>
@@ -117,22 +140,17 @@
 
             portalId = portalId.trim().toUpperCase();
 
-            const { data, error } = await _sb.from('companies').select('*').eq('portal_id', portalId).single();
+            const { data, error } = await _sb.from('companies').select('*').eq('portal_id', portalId).maybeSingle();
 
             if (data) {
                 activeCompany = data;
                 document.getElementById('companyName').innerText = data.company_name;
-                document.getElementById('portalIdDisplay').innerText = `NODE: ${data.portal_id}`;
+                document.getElementById('portalIdDisplay').innerText = `NODE ID: ${data.portal_id}`;
                 
                 if(data.theme_color) document.documentElement.style.setProperty('--primary', data.theme_color);
 
-                if (data.logo_url) {
-                    let finalUrl = data.logo_url;
-                    if (!finalUrl.startsWith('http')) {
-                        const { data: publicData } = _sb.storage.from('jmcyflow').getPublicUrl(finalUrl);
-                        finalUrl = publicData.publicUrl;
-                    }
-                    document.getElementById('logo-container').innerHTML = `<img src="${finalUrl}" alt="Logo" onerror="this.style.display='none'">`;
+                if (data.logo_url && data.logo_url !== "") {
+                    document.getElementById('logo-container').innerHTML = `<img src="${data.logo_url}" alt="Logo" onerror="this.style.display='none'">`;
                 }
             } else {
                 document.getElementById('companyName').innerText = "INVALID NODE";
@@ -142,48 +160,52 @@
 
         async function handleLogin() {
             const userIn = document.getElementById('username').value.trim().toUpperCase();
-            const passIn = document.getElementById('password').value.toUpperCase();
+            const passIn = document.getElementById('password').value.trim().toUpperCase();
             const btn = document.getElementById('loginBtn');
             const errBox = document.getElementById('errorBox');
 
-            if (!activeCompany || !userIn || !passIn) return;
+            if (!activeCompany) return;
+            if (!userIn || !passIn) {
+                errBox.style.display = "block";
+                errBox.innerText = "⚠️ ENTER ALL CREDENTIALS";
+                return;
+            }
 
             btn.disabled = true;
-            btn.innerText = "VERIFYING...";
+            btn.innerText = "AUTHENTICATING...";
             errBox.style.display = "none";
 
-            const { data: user, error } = await _sb.from('staff_members')
-                .select('*')
-                .eq('company_id', activeCompany.id) 
-                .eq('username', userIn)
-                .eq('password', passIn) 
-                .single();
+            try {
+                const { data: user, error } = await _sb.from('staff_members')
+                    .select('*')
+                    .eq('company_id', activeCompany.id) 
+                    .eq('username', userIn)
+                    .eq('password', passIn) 
+                    .maybeSingle();
 
-            if (user) {
-                console.log("Login Success. Role:", user.role);
+                if (user) {
+                    localStorage.setItem('jmcy_cid', activeCompany.id); 
+                    localStorage.setItem('jmcy_role', user.role.toUpperCase());
+                    localStorage.setItem('jmcy_username', user.username);
+                    localStorage.setItem('jmcy_fullname', user.full_name || user.username);
+                    
+                    const routes = {
+                        'OWNER': 'dashboard.html',
+                        'ADMIN': 'dashboard.html',
+                        'SALES STAFF': 'sales.html',
+                        'WAREHOUSE STAFF': 'inventory.html'
+                    };
 
-                // Save session info
-                localStorage.setItem('jmcy_cid', activeCompany.id); 
-                localStorage.setItem('jmcy_role', user.role);
-                localStorage.setItem('jmcy_username', user.username);
-                localStorage.setItem('jmcy_fullname', user.full_name || user.username);
-                
-                // Defined Routes
-                const routes = {
-                    'OWNER': 'dashboard.html',
-                    'ADMIN': 'dashboard.html',
-                    'SALES STAFF': 'sales.html',
-                    'WAREHOUSE STAFF': 'inventory.html'
-                };
-
-                const target = routes[user.role.toUpperCase()] || 'dashboard.html';
-                console.log("Redirecting to:", target);
-                window.location.href = target;
-            } else {
+                    const target = routes[user.role.toUpperCase()] || 'dashboard.html';
+                    window.location.href = target;
+                } else {
+                    throw new Error("Invalid User");
+                }
+            } catch (err) {
                 errBox.style.display = "block";
+                errBox.innerText = "⚠️ ACCESS DENIED: INVALID CREDENTIALS";
                 btn.disabled = false;
                 btn.innerText = "Authorize Access";
-                console.error("Login failed: User not found or password incorrect.");
             }
         }
     </script>
