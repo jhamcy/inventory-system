@@ -68,9 +68,7 @@
             transition: 0.3s;
         }
 
-        /* Force Portal ID input to show uppercase */
         #portalSearch { text-transform: uppercase; }
-
         input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
 
         #login-section { display: none; margin-top: 20px; padding-top: 25px; border-top: 1px solid rgba(255,255,255,0.1); }
@@ -92,6 +90,16 @@
         .btn-action:disabled { opacity: 0.5; cursor: wait; }
 
         .reset-btn { background: none; border: none; color: var(--text-dim); font-size: 0.75rem; cursor: pointer; margin-top: 15px; text-decoration: underline; }
+        
+        .back-home {
+            display: inline-block;
+            margin-top: 20px;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .back-home:hover { color: var(--primary); }
 
         #toast {
             position: fixed;
@@ -124,6 +132,7 @@
                 <input type="text" id="portalSearch" placeholder="ENTER YOUR COMPANY ID">
             </div>
             <button class="btn-action" id="find-btn" onclick="lookupCompany()">Verify Portal</button>
+            <a href="index.html" class="back-home">← Return to Index</a>
         </div>
 
         <!-- STEP 2: CREDENTIALS -->
@@ -176,7 +185,6 @@
 
         async function lookupCompany() {
             const input = document.getElementById('portalSearch');
-            // Force query to UpperCase to match new storage standard
             const query = input.value.toUpperCase().trim();
             if(!query) return;
 
@@ -195,13 +203,15 @@
                     activeCompany = data;
                     revealLogin(data);
                 } else {
-                    showNotification("Portal ID not found.");
+                    // This satisfies the "not exist" notification requirement
+                    showNotification("Portal ID does not exist.", "error");
                     btn.disabled = false;
                     btn.innerText = "Verify Portal";
                 }
             } catch (err) {
-                showNotification("Database connection failed.");
+                showNotification("Connection error.");
                 btn.disabled = false;
+                btn.innerText = "Verify Portal";
             }
         }
 
@@ -223,24 +233,26 @@
             btn.innerText = "Authenticating...";
 
             try {
+                // Ensure table and column names match your registration logic (staff_members / password)
                 const { data: user, error } = await _supabase
-                    .from('users')
+                    .from('staff_members')
                     .select('*')
                     .eq('company_id', activeCompany.id)
-                    .eq('username', u)
-                    .eq('password_hash', p) 
+                    .eq('username', u.toUpperCase())
+                    .eq('password', p.toUpperCase()) 
                     .maybeSingle();
 
                 if (user) {
                     saveAndRedirect(activeCompany.portal_id, user.username, user.role, activeCompany.company_name);
                 } else {
-                    showNotification("Access Denied: Invalid Credentials.");
+                    showNotification("Invalid Credentials.");
                     btn.disabled = false;
                     btn.innerText = "Authorize Access";
                 }
             } catch (err) {
                 showNotification("Verification error.");
                 btn.disabled = false;
+                btn.innerText = "Authorize Access";
             }
         });
 
@@ -253,12 +265,10 @@
             showNotification("Access Granted. Routing...", "success");
 
             setTimeout(() => {
-                if (role === 'admin') {
+                if (role === 'OWNER' || role === 'admin') {
                     window.location.href = "portal.html"; 
                 } else if (role === 'sales') {
                     window.location.href = "sales.html";
-                } else if (role === 'warehouse') {
-                    window.location.href = "inventory.html";
                 } else {
                     window.location.href = "inventory.html"; 
                 }
