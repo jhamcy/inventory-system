@@ -80,7 +80,7 @@
         <div id="logo-container"></div>
         
         <div class="brand-title" id="companyName">...</div>
-        <span class="portal-label" id="portalIdDisplay">AUTHENTICATING NODE</span>
+        <span class="portal-label" id="portalIdDisplay">CONNECTING TO NODE</span>
         
         <div class="form-group">
             <label>Username</label>
@@ -111,31 +111,35 @@
 
             if (!portalId) {
                 document.getElementById('companyName').innerText = "LINK EXPIRED";
+                document.getElementById('portalIdDisplay').innerText = "MISSING PORTAL KEY";
                 return;
             }
 
             portalId = portalId.trim().toUpperCase();
 
+            // STEP 1: Find the specific company based on the Portal ID
             const { data, error } = await _sb.from('companies').select('*').eq('portal_id', portalId).single();
 
             if (data) {
                 activeCompany = data;
                 document.getElementById('companyName').innerText = data.company_name;
-                document.getElementById('portalIdDisplay').innerText = `VERIFIED • ${data.portal_id}`;
+                document.getElementById('portalIdDisplay').innerText = `NODE: ${data.portal_id}`;
                 
+                // Set Theme Color
+                if(data.theme_color) document.documentElement.style.setProperty('--primary', data.theme_color);
+
+                // STEP 2: Fetch and Display the correct Logo
                 if (data.logo_url) {
                     let finalUrl = data.logo_url;
-                    // Check if it's a full URL or just a filename
                     if (!finalUrl.startsWith('http')) {
                         const { data: publicData } = _sb.storage.from('jmcyflow').getPublicUrl(finalUrl);
                         finalUrl = publicData.publicUrl;
                     }
                     document.getElementById('logo-container').innerHTML = `<img src="${finalUrl}" alt="Logo" onerror="this.style.display='none'">`;
                 }
-
-                if(data.theme_color) document.documentElement.style.setProperty('--primary', data.theme_color);
             } else {
                 document.getElementById('companyName').innerText = "INVALID NODE";
+                document.getElementById('portalIdDisplay').innerText = "UNAUTHORIZED ACCESS";
             }
         };
 
@@ -145,20 +149,23 @@
             const btn = document.getElementById('loginBtn');
             const errBox = document.getElementById('errorBox');
 
+            // Prevent login if company data hasn't loaded
             if (!activeCompany || !userIn || !passIn) return;
 
             btn.disabled = true;
-            btn.innerText = "AUTHENTICATING...";
+            btn.innerText = "VERIFYING...";
             errBox.style.display = "none";
 
+            // STEP 3: Check credentials ONLY for this specific Company
             const { data: user, error } = await _sb.from('staff_members')
                 .select('*')
-                .eq('company_id', activeCompany.id)
+                .eq('company_id', activeCompany.id) // This is the isolation lock
                 .eq('username', userIn)
                 .eq('password', passIn) 
                 .single();
 
             if (user) {
+                // Save session info
                 localStorage.setItem('jmcy_cid', activeCompany.id); 
                 localStorage.setItem('jmcy_role', user.role);
                 localStorage.setItem('jmcy_username', user.username);
