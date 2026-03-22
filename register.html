@@ -157,6 +157,8 @@
             const portalId = document.getElementById('compID').value.toUpperCase().trim();
             const adminUser = document.getElementById('adminUser').value.trim().toUpperCase();
             const adminPass = document.getElementById('adminPass').value.toUpperCase();
+            const companyName = document.getElementById('compName').value.trim();
+            const businessAddress = document.getElementById('compAddr').value.trim();
             
             btn.disabled = true;
             btn.innerText = "Building your portal...";
@@ -168,7 +170,6 @@
                     const fileName = `${portalId}-${Date.now()}.${fileExt}`;
                     const filePath = `logos/${fileName}`;
                     
-                    // UPDATED BUCKET NAME TO: jmcyflow
                     const { data: uploadData, error: uploadError } = await _supabase.storage
                         .from('jmcyflow') 
                         .upload(filePath, logoFile, {
@@ -176,28 +177,30 @@
                             upsert: true
                         });
 
-                    if (uploadError) {
-                        console.error("Storage Error:", uploadError);
-                        throw new Error("Logo Upload Failed: " + uploadError.message);
-                    }
+                    if (uploadError) throw new Error("Logo Upload Failed: " + uploadError.message);
 
                     const { data: publicUrlData } = _supabase.storage.from('jmcyflow').getPublicUrl(filePath);
                     logoUrl = publicUrlData.publicUrl;
                 }
 
+                // STEP 1: Insert into companies table using the new SQL column names
                 const { data: companyData, error: companyError } = await _supabase
                     .from('companies').insert([{
                         portal_id: portalId,
-                        company_name: document.getElementById('compName').value.trim(),
-                        company_address: document.getElementById('compAddr').value.trim(),
+                        company_name: companyName,
+                        bussiness_address: businessAddress, // Updated
+                        owner_name: "SYSTEM OWNER",          // Updated
                         tin_number: document.getElementById('compTIN').value.trim(),
                         contact_number: document.getElementById('compContact').value.trim(),
                         business_email: document.getElementById('compEmail').value.trim(),
+                        admin_user: adminUser,               // Updated
+                        admin_pass: adminPass,               // Updated
                         logo_url: logoUrl
                     }]).select().single();
                 
                 if(companyError) throw new Error("Database Error: " + companyError.message);
 
+                // STEP 2: Create login access in staff_members
                 const { error: staffError } = await _supabase.from('staff_members').insert([{
                     company_id: companyData.id,
                     full_name: "SYSTEM OWNER",
@@ -208,10 +211,10 @@
 
                 if(staffError) throw new Error("Admin Setup Error: " + staffError.message);
 
-                showNotify("Success! Redirecting to Portal Verification...", "success");
+                showNotify("Success! Redirecting to login...", "success");
                 
                 setTimeout(() => {
-                    window.location.href = `portal.html`; 
+                    window.location.href = `login.html?id=${portalId}`; 
                 }, 2000);
 
             } catch (error) {

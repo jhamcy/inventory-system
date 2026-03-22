@@ -117,7 +117,6 @@
 
             portalId = portalId.trim().toUpperCase();
 
-            // STEP 1: Find the specific company based on the Portal ID
             const { data, error } = await _sb.from('companies').select('*').eq('portal_id', portalId).single();
 
             if (data) {
@@ -125,10 +124,8 @@
                 document.getElementById('companyName').innerText = data.company_name;
                 document.getElementById('portalIdDisplay').innerText = `NODE: ${data.portal_id}`;
                 
-                // Set Theme Color
                 if(data.theme_color) document.documentElement.style.setProperty('--primary', data.theme_color);
 
-                // STEP 2: Fetch and Display the correct Logo
                 if (data.logo_url) {
                     let finalUrl = data.logo_url;
                     if (!finalUrl.startsWith('http')) {
@@ -149,37 +146,44 @@
             const btn = document.getElementById('loginBtn');
             const errBox = document.getElementById('errorBox');
 
-            // Prevent login if company data hasn't loaded
             if (!activeCompany || !userIn || !passIn) return;
 
             btn.disabled = true;
             btn.innerText = "VERIFYING...";
             errBox.style.display = "none";
 
-            // STEP 3: Check credentials ONLY for this specific Company
             const { data: user, error } = await _sb.from('staff_members')
                 .select('*')
-                .eq('company_id', activeCompany.id) // This is the isolation lock
+                .eq('company_id', activeCompany.id) 
                 .eq('username', userIn)
                 .eq('password', passIn) 
                 .single();
 
             if (user) {
+                console.log("Login Success. Role:", user.role);
+
                 // Save session info
                 localStorage.setItem('jmcy_cid', activeCompany.id); 
                 localStorage.setItem('jmcy_role', user.role);
                 localStorage.setItem('jmcy_username', user.username);
+                localStorage.setItem('jmcy_fullname', user.full_name || user.username);
                 
+                // Defined Routes
                 const routes = {
                     'OWNER': 'dashboard.html',
+                    'ADMIN': 'dashboard.html',
                     'SALES STAFF': 'sales.html',
                     'WAREHOUSE STAFF': 'inventory.html'
                 };
-                window.location.href = routes[user.role] || 'dashboard.html';
+
+                const target = routes[user.role.toUpperCase()] || 'dashboard.html';
+                console.log("Redirecting to:", target);
+                window.location.href = target;
             } else {
                 errBox.style.display = "block";
                 btn.disabled = false;
                 btn.innerText = "Authorize Access";
+                console.error("Login failed: User not found or password incorrect.");
             }
         }
     </script>
