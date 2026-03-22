@@ -79,17 +79,16 @@
             <div class="section-label">Account & Security</div>
             <div class="form-group">
                 <label>Portal ID (Unique URL)</label>
-                <input type="text" id="compID" placeholder="my-business-url" required>
+                <!-- Portal ID is now visually Uppercase -->
+                <input type="text" id="compID" placeholder="MY-BUSINESS-URL" style="text-transform: uppercase;" required>
             </div>
             <div class="grid-2">
                 <div class="form-group">
                     <label>Admin User</label>
-                    <!-- Added style to force visual uppercase -->
                     <input type="text" id="adminUser" style="text-transform: uppercase;" required>
                 </div>
                 <div class="form-group">
                     <label>Admin Pass</label>
-                    <!-- Added style to force visual uppercase -->
                     <input type="password" id="adminPass" style="text-transform: uppercase;" minlength="6" required>
                 </div>
             </div>
@@ -119,9 +118,10 @@
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             const logoFile = document.getElementById('logoFile').files[0];
-            const portalId = document.getElementById('compID').value.toLowerCase().trim();
             
-            // Force values to uppercase for the database
+            // Logically forced to Uppercase now
+            const portalId = document.getElementById('compID').value.toUpperCase().trim();
+            
             const adminUser = document.getElementById('adminUser').value.trim().toUpperCase();
             const adminPass = document.getElementById('adminPass').value.toUpperCase();
             
@@ -132,7 +132,7 @@
 
             if (logoFile) {
                 const fileExt = logoFile.name.split('.').pop();
-                const fileName = `${portalId}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+                const fileName = `${portalId}-${Date.now()}.${fileExt}`;
                 const filePath = `logos/${fileName}`;
 
                 const { data: uploadData, error: uploadError } = await _supabase.storage
@@ -152,10 +152,7 @@
                 tin_number: document.getElementById('compTIN').value.trim(),
                 contact_number: document.getElementById('compContact').value.trim(),
                 business_email: document.getElementById('compEmail').value.trim(),
-                admin_user: adminUser,
-                admin_pass: adminPass,
-                logo_url: logoUrl,
-                trial_expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+                logo_url: logoUrl
             };
 
             const { data: companyData, error: companyError } = await _supabase
@@ -165,7 +162,7 @@
                 .single();
             
             if(companyError) { 
-                alert("Database Error: " + companyError.message); 
+                alert("Registration Error: " + companyError.message); 
                 btn.disabled = false; 
                 btn.innerText = "Create My Portal"; 
                 return;
@@ -174,8 +171,8 @@
             const staffPayload = {
                 company_id: companyData.id,
                 full_name: "SYSTEM OWNER",
-                username: adminUser, // already uppercase
-                password: adminPass, // already uppercase
+                username: adminUser,
+                password: adminPass,
                 role: "OWNER"
             };
 
@@ -184,9 +181,8 @@
                 .insert([staffPayload]);
 
             if(staffError) {
-                alert("Company created, but staff account failed: " + staffError.message);
+                alert("Portal ready, but admin account failed. Contact support.");
             } else {
-                if(logoUrl) localStorage.setItem('jmcy_logo', logoUrl);
                 window.location.href = `login.html?id=${portalId}`; 
             }
         });

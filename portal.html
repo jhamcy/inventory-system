@@ -68,6 +68,9 @@
             transition: 0.3s;
         }
 
+        /* Force Portal ID input to show uppercase */
+        #portalSearch { text-transform: uppercase; }
+
         input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
 
         #login-section { display: none; margin-top: 20px; padding-top: 25px; border-top: 1px solid rgba(255,255,255,0.1); }
@@ -118,7 +121,7 @@
         <div id="search-section">
             <div class="form-group">
                 <label>Portal ID</label>
-                <input type="text" id="portalSearch" placeholder="Enter your company ID">
+                <input type="text" id="portalSearch" placeholder="ENTER YOUR COMPANY ID">
             </div>
             <button class="btn-action" id="find-btn" onclick="lookupCompany()">Verify Portal</button>
         </div>
@@ -153,7 +156,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const id = urlParams.get('id');
             if(id) {
-                document.getElementById('portalSearch').value = id;
+                document.getElementById('portalSearch').value = id.toUpperCase();
                 lookupCompany();
             }
         };
@@ -173,7 +176,8 @@
 
         async function lookupCompany() {
             const input = document.getElementById('portalSearch');
-            const query = input.value.toLowerCase().trim();
+            // Force query to UpperCase to match new storage standard
+            const query = input.value.toUpperCase().trim();
             if(!query) return;
 
             const btn = document.getElementById('find-btn');
@@ -219,13 +223,12 @@
             btn.innerText = "Authenticating...";
 
             try {
-                // Fetch user from the centralized 'users' table
                 const { data: user, error } = await _supabase
                     .from('users')
                     .select('*')
                     .eq('company_id', activeCompany.id)
                     .eq('username', u)
-                    .eq('password_hash', p) // Ideally hashed, but following your setup
+                    .eq('password_hash', p) 
                     .maybeSingle();
 
                 if (user) {
@@ -242,24 +245,22 @@
         });
 
         function saveAndRedirect(portalId, username, role, companyName) {
-            // Save standardized session keys
-            localStorage.setItem('jmcy_portal_id', portalId);
+            localStorage.setItem('jmcy_portal_id', portalId.toUpperCase());
             localStorage.setItem('jmcy_user_role', role);
             localStorage.setItem('jmcy_username', username);
             localStorage.setItem('jmcy_company_name', companyName);
             
             showNotification("Access Granted. Routing...", "success");
 
-            // Role-Based Navigation Logic
             setTimeout(() => {
                 if (role === 'admin') {
-                    window.location.href = "portal.html"; // Or dashboard.html if you have one
+                    window.location.href = "portal.html"; 
                 } else if (role === 'sales') {
                     window.location.href = "sales.html";
                 } else if (role === 'warehouse') {
                     window.location.href = "inventory.html";
                 } else {
-                    window.location.href = "inventory.html"; // Fallback
+                    window.location.href = "inventory.html"; 
                 }
             }, 1000);
         }

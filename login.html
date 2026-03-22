@@ -100,19 +100,22 @@
 
         window.onload = async () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const portalId = urlParams.get('id');
+            let portalId = urlParams.get('id');
 
             if (!portalId) {
                 document.getElementById('portalIdDisplay').innerText = "PORTAL ID MISSING";
                 return;
             }
 
-            const { data, error } = await _sb.from('companies').select('*').eq('portal_id', portalId.toLowerCase()).single();
+            // Clean and force the ID to uppercase for the search
+            portalId = portalId.trim().toUpperCase();
+
+            const { data, error } = await _sb.from('companies').select('*').eq('portal_id', portalId).single();
 
             if (data) {
                 activeCompany = data;
                 document.getElementById('companyName').innerText = data.company_name;
-                document.getElementById('portalIdDisplay').innerText = `NODE: ${data.portal_id.toUpperCase()}`;
+                document.getElementById('portalIdDisplay').innerText = `NODE: ${data.portal_id}`;
                 
                 if (data.logo_url) {
                     document.getElementById('logo-container').innerHTML = `<img src="${data.logo_url}" alt="Logo">`;
@@ -127,7 +130,6 @@
         };
 
         async function handleLogin() {
-            // Force input values to Uppercase for the database query
             const userIn = document.getElementById('username').value.trim().toUpperCase();
             const passIn = document.getElementById('password').value.toUpperCase();
             const btn = document.getElementById('loginBtn');
