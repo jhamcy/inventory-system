@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RECEIVING | JMCYFLOW</title>
+    <title>STOCK OUTSLIP | JMCYFLOW</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #0f172a; --accent: #10b981; --border: #e2e8f0; --bg: #f8fafc; --text: #1e293b; }
+        :root { --primary: #450a0a; --accent: #dc2626; --border: #fca5a5; --bg: #fef2f2; --text: #450a0a; }
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; text-transform: uppercase; }
         
         body { margin: 0; background: var(--bg); color: var(--text); }
@@ -16,29 +16,31 @@
 
         .container { max-width: 900px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
 
-        .card { background: white; border-radius: 12px; border: 1px solid var(--border); padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        h2 { font-size: 1rem; margin-top: 0; display: flex; align-items: center; gap: 10px; color: var(--primary); }
+        .card { background: white; border-radius: 12px; border: 1px solid var(--border); padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        h2 { font-size: 0.9rem; margin-top: 0; display: flex; align-items: center; gap: 10px; color: var(--accent); letter-spacing: 1px; }
         
         .form-group { margin-bottom: 15px; }
-        label { font-size: 0.65rem; font-weight: 800; color: #64748b; margin-bottom: 6px; display: block; }
-        input, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; outline: none; transition: 0.2s; }
-        input:focus { border-color: var(--accent); }
+        label { font-size: 0.65rem; font-weight: 800; color: #991b1b; margin-bottom: 6px; display: block; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #fee2e2; border-radius: 6px; font-size: 0.85rem; outline: none; transition: 0.2s; background: #fffcfc; }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1); }
 
         /* Search Styles */
         #search-box { position: relative; margin-bottom: 20px; }
         #search-results { position: absolute; width: 100%; background: white; border: 1px solid var(--border); z-index: 100; border-radius: 0 0 8px 8px; max-height: 200px; overflow-y: auto; display: none; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        .result-item { padding: 12px; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
-        .result-item:hover { background: #f8fafc; }
+        .result-item { padding: 12px; border-bottom: 1px solid #fef2f2; cursor: pointer; }
+        .result-item:hover { background: #fff1f1; }
 
         /* Table Styles */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; font-size: 0.65rem; color: #64748b; padding: 10px; border-bottom: 2px solid var(--border); }
-        td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; font-size: 0.6rem; color: #991b1b; padding: 10px; border-bottom: 2px solid #fee2e2; }
+        td { padding: 12px 10px; border-bottom: 1px solid #fef2f2; font-size: 0.8rem; font-weight: 600; }
 
         .btn { width: 100%; padding: 14px; border-radius: 8px; border: none; font-weight: 800; cursor: pointer; font-size: 0.75rem; transition: 0.2s; }
-        .btn-add { background: var(--primary); color: white; margin-top: 10px; }
+        .btn-add { background: #7f1d1d; color: white; margin-top: 10px; }
         .btn-post { background: var(--accent); color: white; margin-top: 20px; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .stock-badge { font-size: 0.65rem; padding: 2px 6px; background: #fee2e2; border-radius: 4px; color: #b91c1c; }
 
         @media (max-width: 850px) {
             .container { grid-template-columns: 1fr; }
@@ -49,78 +51,78 @@
 
 <nav class="nav">
     <a href="portal.html" class="back-link">← BACK TO PORTAL</a>
-    <div style="font-weight: 800; letter-spacing: 1px;">STOCK RECEIVING</div>
-    <div id="status" style="font-size: 0.6rem;">● READY</div>
+    <div style="font-weight: 800; letter-spacing: 2px;">INVENTORY OUTSLIP</div>
+    <div id="status" style="font-size: 0.6rem;">● SYSTEM READY</div>
 </nav>
 
 <div class="container">
-    <!-- LEFT: ITEM SELECTION & LIST -->
+    <!-- LEFT: REMOVAL SELECTION -->
     <div>
         <div class="card">
-            <h2>📦 ITEM SELECTION</h2>
+            <h2>⚠️ SELECT ITEMS FOR REMOVAL</h2>
             <div id="search-box">
                 <label>SEARCH SKU OR ITEM NAME</label>
-                <input type="text" id="search-input" placeholder="TYPE TO SEARCH..." oninput="searchItems()">
+                <input type="text" id="search-input" placeholder="SEARCH PRODUCT..." oninput="searchItems()">
                 <div id="search-results"></div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;" id="entry-fields">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div class="form-group">
-                    <label>QUANTITY TO RECEIVE</label>
-                    <input type="number" id="recv-qty" placeholder="0">
+                    <label>QUANTITY TO REMOVE</label>
+                    <input type="number" id="out-qty" placeholder="0">
                 </div>
                 <div class="form-group">
-                    <label>UNIT COST (OPTIONAL)</label>
-                    <input type="number" id="recv-cost" placeholder="0.00">
+                    <label>CURRENT STOCK</label>
+                    <input type="text" id="current-view" placeholder="--" readonly style="background: #f1f1f1;">
                 </div>
             </div>
-            <button class="btn btn-add" onclick="addToQueue()">ADD TO RECEIVING LIST</button>
+            <button class="btn btn-add" onclick="addToQueue()">ADD TO OUTSLIP</button>
         </div>
 
         <div class="card" style="margin-top: 20px;">
-            <h2>📝 RECEIVING QUEUE</h2>
+            <h2>📝 DISPOSAL / USAGE QUEUE</h2>
             <table>
                 <thead>
                     <tr>
                         <th>ITEM</th>
                         <th>QTY</th>
-                        <th>COST</th>
-                        <th>TOTAL</th>
+                        <th>STOCK AFTER</th>
                         <th></th>
                     </tr>
                 </thead>
-                <tbody id="queue-body">
-                    <!-- Items appear here -->
-                </tbody>
+                <tbody id="queue-body"></tbody>
             </table>
         </div>
     </div>
 
-    <!-- RIGHT: TRANSACTION DETAILS -->
+    <!-- RIGHT: AUTHORIZATION -->
     <div>
         <div class="card" style="position: sticky; top: 20px;">
-            <h2>⚙️ TRANSACTION</h2>
+            <h2>⚙️ AUTHORIZATION</h2>
             <div class="form-group">
-                <label>REFERENCE NO. (DR/SI)</label>
-                <input type="text" id="ref-no" placeholder="e.g. DR-8821">
+                <label>OUTSLIP NO.</label>
+                <input type="text" id="out-no" value="OUT-2026-001">
             </div>
             <div class="form-group">
-                <label>SUPPLIER NAME</label>
-                <input type="text" id="supplier" placeholder="e.g. GLOBAL TRADE INC">
+                <label>REASON FOR REMOVAL</label>
+                <select id="reason">
+                    <option value="SPOILAGE / DAMAGE">SPOILAGE / DAMAGE</option>
+                    <option value="EXPIRED">EXPIRED</option>
+                    <option value="INTERNAL USE">INTERNAL USE</option>
+                    <option value="RETURN TO VENDOR">RETURN TO VENDOR</option>
+                    <option value="CORRECTION">DATA CORRECTION</option>
+                </select>
             </div>
             <div class="form-group">
-                <label>RECEIVE DATE</label>
-                <input type="date" id="recv-date">
+                <label>AUTHORIZED BY</label>
+                <input type="text" id="auth-by" placeholder="MANAGER NAME">
+            </div>
+            <div class="form-group">
+                <label>REMARKS</label>
+                <textarea id="remarks" rows="2" placeholder="ADDITIONAL DETAILS..."></textarea>
             </div>
             
-            <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-            
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <span style="font-size: 0.7rem; font-weight: 800; color: #64748b;">TOTAL ITEMS:</span>
-                <span id="total-items" style="font-weight: 800;">0</span>
-            </div>
-
-            <button class="btn btn-post" id="post-btn" onclick="postReceiving()" disabled>POST TO INVENTORY</button>
+            <button class="btn btn-post" id="post-btn" onclick="postOutslip()" disabled>CONFIRM STOCK REMOVAL</button>
         </div>
     </div>
 </div>
@@ -133,10 +135,16 @@
     let selectedItem = null;
 
     window.onload = async () => {
-        document.getElementById('recv-date').valueAsDate = new Date();
         const { data } = await _sb.from('inventory').select('*');
         if(data) inventory = data;
+        generateOutslipNo();
     };
+
+    function generateOutslipNo() {
+        const date = new Date();
+        const rand = Math.floor(1000 + Math.random() * 9000);
+        document.getElementById('out-no').value = `OUT-${date.getFullYear()}-${rand}`;
+    }
 
     function searchItems() {
         const q = document.getElementById('search-input').value.toLowerCase();
@@ -146,7 +154,7 @@
         const matches = inventory.filter(i => i.sku.toLowerCase().includes(q) || i.item_name.toLowerCase().includes(q));
         res.innerHTML = matches.map(m => `
             <div class="result-item" onclick="selectItem('${m.sku}')">
-                <b>${m.sku}</b><br>
+                <b>${m.sku}</b> <span class="stock-badge">STOCK: ${m.quantity_on_hand}</span><br>
                 <small style="color:#64748b">${m.item_name}</small>
             </div>
         `).join('');
@@ -156,31 +164,31 @@
     function selectItem(sku) {
         selectedItem = inventory.find(i => i.sku === sku);
         document.getElementById('search-input').value = selectedItem.item_name;
+        document.getElementById('current-view').value = selectedItem.quantity_on_hand;
         document.getElementById('search-results').style.display = 'none';
-        document.getElementById('recv-qty').focus();
+        document.getElementById('out-qty').focus();
     }
 
     function addToQueue() {
-        const qty = parseFloat(document.getElementById('recv-qty').value);
-        const cost = parseFloat(document.getElementById('recv-cost').value) || 0;
-
+        const qty = parseFloat(document.getElementById('out-qty').value);
         if(!selectedItem || !qty || qty <= 0) return alert("SELECT ITEM & ENTER VALID QTY");
+        
+        if(qty > selectedItem.quantity_on_hand) {
+            if(!confirm("REMOVAL EXCEEDS CURRENT STOCK. PROCEED WITH NEGATIVE STOCK?")) return;
+        }
 
         queue.push({
             sku: selectedItem.sku,
             item_name: selectedItem.item_name,
             qty: qty,
-            cost: cost,
-            current_stock: selectedItem.quantity_on_hand
+            after: selectedItem.quantity_on_hand - qty
         });
 
         updateUI();
-        
-        // Reset Item Pickers
         selectedItem = null;
         document.getElementById('search-input').value = "";
-        document.getElementById('recv-qty').value = "";
-        document.getElementById('recv-cost').value = "";
+        document.getElementById('out-qty').value = "";
+        document.getElementById('current-view').value = "--";
     }
 
     function updateUI() {
@@ -189,13 +197,10 @@
             <tr>
                 <td>${item.item_name}</td>
                 <td>${item.qty}</td>
-                <td>${item.cost.toFixed(2)}</td>
-                <td>${(item.qty * item.cost).toFixed(2)}</td>
+                <td style="${item.after < 0 ? 'color:red' : ''}">${item.after}</td>
                 <td style="color:red; cursor:pointer;" onclick="removeItem(${index})">✕</td>
             </tr>
         `).join('');
-
-        document.getElementById('total-items').innerText = queue.length;
         document.getElementById('post-btn').disabled = queue.length === 0;
     }
 
@@ -204,31 +209,29 @@
         updateUI();
     }
 
-    async function postReceiving() {
-        const ref = document.getElementById('ref-no').value;
-        if(!ref) return alert("ENTER REFERENCE NUMBER (DR/SI)");
+    async function postOutslip() {
+        const auth = document.getElementById('auth-by').value;
+        if(!auth) return alert("ENTER AUTHORIZED PERSON NAME");
 
-        document.getElementById('post-btn').innerText = "PROCESSING...";
+        document.getElementById('post-btn').innerText = "UPDATING...";
         document.getElementById('post-btn').disabled = true;
 
         try {
-            // Update quantities in a loop (Ideally would use a RPC function for bulk, but this is clear for now)
             for (let item of queue) {
-                const newTotal = item.current_stock + item.qty;
                 const { error } = await _sb
                     .from('inventory')
-                    .update({ quantity_on_hand: newTotal })
+                    .update({ quantity_on_hand: item.after })
                     .eq('sku', item.sku);
                 
                 if(error) throw error;
             }
 
-            alert("SUCCESS: INVENTORY UPDATED");
+            alert("SUCCESS: INVENTORY ADJUSTED");
             location.reload();
 
         } catch (err) {
             alert("ERROR: " + err.message);
-            document.getElementById('post-btn').innerText = "POST TO INVENTORY";
+            document.getElementById('post-btn').innerText = "CONFIRM STOCK REMOVAL";
             document.getElementById('post-btn').disabled = false;
         }
     }

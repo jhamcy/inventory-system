@@ -3,15 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | JmcyFlow</title>
+    <title>Secure Login | JmcyFlow POS</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
         
-        :root {
-            --primary: #3b82f6; 
-            --dark-bg: #0f172a;
-        }
+        :root { --primary: #3b82f6; --dark-bg: #0f172a; }
 
         body {
             margin: 0; font-family: 'Inter', sans-serif;
@@ -24,229 +21,137 @@
             background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(20px);
             padding: 40px; border-radius: 28px;
-            width: 90%; max-width: 380px; text-align: center;
+            width: 90%; max-width: 400px; text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.6s ease-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        #logo-container { margin-bottom: 15px; display: flex; justify-content: center; min-height: 20px; }
+        #logo-container img { max-width: 140px; max-height: 80px; object-fit: contain; }
 
-        /* LOGO & BRANDING */
-        #logo-container { 
-            margin-bottom: 15px; 
-            display: flex; 
-            justify-content: center; 
-            min-height: 10px;
-        }
-        #logo-container img { 
-            max-width: 150px; 
-            max-height: 100px; 
-            object-fit: contain; 
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));
-        }
+        .brand-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 5px; text-transform: uppercase; color: white; }
+        .portal-label { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; display: block; font-weight: 700; }
 
-        .brand-title { 
-            font-size: 1.8rem; 
-            font-weight: 800; 
-            margin-bottom: 5px; 
-            letter-spacing: -1px; 
-            text-transform: uppercase;
-            color: white;
-        }
-        
-        .portal-label { 
-            font-size: 0.65rem; 
-            color: #94a3b8; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-            margin-bottom: 30px; 
-            display: block; 
-            font-weight: 700; 
-        }
-
-        /* FORM STYLES */
         .form-group { text-align: left; margin-bottom: 20px; }
-        label { 
-            display: block; 
-            font-size: 0.7rem; 
-            font-weight: 700; 
-            color: var(--primary); 
-            margin-bottom: 8px; 
-            text-transform: uppercase; 
-        }
+        label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--primary); margin-bottom: 8px; text-transform: uppercase; }
         
         input {
             width: 100%; padding: 14px; background: rgba(15, 23, 42, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;
-            color: white; font-size: 1rem; transition: 0.3s; box-sizing: border-box;
+            color: white; font-size: 1rem; box-sizing: border-box; outline: none;
         }
 
-        input:focus { 
-            outline: none; 
-            border-color: var(--primary); 
-            background: rgba(15, 23, 42, 0.9); 
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-        }
+        input:focus { border-color: var(--primary); background: rgba(15, 23, 42, 0.9); }
 
         .btn-login {
             width: 100%; padding: 16px; background: var(--primary);
             color: white; border: none; border-radius: 12px;
             font-weight: 800; cursor: pointer; transition: 0.3s;
-            text-transform: uppercase; letter-spacing: 1px;
-            margin-top: 10px;
+            text-transform: uppercase; letter-spacing: 1px; margin-top: 10px;
         }
 
-        .btn-login:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-2px); }
-        .btn-login:active { transform: translateY(0); }
-        .btn-login:disabled { opacity: 0.6; cursor: wait; }
+        .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .shake { animation: shake 0.4s ease-in-out; }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-8px); }
-            50% { transform: translateX(8px); }
-            75% { transform: translateX(-8px); }
-        }
+        .error-msg { color: #f87171; font-size: 0.75rem; margin-top: 15px; display: none; font-weight: 600; }
     </style>
 </head>
 <body>
 
     <div class="login-card" id="loginCard">
-        <!-- Brand Section -->
         <div id="logo-container"></div>
         <div class="brand-title" id="companyName">Jmcy<span>Flow</span></div>
-        <span class="portal-label" id="portalIdDisplay">Loading Node...</span>
+        <span class="portal-label" id="portalIdDisplay">Initializing...</span>
         
-        <!-- Form Section -->
         <div class="form-group">
-            <label>Employee Username</label>
-            <input type="text" id="username" placeholder="USERNAME" autocomplete="off" spellcheck="false">
+            <label>Username</label>
+            <input type="text" id="username" placeholder="Enter username" autocomplete="off">
         </div>
 
         <div class="form-group">
-            <label>Security Password</label>
+            <label>Password</label>
             <input type="password" id="password" placeholder="••••••••">
         </div>
         
         <button class="btn-login" id="loginBtn" onclick="handleLogin()">Sign In</button>
+        <div id="errorBox" class="error-msg">Invalid Credentials</div>
         
-        <p style="margin-top: 25px; font-size: 0.6rem; color: #475569; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
-            SECURE ACCESS PORTAL | v3.0
+        <p style="margin-top: 25px; font-size: 0.55rem; color: #475569; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+            Authorized Access Only | JmcyFlow v3.0
         </p>
     </div>
 
     <script>
-        const SUPABASE_URL = "https://pehffyqlssrqogosfsab.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s";
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const _sb = supabase.createClient('https://pehffyqlssrqogosfsab.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s');
 
-        let activeCompanyData = null;
+        let activeCompany = null;
 
-        // 1. Initialize Portal Branding
-        async function initPortal() {
+        window.onload = async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const portalId = urlParams.get('id');
 
             if (!portalId) {
-                document.getElementById('portalIdDisplay').innerHTML = 'Layout Preview <span style="background:#fbbf24;color:#000;padding:2px 6px;border-radius:4px;font-size:0.5rem;margin-left:5px;">OFFLINE</span>';
-                return; 
-            }
-
-            try {
-                const { data, error } = await _supabase
-                    .from('companies')
-                    .select('*')
-                    .eq('portal_id', portalId.toLowerCase())
-                    .maybeSingle();
-
-                if (data) {
-                    activeCompanyData = data;
-                    
-                    // Show Logo if available
-                    if(data.company_logo) {
-                        document.getElementById('logo-container').innerHTML = `<img src="${data.company_logo}" alt="Company Logo">`;
-                    }
-                    
-                    // Show Company Name text
-                    document.getElementById('companyName').innerText = data.company_name;
-                    document.getElementById('portalIdDisplay').innerText = `PORTAL: ${data.portal_id.toUpperCase()}`;
-                    
-                    // Apply Custom Theme Color
-                    if(data.theme_color) {
-                        document.documentElement.style.setProperty('--primary', data.theme_color);
-                    }
-                } else {
-                    document.getElementById('portalIdDisplay').innerHTML = '<span style="color:#ef4444;">Portal Identity Not Found</span>';
-                }
-            } catch (e) {
-                console.error("Connection failed:", e);
-            }
-        }
-
-        // 2. Authentication Logic
-        async function handleLogin() {
-            if (!activeCompanyData) {
-                alert("Please use your specific Portal URL to sign in.");
+                document.getElementById('portalIdDisplay').innerText = "PORTAL ID MISSING";
                 return;
             }
 
+            const { data, error } = await _sb.from('companies').select('*').eq('portal_id', portalId.toLowerCase()).single();
+
+            if (data) {
+                activeCompany = data;
+                document.getElementById('companyName').innerText = data.company_name;
+                document.getElementById('portalIdDisplay').innerText = `NODE: ${data.portal_id.toUpperCase()}`;
+                
+                if(data.theme_color) document.documentElement.style.setProperty('--primary', data.theme_color);
+                
+                localStorage.setItem('jmcy_portal_id', data.portal_id);
+            } else {
+                document.getElementById('portalIdDisplay').innerText = "INVALID PORTAL";
+            }
+        };
+
+        async function handleLogin() {
             const userIn = document.getElementById('username').value.trim().toUpperCase();
             const passIn = document.getElementById('password').value;
-            const loginBtn = document.getElementById('loginBtn');
-            const card = document.getElementById('loginCard');
+            const btn = document.getElementById('loginBtn');
+            const errBox = document.getElementById('errorBox');
 
-            if (!userIn || !passIn) return;
+            if (!activeCompany || !userIn || !passIn) return;
 
-            loginBtn.disabled = true;
-            loginBtn.innerText = "Verifying...";
+            btn.disabled = true;
+            btn.innerText = "AUTHENTICATING...";
+            errBox.style.display = "none";
 
-            try {
-                // Check OWNER credentials (from companies table)
-                if (userIn === activeCompanyData.admin_user.toUpperCase() && passIn === activeCompanyData.admin_pass) {
-                    saveAndRedirect('OWNER', userIn);
-                    return;
-                }
+            // Logic changed to target 'staff_members' table
+            const { data: user, error } = await _sb.from('staff_members')
+                .select('*')
+                .eq('company_id', activeCompany.id)
+                .eq('username', userIn)
+                .eq('password', passIn) 
+                .single();
 
-                // Check STAFF credentials (from staff_members table)
-                const { data: staff, error } = await _supabase
-                    .from('staff_members')
-                    .select('*')
-                    .eq('company_id', activeCompanyData.portal_id)
-                    .eq('username', userIn)
-                    .eq('password', passIn)
-                    .maybeSingle();
-
-                if (staff) {
-                    saveAndRedirect('STAFF', userIn);
+            if (user) {
+                // Aligned storage keys with your Management page (user.html)
+                localStorage.setItem('jmcy_role', user.role);
+                localStorage.setItem('jmcy_username', user.username);
+                localStorage.setItem('jmcy_fullname', user.full_name);
+                localStorage.setItem('jmcy_cid', activeCompany.id); 
+                
+                // Redirection Logic matching your roles
+                if (user.role === 'OWNER') {
+                    window.location.href = 'dashboard.html';
+                } else if (user.role === 'SALES STAFF') {
+                    window.location.href = 'sales.html';
+                } else if (user.role === 'WAREHOUSE STAFF') {
+                    window.location.href = 'inventory.html';
                 } else {
-                    throw new Error("Access Denied: Check Credentials");
+                    window.location.href = 'dashboard.html';
                 }
-            } catch (err) {
-                card.classList.add('shake');
-                setTimeout(() => card.classList.remove('shake'), 400);
-                alert(err.message);
-                loginBtn.disabled = false;
-                loginBtn.innerText = "Sign In";
+            } else {
+                errBox.style.display = "block";
+                btn.disabled = false;
+                btn.innerText = "Sign In";
             }
         }
-
-        // 3. Save Session & Route
-        function saveAndRedirect(role, username) {
-            localStorage.setItem('jmcy_role', role);
-            localStorage.setItem('jmcy_user', username);
-            localStorage.setItem('jmcy_cid', activeCompanyData.portal_id);
-            localStorage.setItem('jmcy_company_name', activeCompanyData.company_name);
-            localStorage.setItem('jmcy_logo', activeCompanyData.company_logo || '');
-            
-            // Redirect based on role
-            window.location.href = (role === 'OWNER') ? 'dashboard.html' : 'inventory.html';
-        }
-
-        initPortal();
     </script>
 </body>
 </html>

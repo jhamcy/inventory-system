@@ -2,186 +2,160 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Category Manager | EasiStock</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CATEGORY MANAGEMENT | JMCYFLOW</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        :root { --primary: #0f172a; --accent: #3b82f6; --bg: #f8fafc; --border: #e2e8f0; --text: #1e293b; --danger: #ef4444; --success: #10b981; }
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
         
-        :root {
-            --primary: #0f172a;
-            --accent: #0081ff;
-            --danger: #ef4444;
-            --success: #10b981;
-        }
-
-        body {
-            margin: 0; font-family: 'Inter', sans-serif;
-            background: linear-gradient(180deg, #6ecfff 0%, #3ca7e7 100%);
-            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-        }
-
-        /* NAVBAR */
-        .navbar { 
-            height: 60px; background: var(--primary); 
-            display: flex; align-items: center; justify-content: space-between; 
-            padding: 0 20px; color: white; flex-shrink: 0; 
-        }
-        .nav-logo-text { font-weight: 800; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; }
+        body { margin: 0; background: var(--bg); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        .main-container { flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
+        .nav { height: 60px; background: white; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; }
+        .back-link { color: var(--accent); text-decoration: none; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+
+        .main-layout { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; }
+        .container { max-width: 800px; margin: 0 auto; width: 100%; }
+
+        .header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h1 { font-size: 1.2rem; font-weight: 800; margin: 0; text-transform: uppercase; color: var(--primary); }
+
+        .category-card { background: white; border-radius: 12px; border: 1px solid var(--border); padding: 15px 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        .category-card:hover { border-color: var(--accent); transform: translateX(5px); }
+        .cat-info h3 { margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--primary); }
+        .cat-info p { margin: 2px 0 0; font-size: 0.75rem; color: #64748b; font-weight: 500; }
+
+        .btn { padding: 10px 18px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; font-size: 0.75rem; transition: 0.2s; text-transform: uppercase; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-add { background: var(--primary); color: white; }
+        .btn-delete { background: #fee2e2; color: var(--danger); }
+        .btn-delete:hover { background: var(--danger); color: white; }
+
+        /* Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .modal { background: white; padding: 25px; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .modal h2 { margin-top: 0; font-size: 1rem; font-weight: 800; text-transform: uppercase; margin-bottom: 20px; }
         
-        .grid-layout { 
-            display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; 
-            width: 100%; max-width: 1000px; margin-top: 10px;
-        }
-
-        @media (max-width: 850px) { .grid-layout { grid-template-columns: 1fr; } }
-
-        .card { 
-            background: white; padding: 25px; border-radius: 16px; 
-            border: 2px solid var(--primary); box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-            display: flex; flex-direction: column;
-        }
-
-        .card h2 { margin: 0 0 15px 0; font-size: 0.85rem; text-transform: uppercase; font-weight: 800; color: var(--primary); border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-
-        .badge { background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; }
-
         .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 5px; }
-        
-        input {
-            width: 100%; padding: 12px; border: 2px solid #cbd5e1; border-radius: 8px;
-            font-size: 0.9rem; font-weight: 600; box-sizing: border-box; outline: none;
-            text-transform: uppercase; transition: 0.2s;
-        }
-        input:focus { border-color: var(--accent); background: #f8fafc; }
+        label { font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; outline: none; }
+        input:focus { border-color: var(--accent); }
 
-        .btn-add {
-            width: 100%; background: var(--primary); color: white; padding: 15px;
-            border: none; border-radius: 10px; font-weight: 800; cursor: pointer;
-            text-transform: uppercase; transition: 0.2s; box-shadow: 0 4px 0 #000;
-        }
-        .btn-add:hover { background: var(--accent); transform: translateY(-2px); }
-        .btn-add:active { transform: translateY(0); box-shadow: none; }
-
-        /* LIST AREA */
-        .list-container { max-height: 450px; overflow-y: auto; }
-        .cat-list { list-style: none; padding: 0; margin: 0; }
-        .cat-item { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 12px; border-bottom: 1px solid #f1f5f9; transition: 0.2s;
-        }
-        .cat-item:hover { background: #f8fafc; }
-        .cat-info { display: flex; flex-direction: column; }
-        .cat-name { font-weight: 800; color: var(--primary); font-size: 0.85rem; text-transform: uppercase; }
-        .cat-code { font-family: monospace; color: var(--accent); font-weight: 800; font-size: 1.1rem; margin-top: 2px; }
-
-        .btn-del { 
-            background: #fee2e2; color: var(--danger); border: 1.5px solid var(--danger); 
-            width: 32px; height: 32px; border-radius: 8px; cursor: pointer; 
-            display: flex; align-items: center; justify-content: center; font-weight: 900;
-        }
-        .btn-del:hover { background: var(--danger); color: white; }
-
-        .back-link { margin: 20px 0; color: var(--primary); text-decoration: none; font-weight: 800; font-size: 0.75rem; text-transform: uppercase; border-bottom: 2px solid var(--primary); padding-bottom: 2px; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
     </style>
 </head>
 <body>
 
-    <header class="navbar">
-        <div class="nav-logo-text">EasiStock Categories</div>
-        <button onclick="location.href='dashboard.html'" style="background:none; border: 1.5px solid white; color:white; padding: 6px 12px; border-radius: 6px; font-weight:800; cursor:pointer; font-size: 0.7rem; text-transform: uppercase;">✕ Close</button>
-    </header>
+<nav class="nav">
+    <a href="dashboard.html" class="back-link">← DASHBOARD</a>
+    <div style="font-weight: 800; font-size: 0.75rem; color: #64748b;">CATEGORY MANAGER</div>
+</nav>
 
-    <main class="main-container">
-        <div class="grid-layout">
-            
-            <div class="card">
-                <h2>Create New Prefix</h2>
-                <div class="form-group">
-                    <label>Category Name</label>
-                    <input type="text" id="cat-name" placeholder="e.g. BEARINGS" oninput="this.value = this.value.toUpperCase()">
-                </div>
-                <div class="form-group">
-                    <label>SKU Prefix (3-4 Letters)</label>
-                    <input type="text" id="cat-code" placeholder="e.g. BRG" maxlength="4" oninput="this.value = this.value.toUpperCase()">
-                </div>
-                <button class="btn-add" id="save-btn" onclick="addCategory()">Save Category</button>
-            </div>
-
-            <div class="card">
-                <h2>Active Prefixes <span class="badge" id="cat-count">0</span></h2>
-                <div id="loading-text" style="text-align:center; padding: 20px; font-size:0.8rem; color:#64748b; font-weight: 700;">FETCHING SYSTEM DATA...</div>
-                <div class="list-container">
-                    <ul class="cat-list" id="category-list"></ul>
-                </div>
-            </div>
-
+<div class="main-layout">
+    <div class="container">
+        <div class="header-section">
+            <h1>Product Categories</h1>
+            <button class="btn btn-add" onclick="toggleModal(true)">+ New Category</button>
         </div>
-        <a href="dashboard.html" class="back-link">Return to Admin Dashboard</a>
-    </main>
 
-    <script>
-        const SUPABASE_URL = 'https://crruounuhtfzyssyhgcc.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnVvdW51aHRmenlzc3loZ2NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjc5NDgsImV4cCI6MjA4NjgwMzk0OH0.PMLb-8HZLdXUxXk2Jv0f836_YVWcaS3X2ezCvjfG6jg';
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        <div id="category-list">
+            <div class="empty-state">Loading categories...</div>
+        </div>
+    </div>
+</div>
 
-        async function fetchCategories() {
-            const { data, error } = await _supabase.from('inventory_categories').select('*').order('name');
-            document.getElementById('loading-text').style.display = 'none';
-            
-            if (error) return console.error(error);
+<!-- Add Category Modal -->
+<div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+        <h2>Add Category</h2>
+        <div class="form-group">
+            <label>Category Name</label>
+            <input type="text" id="new-cat-name" placeholder="e.g. Beverages, Electronics">
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 25px;">
+            <button class="btn" style="background: #e2e8f0; flex: 1;" onclick="toggleModal(false)">Cancel</button>
+            <button class="btn btn-add" style="flex: 2; justify-content: center;" onclick="addCategory()">Save Category</button>
+        </div>
+    </div>
+</div>
 
-            const list = document.getElementById('category-list');
-            document.getElementById('cat-count').innerText = data.length;
-            
-            list.innerHTML = data.map(cat => `
-                <li class="cat-item">
-                    <div class="cat-info">
-                        <span class="cat-name">${cat.name}</span>
-                        <span class="cat-code">${cat.code}</span>
-                    </div>
-                    <button class="btn-del" onclick="deleteCategory('${cat.id}', '${cat.name}')">✕</button>
-                </li>
-            `).join('');
-        }
+<script>
+    const _sb = supabase.createClient('https://pehffyqlssrqogosfsab.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s');
+    
+    const cid = localStorage.getItem('jmcy_cid');
 
-        async function addCategory() {
-            const name = document.getElementById('cat-name').value.trim();
-            const code = document.getElementById('cat-code').value.trim();
-            const btn = document.getElementById('save-btn');
-
-            if (!name || !code) return alert("REQUIRED: PLEASE ENTER BOTH NAME AND PREFIX.");
-
-            btn.disabled = true;
-            btn.innerText = "SAVING...";
-
-            const { error } = await _supabase.from('inventory_categories').insert([{ name, code }]);
-            
-            if (error) {
-                alert("DUPLICATE OR ERROR: " + error.message.toUpperCase());
-                btn.disabled = false;
-                btn.innerText = "SAVE CATEGORY";
-            } else {
-                document.getElementById('cat-name').value = "";
-                document.getElementById('cat-code').value = "";
-                btn.disabled = false;
-                btn.innerText = "SAVE CATEGORY";
-                fetchCategories();
-            }
-        }
-
-        async function deleteCategory(id, name) {
-            if (!confirm(`PERMANENT ACTION: Delete the "${name}" category? This will not delete items already created, but you won't be able to select this category for new items.`)) return;
-            
-            const { error } = await _supabase.from('inventory_categories').delete().eq('id', id);
-            if (error) alert(error.message);
-            else fetchCategories();
-        }
-
+    window.onload = () => {
+        if (!cid) { window.location.href = 'login.html'; return; }
         fetchCategories();
-    </script>
+    };
+
+    function toggleModal(show) {
+        document.getElementById('modal-overlay').style.display = show ? 'flex' : 'none';
+        if(show) document.getElementById('new-cat-name').focus();
+    }
+
+    async function fetchCategories() {
+        const listDiv = document.getElementById('category-list');
+        
+        const { data, error } = await _sb
+            .from('categories')
+            .select('*')
+            .eq('company_id', cid)
+            .order('name', { ascending: true });
+
+        if (error) {
+            listDiv.innerHTML = `<div class="empty-state">Error loading data.</div>`;
+            return;
+        }
+
+        if (data.length === 0) {
+            listDiv.innerHTML = `<div class="empty-state">No categories found. Click "New Category" to begin.</div>`;
+            return;
+        }
+
+        listDiv.innerHTML = data.map(cat => `
+            <div class="category-card">
+                <div class="cat-info">
+                    <h3>${cat.name}</h3>
+                    <p>ID: ${cat.id.substring(0,8)}</p>
+                </div>
+                <button class="btn btn-delete" onclick="deleteCategory('${cat.id}', '${cat.name}')">Delete</button>
+            </div>
+        `).join('');
+    }
+
+    async function addCategory() {
+        const name = document.getElementById('new-cat-name').value.trim();
+        if (!name) return;
+
+        const { error } = await _sb
+            .from('categories')
+            .insert([{ name: name, company_id: cid }]);
+
+        if (!error) {
+            document.getElementById('new-cat-name').value = '';
+            toggleModal(false);
+            fetchCategories();
+        } else {
+            alert("Error: " + error.message);
+        }
+    }
+
+    async function deleteCategory(id, name) {
+        if (!confirm(`Are you sure you want to delete "${name}"? This may affect items assigned to this category.`)) return;
+
+        const { error } = await _sb
+            .from('categories')
+            .delete()
+            .eq('id', id);
+
+        if (!error) {
+            fetchCategories();
+        } else {
+            alert("Error: Cannot delete category while it is in use.");
+        }
+    }
+</script>
+
 </body>
 </html>

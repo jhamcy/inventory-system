@@ -3,189 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register | JmcyFlow by Jmcy Web Solutions</title>
-    <!-- Supabase CDN -->
+    <title>Register | JmcyFlow Professional</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
     <style>
-        :root {
-            --primary: #3b82f6;
-            --dark-bg: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #f8fafc;
-            --text-dim: #94a3b8;
-            --accent: #38bdf8;
-        }
-
+        :root { --primary: #3b82f6; --dark-bg: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-dim: #94a3b8; --accent: #38bdf8; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--dark-bg);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .reg-card {
-            background: var(--card-bg);
-            width: 100%;
-            max-width: 450px;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h2 { font-size: 1.8rem; margin-bottom: 5px; letter-spacing: -1px; }
-        .header p { color: var(--text-dim); font-size: 0.9rem; }
-        .header span { color: var(--accent); font-weight: bold; }
-
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-size: 0.85rem; margin-bottom: 8px; color: var(--accent); font-weight: 600; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--dark-bg); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .reg-card { background: var(--card-bg); width: 100%; max-width: 550px; padding: 35px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h2 { font-size: 1.8rem; font-weight: 800; letter-spacing: -1px; }
+        .header h2 span { color: var(--accent); }
+        .section-label { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; margin: 20px 0 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
+        .form-group { margin-bottom: 12px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        label { display: block; font-size: 0.7rem; margin-bottom: 5px; color: var(--accent); font-weight: 700; text-transform: uppercase; }
+        input, textarea { width: 100%; padding: 10px 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; outline: none; transition: 0.3s; font-family: inherit; font-size: 0.9rem; }
+        input:focus, textarea:focus { border-color: var(--primary); background: #0f172a; }
+        textarea { resize: none; height: 50px; }
         
-        input {
-            width: 100%;
-            padding: 12px 15px;
-            background: #0f172a;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            color: white;
-            font-size: 1rem;
-            outline: none;
-            transition: 0.3s;
-        }
+        /* Logo Upload Styling */
+        .file-input-wrapper { border: 2px dashed rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .file-input-wrapper:hover { border-color: var(--accent); background: rgba(56, 189, 248, 0.05); }
+        input[type="file"] { display: none; }
+        .logo-preview { max-height: 60px; margin-top: 10px; border-radius: 4px; display: none; margin-left: auto; margin-right: auto; }
 
-        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
-
-        .btn-reg {
-            width: 100%;
-            padding: 14px;
-            background: var(--primary);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-top: 10px;
-        }
-
-        .btn-reg:hover:not(:disabled) { background: #2563eb; transform: translateY(-2px); }
-        .btn-reg:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        .footer-link { text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-dim); }
-        .footer-link a { color: var(--accent); text-decoration: none; font-weight: 600; }
-
-        @media (max-width: 480px) {
-            .reg-card { padding: 30px 20px; }
-        }
+        .btn-reg { width: 100%; padding: 14px; background: var(--primary); border: none; border-radius: 10px; color: white; font-weight: 700; cursor: pointer; margin-top: 20px; font-size: 1rem; transition: 0.3s; }
+        .btn-reg:hover { background: #2563eb; transform: translateY(-1px); }
+        .btn-reg:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body>
-
     <div class="reg-card">
         <div class="header">
             <h2>Jmcy<span>Flow</span></h2>
-            <p>Registration by <span>Jmcy Web Solutions</span></p>
-            <p style="margin-top: 10px; font-size: 0.8rem; color: #fbbf24;">✨ Includes 1-Month Free Trial</p>
+            <p style="color: var(--text-dim); font-size: 0.8rem;">Professional Invoice Setup</p>
         </div>
-
         <form id="regForm">
+            
+            <div class="section-label">Business Identity</div>
             <div class="form-group">
                 <label>Company Name</label>
-                <input type="text" id="compName" placeholder="Acme Logistics" required>
+                <input type="text" id="compName" placeholder="Acme Web Solutions Inc." required>
+            </div>
+            
+            <div class="form-group">
+                <label>Company Logo</label>
+                <label for="logoFile" class="file-input-wrapper">
+                    <span id="file-label" style="font-size: 0.8rem; color: var(--text-dim);">Click to upload logo (PNG/JPG)</span>
+                    <input type="file" id="logoFile" accept="image/*" onchange="previewLogo(this)">
+                    <img id="logoPreview" class="logo-preview">
+                </label>
             </div>
 
             <div class="form-group">
-                <label>Portal ID (Unique link for your company)</label>
-                <input type="text" id="compID" placeholder="acme-flow" required>
+                <label>Business Address</label>
+                <textarea id="compAddr" placeholder="123 Business Park, Metro Manila" required></textarea>
             </div>
 
+            <div class="section-label">Tax & Contact Info</div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>TIN Number</label>
+                    <input type="text" id="compTIN" placeholder="000-000-000-000" required>
+                </div>
+                <div class="form-group">
+                    <label>Contact Number</label>
+                    <input type="text" id="compContact" placeholder="09xx-xxx-xxxx" required>
+                </div>
+            </div>
             <div class="form-group">
-                <label>Admin Username</label>
-                <input type="text" id="adminUser" placeholder="admin_user" required>
+                <label>Business Email (Printed on Invoice)</label>
+                <input type="email" id="compEmail" placeholder="billing@yourcompany.com" required>
             </div>
 
+            <div class="section-label">Account & Security</div>
             <div class="form-group">
-                <label>Admin Password</label>
-                <input type="password" id="adminPass" placeholder="••••••••" required>
+                <label>Portal ID (Unique URL)</label>
+                <input type="text" id="compID" placeholder="my-business-url" required>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Admin User</label>
+                    <input type="text" id="adminUser" required>
+                </div>
+                <div class="form-group">
+                    <label>Admin Pass</label>
+                    <input type="password" id="adminPass" minlength="6" required>
+                </div>
             </div>
 
             <button type="submit" id="submitBtn" class="btn-reg">Create My Portal</button>
         </form>
-
-        <div class="footer-link">
-            Already have a portal? <a href="portal.html">Login Here</a>
-        </div>
     </div>
 
     <script>
-        // --- Supabase Configuration ---
-        const SUPABASE_URL = "https://pehffyqlssrqogosfsab.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s";
+        const _supabase = supabase.createClient("https://pehffyqlssrqogosfsab.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s");
         
-        // Use _supabase to avoid naming conflict with the global library
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        const regForm = document.getElementById('regForm');
-        const submitBtn = document.getElementById('submitBtn');
-
-        regForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            // Disable button to prevent double registration
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Provisioning Portal...";
-
-            // 1. Prepare Data
-            const companyId = document.getElementById('compID').value.toLowerCase().trim();
-            const companyName = document.getElementById('compName').value.trim();
-            const adminUser = document.getElementById('adminUser').value.trim();
-            const adminPass = document.getElementById('adminPass').value;
-            
-            // Calculate Trial Expiry (Current Date + 30 Days)
-            const expiryDate = new Date();
-            expiryDate.setDate(expiryDate.getDate() + 30);
-
-            try {
-                // 2. Insert into Supabase 'companies' table
-                // We include role: 'OWNER' to distinguish from staff accounts
-                const { data, error } = await _supabase
-                    .from('companies')
-                    .insert([
-                        { 
-                            portal_id: companyId, 
-                            company_name: companyName,
-                            admin_user: adminUser,
-                            admin_pass: adminPass,
-                            role: 'OWNER', 
-                            trial_expires: expiryDate.toISOString(),
-                            theme_color: "#3b82f6" 
-                        }
-                    ]);
-
-                if (error) {
-                    // Check for duplicate Portal ID (Postgres unique constraint error)
-                    if (error.code === "23505" || error.message.includes("unique")) {
-                        throw new Error("This Portal ID is already taken. Please try another name.");
-                    }
-                    throw error;
+        function previewLogo(input) {
+            const preview = document.getElementById('logoPreview');
+            const label = document.getElementById('file-label');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    label.innerText = input.files[0].name;
                 }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
 
-                // 3. Success - Redirect to portal.html and pass the ID for automatic loading
-                alert("Success! Your JmcyFlow portal is ready.");
-                window.location.href = `portal.html?id=${companyId}`;
+        document.getElementById('regForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const logoFile = document.getElementById('logoFile').files[0];
+            const portalId = document.getElementById('compID').value.toLowerCase().trim();
+            
+            btn.disabled = true;
+            btn.innerText = "Building your portal...";
 
-            } catch (err) {
-                alert("Error: " + err.message);
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Create My Portal";
+            let logoUrl = "";
+
+            // 1. Upload Logo if present
+            if (logoFile) {
+                const fileExt = logoFile.name.split('.').pop();
+                const fileName = `${portalId}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+                const filePath = `logos/${fileName}`;
+
+                const { data: uploadData, error: uploadError } = await _supabase.storage
+                    .from('public') // Make sure you have a bucket named 'public'
+                    .upload(filePath, logoFile);
+
+                if (uploadError) {
+                    console.error("Logo upload failed:", uploadError);
+                } else {
+                    const { data: publicUrlData } = _supabase.storage
+                        .from('public')
+                        .getPublicUrl(filePath);
+                    logoUrl = publicUrlData.publicUrl;
+                }
+            }
+
+            // 2. Insert Company Data
+            const payload = {
+                portal_id: portalId,
+                company_name: document.getElementById('compName').value.trim(),
+                company_address: document.getElementById('compAddr').value.trim(),
+                tin_number: document.getElementById('compTIN').value.trim(),
+                contact_number: document.getElementById('compContact').value.trim(),
+                business_email: document.getElementById('compEmail').value.trim(),
+                admin_user: document.getElementById('adminUser').value.trim(),
+                admin_pass: document.getElementById('adminPass').value,
+                logo_url: logoUrl, // Saved the URL here
+                trial_expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            };
+
+            const { error } = await _supabase.from('companies').insert([payload]);
+            
+            if(error) { 
+                alert(error.message); 
+                btn.disabled = false; 
+                btn.innerText = "Create My Portal"; 
+            } else { 
+                // Save logo to local storage for instant UI updates on next page
+                if(logoUrl) localStorage.setItem('jmcy_logo', logoUrl);
+                window.location.href = `portal.html?id=${payload.portal_id}`; 
             }
         });
     </script>

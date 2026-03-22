@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy | JmcyFlow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --accent: #38bdf8;
+            --border-color: rgba(255,255,255,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .no-print-zone {
+            max-width: 850px;
+            margin: 0 auto 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .container {
+            max-width: 850px;
+            background: var(--card-bg);
+            margin: 0 auto;
+            padding: 60px;
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 25px;
+            margin-bottom: 40px;
+        }
+
+        .logo-area h1 {
+            font-weight: 800;
+            font-size: 2rem;
+            margin: 0;
+            letter-spacing: -1px;
+        }
+
+        .logo-area h1 span { color: var(--accent); }
+
+        .doc-title {
+            margin-top: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            color: var(--accent);
+            letter-spacing: 2px;
+        }
+
+        h2 { 
+            font-size: 1.15rem; 
+            margin: 35px 0 15px; 
+            color: var(--text-main);
+        }
+
+        p, li { font-size: 0.95rem; color: var(--text-dim); margin-bottom: 15px; }
+        ul { padding-left: 20px; margin-bottom: 20px; }
+        
+        strong { color: var(--text-main); }
+
+        .security-note {
+            background: rgba(59, 130, 246, 0.1);
+            padding: 20px;
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+
+        .btn {
+            background: transparent;
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border: 1px solid var(--border-color);
+            transition: 0.3s;
+        }
+
+        .btn:hover { background: var(--primary); border-color: var(--primary); }
+
+        footer {
+            margin-top: 50px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        @media print {
+            body { background: white; color: black; padding: 0; }
+            .container { box-shadow: none; border: none; background: white; padding: 0; }
+            .no-print-zone, .btn { display: none; }
+            h2, p, li, strong { color: black !important; }
+            .security-note { border: 1px solid #ccc; background: #eee; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print-zone">
+        <a href="index.html" class="btn">← Back to Site</a>
+        <button onclick="window.print()" class="btn">Print Version</button>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo-area">
+                <h1>Jmcy<span>Flow</span></h1>
+            </div>
+            <div class="doc-title">Data Privacy & Protection Policy</div>
+        </div>
+
+        <p>At <strong>Jmcy Web Solutions</strong>, we value the integrity of your business data. This policy explains how JmcyFlow handles information for your company and your clients.</p>
+
+        <h2>1. Data We Collect</h2>
+        <p>To provide a functional inventory engine, we store the following data on your behalf:</p>
+        <ul>
+            <li><strong>Company Profiles:</strong> Business name, logo, and preferred color schemes.</li>
+            <li><strong>Inventory Data:</strong> Product names, quantities, SKUs, and transaction history.</li>
+            <li><strong>Staff Accounts:</strong> Login emails and encrypted credentials for your team members.</li>
+            <li><strong>Sales Records:</strong> Transaction amounts, timestamps, and itemized lists.</li>
+        </ul>
+
+        <h2>2. Data Isolation (Your Vault)</h2>
+        <p>JmcyFlow is built on a "Multi-Tenant" architecture. This means while all users use the same application, your data is kept in a <strong>separate digital vault</strong>. We use Row Level Security (RLS) to ensure that staff from "Company A" can never view or access data from "Company B."</p>
+
+        <div class="security-note">
+            <strong>Pro-Tech Security:</strong> All data is stored in a real-time cloud database (Supabase) with enterprise-grade encryption. We do not sell, rent, or share your business data with third-party advertisers.
+        </div>
+
+        <h2>3. Use of Information</h2>
+        <p>We use your data strictly to:</p>
+        <ul>
+            <li>Generate your inventory and sales reports.</li>
+            <li>Enable staff to process transfers and returns.</li>
+            <li>Maintain system security and prevent unauthorized logins.</li>
+        </ul>
+
+        <h2>4. Cookies & Local Storage</h2>
+        <p>JmcyFlow uses local storage to keep your session active and remember your portal preferences (like your custom logo). We do not use tracking cookies for advertising purposes.</p>
+
+        <h2>5. Data Deletion</h2>
+        <p>You have full control over your data. Upon termination of your managed service, you may request a full export of your records. 14 days after a service expires, all associated data is purged from our production servers to maintain security.</p>
+
+        <h2>6. Contact Us</h2>
+        <p>For questions regarding your data privacy, please reach out to the development team at <strong>Whatsapp No.09091297422 </strong>.</p>
+
+        <footer>
+            <p>&copy; 2026 Jmcy Web Solutions | Last Updated: March 2026</p>
+        </footer>
+    </div>
+
+</body>
+</html>

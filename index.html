@@ -96,12 +96,35 @@
         .trial-info h2 { font-size: clamp(1.8rem, 5vw, 2.5rem); margin-bottom: 15px; }
         .trial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 30px; margin-top: 40px; }
 
+        /* --- PRICING SECTION --- */
+        .pricing { padding: 100px 8%; text-align: center; }
+        .price-card {
+            max-width: 450px;
+            margin: 40px auto;
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            padding: 50px 30px;
+            border-radius: 24px;
+            border: 1px solid var(--primary);
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        .price-card h4 { text-transform: uppercase; letter-spacing: 2px; color: var(--accent); font-size: 0.8rem; margin-bottom: 10px; }
+        .price-value { font-size: 3.5rem; font-weight: 800; margin-bottom: 5px; }
+        .price-value span { font-size: 1rem; color: var(--text-dim); font-weight: 400; }
+        
+        .price-features { list-style: none; margin: 30px 0; text-align: left; padding-left: 10px; }
+        .price-features li { margin-bottom: 14px; color: var(--text-dim); font-size: 0.9rem; display: flex; align-items: flex-start; gap: 12px; }
+        .price-features li strong { color: var(--text-main); }
+        .price-features li::before { content: "✓"; color: var(--accent); font-weight: bold; flex-shrink: 0; }
+
         footer { text-align: center; padding: 50px 20px; color: var(--text-dim); border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
+        footer a { color: var(--accent); text-decoration: none; font-weight: 600; transition: 0.2s; }
+        footer a:hover { color: var(--text-main); }
 
         /* --- MOBILE ADJUSTMENTS --- */
         @media (max-width: 768px) {
             nav { padding: 15px 5%; }
-            .nav-links a:not(.btn-portal) { display: none; } /* Hide text links, keep Portal button */
+            .nav-links a:not(.btn-portal) { display: none; } 
             
             .hero { padding-top: 100px; padding-bottom: 40px; }
             .cta-group { flex-direction: column; max-width: 300px; }
@@ -123,6 +146,7 @@
         </div>
         <div class="nav-links">
             <a href="#features">Solutions</a>
+            <a href="#pricing">Pricing</a>
             <a href="register.html" class="btn-portal">Start Trial</a>
         </div>
     </nav>
@@ -153,6 +177,29 @@
         </div>
     </section>
 
+    <section id="pricing" class="pricing">
+        <h2>Simple, Transparent Pricing</h2>
+        <p>Full access today. Zero cost for the first 30 days.</p>
+        
+        <div class="price-card">
+            <h4>Managed Service</h4>
+            <div class="price-value">₱3,500<span>/mo</span></div>
+            <p style="font-size: 0.9rem; color: var(--trial-gold); font-weight: 700;">Evaluation Period: First 30 Days Free</p>
+            
+            <ul class="price-features">
+                <li><strong>Multi-Company:</strong> Unified management portal</li>
+                <li><strong>Core Tracking:</strong> Inventory Stock In & Out Records</li>
+                <li><strong>Finance:</strong> Integrated Sales & Transaction Logs</li>
+                <li><strong>Logistics:</strong> Receiving, Transfer & Return Items</li>
+                <li><strong>Identity:</strong> Custom Branding & Logo Control</li>
+                <li><strong>Database:</strong> Real-time Supabase Engine</li>
+                <li><strong>Security:</strong> Secure Login & Staff Management</li>
+            </ul>
+            
+            <a href="register.html" class="cta-btn primary" style="display: block; margin-top: 20px;">Begin Free Trial</a>
+        </div>
+    </section>
+
     <section class="trial-info">
         <h2>Your First Month is on <strong>Jmcy Web Solutions</strong></h2>
         <div class="trial-grid">
@@ -173,7 +220,11 @@
 
     <footer>
         <p>Developed by <strong>Jmcy Web Solutions</strong></p>
-        <p style="font-size: 0.7rem; margin-top: 10px;">&copy; 2026 JmcyFlow Systems. All Rights Reserved.</p>
+        <p style="margin: 15px 0;">
+            <a href="agreement.html" target="_blank">Service Agreement</a> | 
+            <a href="privacy.html">Privacy Policy</a>
+        </p>
+        <p style="font-size: 0.7rem; margin-top: 10px; opacity: 0.6;">&copy; 2026 JmcyFlow Systems. All Rights Reserved.</p>
     </footer>
 
 </body>

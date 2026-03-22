@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Company Portal | JmcyFlow</title>
-    <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -15,6 +14,7 @@
             --text-main: #f8fafc;
             --text-dim: #94a3b8;
             --error: #ef4444;
+            --success: #10b981;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -38,6 +38,7 @@
             border: 1px solid rgba(255,255,255,0.08);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             text-align: center;
+            transition: 0.3s;
         }
 
         .shake { animation: shake 0.4s ease-in-out; }
@@ -48,18 +49,19 @@
             75% { transform: translateX(-8px); }
         }
 
-        .company-header h2 { font-size: 1.8rem; margin-bottom: 8px; letter-spacing: -1px; }
-        .status-badge { font-size: 0.7rem; text-transform: uppercase; color: #fbbf24; margin-bottom: 25px; display: block; letter-spacing: 1px; }
+        .company-header h2 { font-size: 1.8rem; margin-bottom: 8px; letter-spacing: -1px; font-weight: 800; }
+        .company-header span { color: var(--primary); }
+        .status-badge { font-size: 0.65rem; text-transform: uppercase; color: #fbbf24; margin-bottom: 25px; display: block; letter-spacing: 1.5px; font-weight: 700; }
 
         .form-group { text-align: left; margin-bottom: 18px; }
-        label { display: block; font-size: 0.8rem; margin-bottom: 8px; color: var(--text-dim); font-weight: 600; }
+        label { display: block; font-size: 0.75rem; margin-bottom: 8px; color: var(--text-dim); font-weight: 700; text-transform: uppercase; }
         
         input {
             width: 100%;
             padding: 14px;
             background: #0f172a;
             border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
+            border-radius: 12px;
             color: white;
             font-size: 1rem;
             outline: none;
@@ -68,35 +70,38 @@
 
         input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
 
-        #login-section { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+        #login-section { display: none; margin-top: 20px; padding-top: 25px; border-top: 1px solid rgba(255,255,255,0.1); }
 
         .btn-action {
             width: 100%;
             padding: 16px;
             background: var(--primary);
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             color: white;
             font-weight: 700;
             cursor: pointer;
             transition: 0.3s;
+            font-size: 0.95rem;
         }
 
-        .btn-action:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-action:hover { transform: translateY(-1px); filter: brightness(1.1); }
         .btn-action:disabled { opacity: 0.5; cursor: wait; }
+
+        .reset-btn { background: none; border: none; color: var(--text-dim); font-size: 0.75rem; cursor: pointer; margin-top: 15px; text-decoration: underline; }
 
         #toast {
             position: fixed;
             top: 20px;
-            right: -300px;
-            background: var(--error);
-            color: white;
             padding: 15px 25px;
             border-radius: 12px;
-            transition: 0.5s;
+            transform: translateY(-100px);
+            transition: 0.4s;
             z-index: 1000;
+            font-weight: 600;
+            font-size: 0.9rem;
         }
-        #toast.show { right: 20px; }
+        #toast.show { transform: translateY(0); }
     </style>
 </head>
 <body>
@@ -109,39 +114,39 @@
             <span class="status-badge" id="status-text">Gateway Terminal</span>
         </div>
         
+        <!-- STEP 1: PORTAL DISCOVERY -->
         <div id="search-section">
             <div class="form-group">
-                <label>Enter Portal ID</label>
-                <input type="text" id="portalSearch" placeholder="e.g. acme-logistics">
+                <label>Portal ID</label>
+                <input type="text" id="portalSearch" placeholder="Enter your company ID">
             </div>
             <button class="btn-action" id="find-btn" onclick="lookupCompany()">Verify Portal</button>
         </div>
 
+        <!-- STEP 2: CREDENTIALS -->
         <div id="login-section">
             <form id="loginForm">
                 <div class="form-group">
                     <label>Username</label>
-                    <input type="text" id="user" placeholder="Admin or Staff Username" required>
+                    <input type="text" id="user" placeholder="Enter Username" required autocomplete="username">
                 </div>
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" id="pass" placeholder="••••••••" required>
+                    <input type="password" id="pass" placeholder="••••••••" required autocomplete="current-password">
                 </div>
                 <button type="submit" class="btn-action" id="login-btn">Authorize Access</button>
             </form>
+            <button class="reset-btn" onclick="location.reload()">Change Portal ID</button>
         </div>
 
-        <p style="margin-top: 25px; font-size: 0.7rem; color: var(--text-dim);">
-            Powered by Jmcy Web Solutions
+        <p style="margin-top: 30px; font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;">
+            Secure Managed Instance • 2026
         </p>
     </div>
 
     <script>
-        const SUPABASE_URL = "https://pehffyqlssrqogosfsab.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s";
+        const _supabase = supabase.createClient('https://pehffyqlssrqogosfsab.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s');
         
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
         let activeCompany = null;
 
         window.onload = () => {
@@ -153,11 +158,13 @@
             }
         };
 
-        function showNotification(msg) {
+        function showNotification(msg, type = "error") {
             const toast = document.getElementById('toast');
-            toast.innerText = "⚠️ " + msg;
+            toast.style.background = type === "error" ? "var(--error)" : "var(--success)";
+            toast.innerText = (type === "error" ? "⚠️ " : "✅ ") + msg;
             toast.classList.add('show');
-            document.getElementById('portal-card').classList.add('shake');
+            if(type === "error") document.getElementById('portal-card').classList.add('shake');
+            
             setTimeout(() => {
                 toast.classList.remove('show');
                 document.getElementById('portal-card').classList.remove('shake');
@@ -167,12 +174,11 @@
         async function lookupCompany() {
             const input = document.getElementById('portalSearch');
             const query = input.value.toLowerCase().trim();
-            const findBtn = document.getElementById('find-btn');
-
             if(!query) return;
 
-            findBtn.disabled = true;
-            findBtn.innerText = "Searching...";
+            const btn = document.getElementById('find-btn');
+            btn.disabled = true;
+            btn.innerText = "Finding Portal...";
             
             try {
                 const { data, error } = await _supabase
@@ -185,21 +191,20 @@
                     activeCompany = data;
                     revealLogin(data);
                 } else {
-                    showNotification("Portal ID not registered.");
-                    findBtn.disabled = false;
-                    findBtn.innerText = "Verify Portal";
+                    showNotification("Portal ID not found.");
+                    btn.disabled = false;
+                    btn.innerText = "Verify Portal";
                 }
             } catch (err) {
-                showNotification("Connection Error.");
-                findBtn.disabled = false;
-                findBtn.innerText = "Verify Portal";
+                showNotification("Database connection failed.");
+                btn.disabled = false;
             }
         }
 
         function revealLogin(company) {
-            document.getElementById('display-title').innerHTML = company.company_name.toUpperCase();
+            document.getElementById('display-title').innerText = company.company_name;
             document.documentElement.style.setProperty('--primary', company.theme_color || '#3b82f6');
-            document.getElementById('status-text').innerText = "Portal Verified • Secure Access";
+            document.getElementById('status-text').innerText = "Verified • Encrypted Connection";
             document.getElementById('search-section').style.display = "none";
             document.getElementById('login-section').style.display = "block";
         }
@@ -208,47 +213,55 @@
             e.preventDefault();
             const u = document.getElementById('user').value.trim();
             const p = document.getElementById('pass').value;
-            const loginBtn = document.getElementById('login-btn');
+            const btn = document.getElementById('login-btn');
 
-            loginBtn.disabled = true;
-            loginBtn.innerText = "Verifying...";
+            btn.disabled = true;
+            btn.innerText = "Authenticating...";
 
-            // LOGIC STEP 1: Check if it's the Master Admin (Owner)
-            if (u === activeCompany.admin_user && p === activeCompany.admin_pass) {
-                saveAndRedirect(activeCompany.portal_id, u, 'OWNER');
-                return;
-            }
-
-            // LOGIC STEP 2: Check the Staff Table (LOCKED to this Portal ID)
             try {
-                const { data: staff, error } = await _supabase
-                    .from('staff_members')
+                // Fetch user from the centralized 'users' table
+                const { data: user, error } = await _supabase
+                    .from('users')
                     .select('*')
-                    .eq('company_id', activeCompany.portal_id) // Lock to this company
+                    .eq('company_id', activeCompany.id)
                     .eq('username', u)
-                    .eq('password', p)
+                    .eq('password_hash', p) // Ideally hashed, but following your setup
                     .maybeSingle();
 
-                if (staff) {
-                    saveAndRedirect(activeCompany.portal_id, staff.username, 'STAFF');
+                if (user) {
+                    saveAndRedirect(activeCompany.portal_id, user.username, user.role, activeCompany.company_name);
                 } else {
-                    showNotification("Invalid Credentials for this portal.");
-                    loginBtn.disabled = false;
-                    loginBtn.innerText = "Authorize Access";
+                    showNotification("Access Denied: Invalid Credentials.");
+                    btn.disabled = false;
+                    btn.innerText = "Authorize Access";
                 }
             } catch (err) {
-                showNotification("Login process failed.");
-                loginBtn.disabled = false;
-                loginBtn.innerText = "Authorize Access";
+                showNotification("Verification error.");
+                btn.disabled = false;
             }
         });
 
-        function saveAndRedirect(cid, user, role) {
-            localStorage.setItem('jmcy_cid', cid);
-            localStorage.setItem('jmcy_user', user);
-            localStorage.setItem('jmcy_role', role);
+        function saveAndRedirect(portalId, username, role, companyName) {
+            // Save standardized session keys
+            localStorage.setItem('jmcy_portal_id', portalId);
+            localStorage.setItem('jmcy_user_role', role);
+            localStorage.setItem('jmcy_username', username);
+            localStorage.setItem('jmcy_company_name', companyName);
             
-            window.location.href = "inventory.html";
+            showNotification("Access Granted. Routing...", "success");
+
+            // Role-Based Navigation Logic
+            setTimeout(() => {
+                if (role === 'admin') {
+                    window.location.href = "portal.html"; // Or dashboard.html if you have one
+                } else if (role === 'sales') {
+                    window.location.href = "sales.html";
+                } else if (role === 'warehouse') {
+                    window.location.href = "inventory.html";
+                } else {
+                    window.location.href = "inventory.html"; // Fallback
+                }
+            }, 1000);
         }
     </script>
 </body>

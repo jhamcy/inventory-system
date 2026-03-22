@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITEM PROFILE | JMCYFLOW</title>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #0f172a; 
+            --accent: #3b82f6; 
+            --bg: #f1f5f9; 
+            --border: #e2e8f0; 
+            --text: #1e293b; 
+            --subtext: #64748b;
+        }
+        
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; text-transform: uppercase; }
+        
+        body { 
+            margin: 0; 
+            background: var(--bg); 
+            color: var(--text); 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; 
+        }
+
+        /* --- HEADER --- */
+        .header { 
+            height: 60px; 
+            background: var(--primary); 
+            display: flex; 
+            align-items: center; 
+            padding: 0 40px; 
+            justify-content: space-between;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: white;
+            transition: 0.2s;
+        }
+
+        .back-btn:hover { background: rgba(255,255,255,0.2); }
+
+        /* --- MAIN CONTAINER --- */
+        .container { 
+            max-width: 800px; 
+            margin: 30px auto; 
+            width: 95%; 
+        }
+
+        /* --- PROFILE CARD --- */
+        .card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        /* --- TOP IMAGE SECTION --- */
+        .image-header-section {
+            width: 100%;
+            height: 350px;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-header-section img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 20px;
+        }
+
+        .placeholder-text {
+            text-align: center;
+            color: var(--subtext);
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        /* --- CONTENT SECTION --- */
+        .item-header {
+            padding: 30px 40px;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge {
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .data-grid {
+            padding: 0 40px 40px 40px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .info-block { border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
+        .info-block.full-width { grid-column: span 2; }
+        .info-block.highlight {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 8px;
+            grid-column: span 2;
+        }
+
+        .label { font-size: 0.65rem; color: var(--subtext); font-weight: 800; margin-bottom: 8px; display: block; }
+        .value { font-size: 1rem; color: var(--primary); font-weight: 600; }
+        .desc-value { font-size: 1.1rem; color: var(--text); font-weight: 500; line-height: 1.5; text-transform: none; }
+        .stock-value { font-size: 2.8rem; color: var(--primary); font-weight: 800; letter-spacing: -1px; line-height: 1; }
+
+        @media (max-width: 600px) {
+            .data-grid { grid-template-columns: 1fr; }
+            .info-block.full-width, .info-block.highlight { grid-column: span 1; }
+            .image-header-section { height: 250px; }
+            .item-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <button class="back-btn" onclick="history.back()">← BACK TO INVENTORY</button>
+    <div id="timestamp" style="font-size: 0.65rem; font-weight: 600; opacity: 0.8;"></div>
+</header>
+
+<div class="container">
+    <div id="loading-state" style="text-align: center; padding: 50px; font-weight: 700; color: var(--subtext);">LOADING ITEM DETAILS...</div>
+    
+    <div class="card" id="main-card" style="display: none;">
+        <!-- TOP IMAGE -->
+        <div class="image-header-section">
+            <img id="item-preview" src="" style="display:none;" alt="Product Image">
+            <div class="placeholder-text" id="placeholder">
+                <div style="font-size: 2rem; margin-bottom: 10px;">📦</div>
+                NO PRODUCT IMAGE AVAILABLE
+            </div>
+        </div>
+
+        <!-- TITLE AREA -->
+        <div class="item-header">
+            <div>
+                <span class="label" id="display-cat" style="color:var(--accent); margin-bottom: 4px;">CATEGORY</span>
+                <h1 id="display-code" style="margin:0; font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; color: var(--primary);">ITEM CODE</h1>
+            </div>
+            <span class="badge">ACTIVE INVENTORY</span>
+        </div>
+
+        <!-- DETAILS GRID -->
+        <div class="data-grid">
+            <div class="info-block full-width">
+                <span class="label">TECHNICAL DESCRIPTION</span>
+                <span id="display-desc" class="desc-value">-</span>
+            </div>
+
+            <div class="info-block">
+                <span class="label">BRAND / MANUFACTURER</span>
+                <span id="display-brand" class="value">-</span>
+            </div>
+
+            <div class="info-block">
+                <span class="label">UNIT OF MEASURE</span>
+                <span id="display-uom" class="value">-</span>
+            </div>
+
+            <div class="info-block highlight">
+                <span class="label" style="color:var(--accent)">TOTAL QUANTITY ON HAND</span>
+                <div style="display: flex; align-items: baseline; gap: 10px;">
+                    <span id="display-qty" class="stock-value">0</span>
+                    <span class="label" id="display-uom-small" style="font-size: 0.8rem;">UNITS</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize Supabase
+    const _sb = supabase.createClient('https://pehffyqlssrqogosfsab.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s');
+
+    async function loadItemDetails() {
+        const params = new URLSearchParams(window.location.search);
+        const sku = params.get('code');
+
+        if (!sku) {
+            document.getElementById('loading-state').innerText = "NO ITEM CODE PROVIDED.";
+            return;
+        }
+
+        // Fetch fresh data from Supabase using the SKU (Item Code)
+        const { data, error } = await _sb
+            .from('inventory')
+            .select('*')
+            .eq('sku', sku)
+            .single();
+
+        if (error || !data) {
+            console.error("Error fetching item:", error);
+            document.getElementById('loading-state').innerText = "ITEM NOT FOUND.";
+            return;
+        }
+
+        // Populate the UI
+        document.getElementById('display-code').innerText = data.sku;
+        document.getElementById('display-cat').innerText = data.category || 'N/A';
+        document.getElementById('display-desc').innerText = data.item_name || 'NO DESCRIPTION PROVIDED';
+        document.getElementById('display-brand').innerText = data.brand || 'GENERIC';
+        document.getElementById('display-qty').innerText = data.quantity_on_hand || 0;
+        document.getElementById('display-uom').innerText = data.uom || 'PCS';
+        document.getElementById('display-uom-small').innerText = data.uom || 'UNITS';
+
+        // Handle Image
+        if (data.image_url) {
+            const preview = document.getElementById('item-preview');
+            preview.src = data.image_url;
+            preview.style.display = 'block';
+            document.getElementById('placeholder').style.display = 'none';
+        }
+
+        // Show the card, hide loading
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('main-card').style.display = 'block';
+    }
+
+    window.onload = () => {
+        loadItemDetails();
+        const now = new Date();
+        document.getElementById('timestamp').innerText = "VIEWED: " + now.toLocaleString();
+    };
+</script>
+
+</body>
+</html>

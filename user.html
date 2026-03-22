@@ -14,7 +14,6 @@
             --danger: #ef4444; 
             --success: #10b981;
             --border-main: #cbd5e1;
-            --sidebar-width: 110px;
         }
 
         /* --- GLOBAL LAYOUT --- */
@@ -24,16 +23,10 @@
         .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; flex-shrink: 0; z-index: 1000; border-bottom: 2px solid var(--accent); }
         .nav-title { color: white; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
 
-        .main-content { flex: 1; display: flex; flex-direction: column; padding: 8px; overflow: hidden; gap: 8px; }
-
-        /* --- SIDEBAR --- */
-        .action-bar-container { display: flex; justify-content: center; flex-shrink: 0; }
-        .toggle-group { display: flex; width: 100%; max-width: 550px; border-radius: 10px; overflow: hidden; border: 2px solid var(--primary); background: var(--primary); }
-        .btn-toggle { flex: 1; padding: 8px 0; border: none; border-right: 1px solid rgba(255,255,255,0.15); cursor: pointer; color: rgba(255,255,255,0.6); background: var(--primary); font-size: 0.6rem; font-weight: 800; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 2px; }
-        .btn-toggle.active { background: var(--accent) !important; color: white !important; }
+        .main-content { flex: 1; display: flex; flex-direction: column; padding: 15px; overflow: hidden; gap: 15px; }
 
         /* --- CONTENT PANELS --- */
-        .right-panel { flex: 1; display: grid; grid-template-columns: 1fr; gap: 10px; overflow: hidden; }
+        .right-panel { flex: 1; display: grid; grid-template-columns: 1fr; gap: 15px; overflow: hidden; }
         @media (min-width: 1024px) {
             .right-panel { grid-template-columns: 350px 1fr; }
         }
@@ -48,11 +41,6 @@
         input, select { padding: 12px; border: 2px solid var(--border-main); border-radius: 8px; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; outline: none; transition: 0.2s; }
         input:focus { border-color: var(--accent); background: #f0f7ff; }
 
-        .permission-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: #f1f5f9; padding: 10px; border-radius: 8px; margin-top: 5px; }
-        .perm-item { display: flex; align-items: center; gap: 6px; font-size: 0.55rem; font-weight: 800; color: var(--primary); background: white; padding: 8px; border-radius: 5px; border: 1px solid var(--border-main); cursor: pointer; transition: 0.2s; }
-        .perm-item input { width: auto; padding: 0; margin: 0; }
-        .perm-item:has(input:checked) { border-color: var(--accent); background: #eff6ff; color: var(--accent); }
-        
         .btn-action { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: 800; text-transform: uppercase; cursor: pointer; margin-top: 10px; transition: 0.2s; }
         .btn-save { background: var(--primary); color: white; }
         .btn-update { background: var(--accent); color: white; display: none; }
@@ -66,19 +54,11 @@
 
         .role-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.55rem; color: white; background: #64748b; }
         .role-admin { background: var(--danger); }
+        .role-warehouse { background: #f97316; }
+        .role-sales { background: #10b981; }
         .pass-code { font-family: monospace; color: var(--accent); letter-spacing: 1px; }
 
         .preview-tag { background: #fbbf24; color: black; padding: 2px 6px; border-radius: 4px; font-size: 0.5rem; margin-left: 5px; }
-
-        /* --- DESKTOP VIEW --- */
-        @media (min-width: 1024px) {
-            .main-content { flex-direction: row; padding: 0; gap: 0; }
-            .right-panel { order: 1; padding: 20px; }
-            .action-bar-container { order: 2; width: var(--sidebar-width); height: 100%; background: var(--primary); flex-direction: column; border-left: 2px solid var(--accent); }
-            .toggle-group { flex-direction: column; height: 100%; border-radius: 0; border: none; }
-            .btn-toggle { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 30px 5px; width: 100%; }
-            .btn-toggle span:first-child { font-size: 1.5rem; }
-        }
     </style>
 </head>
 <body>
@@ -89,14 +69,6 @@
 </header>
 
 <main class="main-content">
-    <div class="action-bar-container">
-        <div class="toggle-group">
-            <button class="btn-toggle" onclick="location.href='inventory.html'"><span>📦</span><span>Stock</span></button>
-            <button class="btn-toggle" onclick="location.href='logs.html'"><span>📜</span><span>Logs</span></button>
-            <button class="btn-toggle active"><span>👥</span><span>Users</span></button>
-        </div>
-    </div>
-
     <div class="right-panel">
         <div class="card">
             <div class="card-header" id="form-title">Account Registration</div>
@@ -108,20 +80,11 @@
                     <input type="text" id="pass-in" placeholder="PASSWORD">
                     
                     <select id="role-in">
-                        <option value="STAFF">STAFF MEMBER</option>
+                        <option value="WAREHOUSE STAFF">WAREHOUSE STAFF</option>
+                        <option value="SALES STAFF">SALES STAFF</option>
                         <option value="OWNER">ADMINISTRATOR</option>
                     </select>
                     
-                    <div style="font-size: 0.6rem; font-weight: 800; color: var(--accent); margin-top: 10px;">ACTION PRIVILEGES:</div>
-                    <div class="permission-grid" id="perm-list">
-                        <label class="perm-item"><input type="checkbox" value="perm_add"> ADD</label>
-                        <label class="perm-item"><input type="checkbox" value="perm_edit"> EDIT</label>
-                        <label class="perm-item"><input type="checkbox" value="perm_adj"> ADJ</label>
-                        <label class="perm-item"><input type="checkbox" value="perm_delete"> DEL</label>
-                        <label class="perm-item"><input type="checkbox" value="perm_logs"> LOGS</label>
-                        <label class="perm-item"><input type="checkbox" value="perm_users"> MGMT</label>
-                    </div>
-
                     <button id="btn-save" class="btn-action btn-save" onclick="saveUser()">Create Account</button>
                     <button id="btn-update" class="btn-action btn-update" onclick="updateUser()">Update Details</button>
                     <button id="btn-cancel" class="btn-action btn-cancel" onclick="resetForm()" style="display:none;">Cancel Edit</button>
@@ -155,7 +118,7 @@
     const _KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s';
     
     let _sb;
-    let editingUserId = null; // Use DB internal ID or username
+    let editingUserId = null;
     let previewMode = false;
 
     function init() {
@@ -180,8 +143,9 @@
 
         if (previewMode) {
             staffList = [
-                { staff_id: 'JMCY-001', full_name: 'DEMO OWNER', username: 'ADMIN', password: '123', role: 'OWNER', permissions: ['perm_users', 'perm_logs', 'perm_add', 'perm_edit'] },
-                { staff_id: 'JMCY-002', full_name: 'JUAN DELA CRUZ', username: 'JUAN_STAFF', password: '456', role: 'STAFF', permissions: ['perm_add', 'perm_edit'] }
+                { staff_id: 'JMCY-001', full_name: 'DEMO OWNER', username: 'ADMIN', password: '123', role: 'OWNER' },
+                { staff_id: 'JMCY-002', full_name: 'JUAN WAREHOUSE', username: 'JUAN_WH', password: '456', role: 'WAREHOUSE STAFF' },
+                { staff_id: 'JMCY-003', full_name: 'MARIA SALES', username: 'MARIA_POS', password: '789', role: 'SALES STAFF' }
             ];
         } else {
             const cid = localStorage.getItem('jmcy_cid');
@@ -200,18 +164,24 @@
 
     function renderTable(data) {
         const tbody = document.getElementById('user-table-body');
-        tbody.innerHTML = data.map(u => `
+        tbody.innerHTML = data.map(u => {
+            let roleClass = '';
+            if(u.role === 'OWNER') roleClass = 'role-admin';
+            else if(u.role === 'WAREHOUSE STAFF') roleClass = 'role-warehouse';
+            else if(u.role === 'SALES STAFF') roleClass = 'role-sales';
+
+            return `
             <tr onclick='activateEditMode(${JSON.stringify(u)})'>
                 <td style="color:#64748b;">#${u.staff_id || '---'}</td>
                 <td>${u.full_name}</td>
                 <td style="color:var(--accent); font-weight:800;">${u.username}</td>
                 <td class="pass-code">${u.password}</td>
-                <td><span class="role-badge ${u.role === 'OWNER' ? 'role-admin' : ''}">${u.role}</span></td>
+                <td><span class="role-badge ${roleClass}">${u.role}</span></td>
                 <td>
                     <button style="color:var(--danger); background:none; border:none; font-weight:800; cursor:pointer;" onclick="event.stopPropagation(); delUser('${u.username}')">DEL</button>
                 </td>
             </tr>
-        `).join('');
+        `}).join('');
     }
 
     function activateEditMode(user) {
@@ -223,12 +193,6 @@
         document.getElementById('pass-in').value = user.password;
         document.getElementById('role-in').value = user.role;
         
-        // Sync permissions checkboxes
-        const pList = user.permissions || [];
-        document.querySelectorAll('#perm-list input').forEach(cb => {
-            cb.checked = pList.includes(cb.value);
-        });
-        
         document.getElementById('btn-save').style.display = 'none';
         document.getElementById('btn-update').style.display = 'block';
         document.getElementById('btn-cancel').style.display = 'block';
@@ -238,7 +202,6 @@
         editingUserId = null;
         document.getElementById('form-title').innerText = "Account Registration";
         document.querySelectorAll('.form-grid input').forEach(i => i.value = "");
-        document.querySelectorAll('#perm-list input').forEach(cb => cb.checked = false);
         document.getElementById('btn-save').style.display = 'block';
         document.getElementById('btn-update').style.display = 'none';
         document.getElementById('btn-cancel').style.display = 'none';
@@ -246,12 +209,9 @@
 
     async function saveUser() {
         if (previewMode) return alert("Preview Mode: Cannot save to database.");
-        
         const payload = getFormData();
         if(!payload.username || !payload.password) return alert("Fill required fields!");
-
         payload.company_id = localStorage.getItem('jmcy_cid');
-
         const { error } = await _sb.from('staff_members').insert([payload]);
         if(error) alert(error.message);
         else { resetForm(); loadTable(); }
@@ -259,10 +219,8 @@
 
     async function updateUser() {
         if (previewMode) return alert("Preview Mode: Cannot update database.");
-        
         const payload = getFormData();
         const { error } = await _sb.from('staff_members').update(payload).eq('username', editingUserId);
-        
         if(error) alert(error.message);
         else { resetForm(); loadTable(); }
     }
@@ -274,14 +232,13 @@
             username: document.getElementById('user-in').value.trim().toUpperCase(),
             password: document.getElementById('pass-in').value.trim(),
             role: document.getElementById('role-in').value,
-            permissions: Array.from(document.querySelectorAll('#perm-list input:checked')).map(cb => cb.value)
+            permissions: [] // Default empty as UI was removed
         };
     }
 
     async function delUser(username) {
         if (previewMode) return alert("Preview Mode: Cannot delete.");
         if(!confirm(`Delete user ${username}?`)) return;
-        
         const { error } = await _sb.from('staff_members').delete().eq('username', username);
         if(error) alert(error.message);
         else loadTable();
