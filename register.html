@@ -7,9 +7,41 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #3b82f6; --dark-bg: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-dim: #94a3b8; --accent: #38bdf8; }
+        :root { 
+            --primary: #3b82f6; 
+            --dark-bg: #0f172a; 
+            --card-bg: #1e293b; 
+            --text-main: #f8fafc; 
+            --text-dim: #94a3b8; 
+            --accent: #38bdf8; 
+            --success: #10b981;
+            --error: #ef4444;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background-color: var(--dark-bg); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        
+        /* Toast Notification */
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transform: translateX(120%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #notification.show { transform: translateX(0); }
+        .ntf-success { background: var(--success); border-left: 5px solid #065f46; }
+        .ntf-error { background: var(--error); border-left: 5px solid #991b1b; }
+
         .reg-card { background: var(--card-bg); width: 100%; max-width: 550px; padding: 35px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); }
         .header { text-align: center; margin-bottom: 25px; }
         .header h2 { font-size: 1.8rem; font-weight: 800; letter-spacing: -1px; }
@@ -33,6 +65,9 @@
     </style>
 </head>
 <body>
+
+    <div id="notification"></div>
+
     <div class="reg-card">
         <div class="header">
             <h2>Jmcy<span>Flow</span></h2>
@@ -99,6 +134,19 @@
     <script>
         const _supabase = supabase.createClient("https://pehffyqlssrqogosfsab.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s");
         
+        function showNotify(message, type = 'success') {
+            const ntf = document.getElementById('notification');
+            ntf.innerText = message;
+            ntf.className = type === 'success' ? 'ntf-success show' : 'ntf-error show';
+            
+            if(type === 'success') {
+                // Keep success visible slightly longer for redirect
+                setTimeout(() => ntf.classList.remove('show'), 3500);
+            } else {
+                setTimeout(() => ntf.classList.remove('show'), 3000);
+            }
+        }
+
         function previewLogo(input) {
             const preview = document.getElementById('logoPreview');
             const label = document.getElementById('file-label');
@@ -125,63 +173,70 @@
             btn.disabled = true;
             btn.innerText = "Building your portal...";
 
-            let logoUrl = "";
+            try {
+                let logoUrl = "";
 
-            if (logoFile) {
-                const fileExt = logoFile.name.split('.').pop();
-                const fileName = `${portalId}-${Date.now()}.${fileExt}`;
-                const filePath = `logos/${fileName}`;
+                if (logoFile) {
+                    const fileExt = logoFile.name.split('.').pop();
+                    const fileName = `${portalId}-${Date.now()}.${fileExt}`;
+                    const filePath = `logos/${fileName}`;
 
-                const { data: uploadData, error: uploadError } = await _supabase.storage
-                    .from('public') 
-                    .upload(filePath, logoFile);
+                    const { data: uploadData, error: uploadError } = await _supabase.storage
+                        .from('public') 
+                        .upload(filePath, logoFile);
 
-                if (!uploadError) {
-                    const { data: publicUrlData } = _supabase.storage.from('public').getPublicUrl(filePath);
-                    logoUrl = publicUrlData.publicUrl;
+                    if (!uploadError) {
+                        const { data: publicUrlData } = _supabase.storage.from('public').getPublicUrl(filePath);
+                        logoUrl = publicUrlData.publicUrl;
+                    }
                 }
-            }
 
-            const companyPayload = {
-                portal_id: portalId,
-                company_name: document.getElementById('compName').value.trim(),
-                company_address: document.getElementById('compAddr').value.trim(),
-                tin_number: document.getElementById('compTIN').value.trim(),
-                contact_number: document.getElementById('compContact').value.trim(),
-                business_email: document.getElementById('compEmail').value.trim(),
-                logo_url: logoUrl
-            };
+                const companyPayload = {
+                    portal_id: portalId,
+                    company_name: document.getElementById('compName').value.trim(),
+                    company_address: document.getElementById('compAddr').value.trim(),
+                    tin_number: document.getElementById('compTIN').value.trim(),
+                    contact_number: document.getElementById('compContact').value.trim(),
+                    business_email: document.getElementById('compEmail').value.trim(),
+                    logo_url: logoUrl
+                };
 
-            const { data: companyData, error: companyError } = await _supabase
-                .from('companies')
-                .insert([companyPayload])
-                .select()
-                .single();
-            
-            if(companyError) { 
-                alert("Registration Error: " + companyError.message); 
-                btn.disabled = false; 
-                btn.innerText = "Create My Portal"; 
-                return;
-            }
+                const { data: companyData, error: companyError } = await _supabase
+                    .from('companies')
+                    .insert([companyPayload])
+                    .select()
+                    .single();
+                
+                if(companyError) { 
+                    throw new Error("Registration Failed: " + companyError.message);
+                }
 
-            const staffPayload = {
-                company_id: companyData.id,
-                full_name: "SYSTEM OWNER",
-                username: adminUser,
-                password: adminPass,
-                role: "OWNER"
-            };
+                const staffPayload = {
+                    company_id: companyData.id,
+                    full_name: "SYSTEM OWNER",
+                    username: adminUser,
+                    password: adminPass,
+                    role: "OWNER"
+                };
 
-            const { error: staffError } = await _supabase
-                .from('staff_members')
-                .insert([staffPayload]);
+                const { error: staffError } = await _supabase
+                    .from('staff_members')
+                    .insert([staffPayload]);
 
-            if(staffError) {
-                alert("Portal ready, but admin account failed. Contact support.");
-            } else {
-                // REDIRECT TO PORTAL.HTML INSTEAD OF LOGIN.HTML
-                window.location.href = `portal.html?id=${portalId}`; 
+                if(staffError) {
+                    throw new Error("Portal ready, but admin setup failed. Please contact support.");
+                } else {
+                    showNotify("Registration Successful! Redirecting to your portal...", "success");
+                    // Wait 2 seconds so they can see the notification
+                    setTimeout(() => {
+                        window.location.href = `portal.html?id=${portalId}`; 
+                    }, 2000);
+                }
+
+            } catch (error) {
+                showNotify(error.message, "error");
+                btn.disabled = false;
+                btn.innerText = "Create My Portal";
             }
         });
     </script>
