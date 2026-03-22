@@ -22,7 +22,6 @@
         input:focus, textarea:focus { border-color: var(--primary); background: #0f172a; }
         textarea { resize: none; height: 50px; }
         
-        /* Logo Upload Styling */
         .file-input-wrapper { border: 2px dashed rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s; }
         .file-input-wrapper:hover { border-color: var(--accent); background: rgba(56, 189, 248, 0.05); }
         input[type="file"] { display: none; }
@@ -119,6 +118,8 @@
             const btn = document.getElementById('submitBtn');
             const logoFile = document.getElementById('logoFile').files[0];
             const portalId = document.getElementById('compID').value.toLowerCase().trim();
+            const adminUser = document.getElementById('adminUser').value.trim();
+            const adminPass = document.getElementById('adminPass').value;
             
             btn.disabled = true;
             btn.innerText = "Building your portal...";
@@ -132,43 +133,61 @@
                 const filePath = `logos/${fileName}`;
 
                 const { data: uploadData, error: uploadError } = await _supabase.storage
-                    .from('public') // Make sure you have a bucket named 'public'
+                    .from('public') 
                     .upload(filePath, logoFile);
 
-                if (uploadError) {
-                    console.error("Logo upload failed:", uploadError);
-                } else {
-                    const { data: publicUrlData } = _supabase.storage
-                        .from('public')
-                        .getPublicUrl(filePath);
+                if (!uploadError) {
+                    const { data: publicUrlData } = _supabase.storage.from('public').getPublicUrl(filePath);
                     logoUrl = publicUrlData.publicUrl;
                 }
             }
 
-            // 2. Insert Company Data
-            const payload = {
+            // 2. Insert Company Data and get the generated ID
+            const companyPayload = {
                 portal_id: portalId,
                 company_name: document.getElementById('compName').value.trim(),
                 company_address: document.getElementById('compAddr').value.trim(),
                 tin_number: document.getElementById('compTIN').value.trim(),
                 contact_number: document.getElementById('compContact').value.trim(),
                 business_email: document.getElementById('compEmail').value.trim(),
-                admin_user: document.getElementById('adminUser').value.trim(),
-                admin_pass: document.getElementById('adminPass').value,
-                logo_url: logoUrl, // Saved the URL here
+                admin_user: adminUser,
+                admin_pass: adminPass,
+                logo_url: logoUrl,
                 trial_expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
             };
 
-            const { error } = await _supabase.from('companies').insert([payload]);
+            const { data: companyData, error: companyError } = await _supabase
+                .from('companies')
+                .insert([companyPayload])
+                .select()
+                .single();
             
-            if(error) { 
-                alert(error.message); 
+            if(companyError) { 
+                alert("Database Error: " + companyError.message); 
                 btn.disabled = false; 
                 btn.innerText = "Create My Portal"; 
-            } else { 
-                // Save logo to local storage for instant UI updates on next page
+                return;
+            }
+
+            // 3. Create the Owner in 'staff_members' table
+            const staffPayload = {
+                company_id: companyData.id,
+                full_name: "SYSTEM OWNER",
+                username: adminUser.toUpperCase(),
+                password: adminPass,
+                role: "OWNER"
+            };
+
+            const { error: staffError } = await _supabase
+                .from('staff_members')
+                .insert([staffPayload]);
+
+            if(staffError) {
+                alert("Company created, but staff account failed: " + staffError.message);
+            } else {
                 if(logoUrl) localStorage.setItem('jmcy_logo', logoUrl);
-                window.location.href = `portal.html?id=${payload.portal_id}`; 
+                // Redirect to login page with the new portal ID
+                window.location.href = `login.html?id=${portalId}`; 
             }
         });
     </script>
