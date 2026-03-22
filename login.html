@@ -30,9 +30,8 @@
         #logo-container { margin-bottom: 20px; display: flex; justify-content: center; min-height: 40px; }
         #logo-container img { max-width: 180px; max-height: 100px; object-fit: contain; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3)); }
 
-        /* Text Adjustments */
         .brand-title { 
-            font-size: 1.8rem; /* Increased size */
+            font-size: 1.8rem; 
             font-weight: 800; 
             margin-bottom: 8px; 
             text-transform: uppercase; 
@@ -50,6 +49,8 @@
             width: 100%; padding: 14px; background: rgba(15, 23, 42, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;
             color: white; font-size: 1rem; box-sizing: border-box; outline: none;
+            /* Forced Uppercase Visual */
+            text-transform: uppercase; 
         }
 
         input:focus { border-color: var(--primary); background: rgba(15, 23, 42, 0.9); }
@@ -69,10 +70,8 @@
 <body>
 
     <div class="login-card" id="loginCard">
-        <!-- Logo appears here first -->
         <div id="logo-container"></div>
         
-        <!-- Company Name second -->
         <div class="brand-title" id="companyName">Initializing...</div>
         <span class="portal-label" id="portalIdDisplay">Locating Node...</span>
         
@@ -115,7 +114,6 @@
                 document.getElementById('companyName').innerText = data.company_name;
                 document.getElementById('portalIdDisplay').innerText = `NODE: ${data.portal_id.toUpperCase()}`;
                 
-                // Show Logo if available
                 if (data.logo_url) {
                     document.getElementById('logo-container').innerHTML = `<img src="${data.logo_url}" alt="Logo">`;
                 }
@@ -129,8 +127,9 @@
         };
 
         async function handleLogin() {
+            // Force input values to Uppercase for the database query
             const userIn = document.getElementById('username').value.trim().toUpperCase();
-            const passIn = document.getElementById('password').value;
+            const passIn = document.getElementById('password').value.toUpperCase();
             const btn = document.getElementById('loginBtn');
             const errBox = document.getElementById('errorBox');
 

@@ -84,11 +84,13 @@
             <div class="grid-2">
                 <div class="form-group">
                     <label>Admin User</label>
-                    <input type="text" id="adminUser" required>
+                    <!-- Added style to force visual uppercase -->
+                    <input type="text" id="adminUser" style="text-transform: uppercase;" required>
                 </div>
                 <div class="form-group">
                     <label>Admin Pass</label>
-                    <input type="password" id="adminPass" minlength="6" required>
+                    <!-- Added style to force visual uppercase -->
+                    <input type="password" id="adminPass" style="text-transform: uppercase;" minlength="6" required>
                 </div>
             </div>
 
@@ -118,15 +120,16 @@
             const btn = document.getElementById('submitBtn');
             const logoFile = document.getElementById('logoFile').files[0];
             const portalId = document.getElementById('compID').value.toLowerCase().trim();
-            const adminUser = document.getElementById('adminUser').value.trim();
-            const adminPass = document.getElementById('adminPass').value;
+            
+            // Force values to uppercase for the database
+            const adminUser = document.getElementById('adminUser').value.trim().toUpperCase();
+            const adminPass = document.getElementById('adminPass').value.toUpperCase();
             
             btn.disabled = true;
             btn.innerText = "Building your portal...";
 
             let logoUrl = "";
 
-            // 1. Upload Logo if present
             if (logoFile) {
                 const fileExt = logoFile.name.split('.').pop();
                 const fileName = `${portalId}-${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -142,7 +145,6 @@
                 }
             }
 
-            // 2. Insert Company Data and get the generated ID
             const companyPayload = {
                 portal_id: portalId,
                 company_name: document.getElementById('compName').value.trim(),
@@ -169,12 +171,11 @@
                 return;
             }
 
-            // 3. Create the Owner in 'staff_members' table
             const staffPayload = {
                 company_id: companyData.id,
                 full_name: "SYSTEM OWNER",
-                username: adminUser.toUpperCase(),
-                password: adminPass,
+                username: adminUser, // already uppercase
+                password: adminPass, // already uppercase
                 role: "OWNER"
             };
 
@@ -186,7 +187,6 @@
                 alert("Company created, but staff account failed: " + staffError.message);
             } else {
                 if(logoUrl) localStorage.setItem('jmcy_logo', logoUrl);
-                // Redirect to login page with the new portal ID
                 window.location.href = `login.html?id=${portalId}`; 
             }
         });
