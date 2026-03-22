@@ -189,7 +189,7 @@
                         portal_id: portalId,
                         company_name: companyName,
                         company_address: companyAddress, 
-                        owner_name: "SYSTEM OWNER",          
+                        owner_name: "ADMINISTRATOR",          
                         tin_number: document.getElementById('compTIN').value.trim(),
                         contact_number: document.getElementById('compContact').value.trim(),
                         business_email: document.getElementById('compEmail').value.trim(),
@@ -203,10 +203,10 @@
                 // STEP 2: Create login access in staff_members
                 const { error: staffError } = await _supabase.from('staff_members').insert([{
                     company_id: companyData.id,
-                    full_name: "SYSTEM OWNER",
+                    full_name: "ADMINISTRATOR",
                     username: adminUser,
                     password: adminPass,
-                    role: "OWNER"
+                    role: "ADMIN"
                 }]);
 
                 if(staffError) throw new Error("Admin Setup Error: " + staffError.message);

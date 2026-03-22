@@ -77,7 +77,6 @@
                         <option value="WAREHOUSE STAFF">WAREHOUSE STAFF</option>
                         <option value="SALES STAFF">SALES STAFF</option>
                         <option value="ADMIN">ADMINISTRATOR</option>
-                        <option value="OWNER">OWNER</option>
                     </select>
                     
                     <button id="btn-save" class="btn-action btn-save" onclick="saveUser()">Create Account</button>
@@ -126,7 +125,7 @@
             return;
         }
 
-        if (role !== 'OWNER' && role !== 'ADMIN') {
+        if (role !== 'ADMINISTRATOR' && role !== 'ADMIN') {
             window.location.href = 'inventory.html';
             return;
         }
@@ -150,7 +149,7 @@
         const tbody = document.getElementById('user-table-body');
         tbody.innerHTML = data.map(u => {
             let roleClass = '';
-            if(u.role === 'OWNER' || u.role === 'ADMIN') roleClass = 'role-admin';
+            if(u.role === 'ADMINISTRATOR' || u.role === 'ADMIN') roleClass = 'role-admin';
             else if(u.role === 'WAREHOUSE STAFF') roleClass = 'role-warehouse';
             else if(u.role === 'SALES STAFF') roleClass = 'role-sales';
 
