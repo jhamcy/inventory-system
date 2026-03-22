@@ -16,7 +16,6 @@
             --border-main: #cbd5e1;
         }
 
-        /* --- GLOBAL LAYOUT --- */
         html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; position: fixed; width: 100%; }
         body { font-family: 'Inter', sans-serif; background: #f1f5f9; display: flex; flex-direction: column; }
 
@@ -25,7 +24,6 @@
 
         .main-content { flex: 1; display: flex; flex-direction: column; padding: 15px; overflow: hidden; gap: 15px; }
 
-        /* --- CONTENT PANELS --- */
         .right-panel { flex: 1; display: grid; grid-template-columns: 1fr; gap: 15px; overflow: hidden; }
         @media (min-width: 1024px) {
             .right-panel { grid-template-columns: 350px 1fr; }
@@ -36,7 +34,6 @@
         
         .scroll-body { flex: 1; overflow-y: auto; padding: 15px; }
 
-        /* --- FORM STYLES --- */
         .form-grid { display: flex; flex-direction: column; gap: 10px; }
         input, select { padding: 12px; border: 2px solid var(--border-main); border-radius: 8px; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; outline: none; transition: 0.2s; }
         input:focus { border-color: var(--accent); background: #f0f7ff; }
@@ -46,7 +43,6 @@
         .btn-update { background: var(--accent); color: white; display: none; }
         .btn-cancel { background: #64748b; color: white; margin-top: 5px; }
 
-        /* --- TABLE STYLES --- */
         table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 600px; }
         thead th { position: sticky; top: 0; background: #f8fafc; z-index: 10; padding: 12px; font-size: 0.6rem; border-bottom: 2px solid var(--primary); text-align: left; }
         tbody td { padding: 12px; border-bottom: 1px solid var(--border-main); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
@@ -57,8 +53,6 @@
         .role-warehouse { background: #f97316; }
         .role-sales { background: #10b981; }
         .pass-code { font-family: monospace; color: var(--accent); letter-spacing: 1px; }
-
-        .preview-tag { background: #fbbf24; color: black; padding: 2px 6px; border-radius: 4px; font-size: 0.5rem; margin-left: 5px; }
     </style>
 </head>
 <body>
@@ -82,7 +76,8 @@
                     <select id="role-in">
                         <option value="WAREHOUSE STAFF">WAREHOUSE STAFF</option>
                         <option value="SALES STAFF">SALES STAFF</option>
-                        <option value="OWNER">ADMINISTRATOR</option>
+                        <option value="ADMIN">ADMINISTRATOR</option>
+                        <option value="OWNER">OWNER</option>
                     </select>
                     
                     <button id="btn-save" class="btn-action btn-save" onclick="saveUser()">Create Account</button>
@@ -119,7 +114,6 @@
     
     let _sb;
     let editingUserId = null;
-    let previewMode = false;
 
     function init() {
         _sb = supabase.createClient(_URL, _KEY);
@@ -128,9 +122,11 @@
         const cid = localStorage.getItem('jmcy_cid');
 
         if (!role || !cid) {
-            previewMode = true;
-            document.getElementById('page-header').innerHTML += ' <span class="preview-tag">LAYOUT PREVIEW</span>';
-        } else if (role !== 'OWNER') {
+            window.location.href = 'portal.html';
+            return;
+        }
+
+        if (role !== 'OWNER' && role !== 'ADMIN') {
             window.location.href = 'inventory.html';
             return;
         }
@@ -139,34 +135,22 @@
     }
 
     async function loadTable() {
-        let staffList = [];
-
-        if (previewMode) {
-            staffList = [
-                { staff_id: 'JMCY-001', full_name: 'DEMO OWNER', username: 'ADMIN', password: '123', role: 'OWNER' },
-                { staff_id: 'JMCY-002', full_name: 'JUAN WAREHOUSE', username: 'JUAN_WH', password: '456', role: 'WAREHOUSE STAFF' },
-                { staff_id: 'JMCY-003', full_name: 'MARIA SALES', username: 'MARIA_POS', password: '789', role: 'SALES STAFF' }
-            ];
-        } else {
-            const cid = localStorage.getItem('jmcy_cid');
-            const { data, error } = await _sb
-                .from('staff_members')
-                .select('*')
-                .eq('company_id', cid)
-                .order('full_name');
-            
-            if (error) { console.error(error); return; }
-            staffList = data;
-        }
+        const cid = localStorage.getItem('jmcy_cid');
+        const { data, error } = await _sb
+            .from('staff_members')
+            .select('*')
+            .eq('company_id', cid)
+            .order('full_name');
         
-        renderTable(staffList);
+        if (error) { console.error(error); return; }
+        renderTable(data);
     }
 
     function renderTable(data) {
         const tbody = document.getElementById('user-table-body');
         tbody.innerHTML = data.map(u => {
             let roleClass = '';
-            if(u.role === 'OWNER') roleClass = 'role-admin';
+            if(u.role === 'OWNER' || u.role === 'ADMIN') roleClass = 'role-admin';
             else if(u.role === 'WAREHOUSE STAFF') roleClass = 'role-warehouse';
             else if(u.role === 'SALES STAFF') roleClass = 'role-sales';
 
@@ -208,19 +192,24 @@
     }
 
     async function saveUser() {
-        if (previewMode) return alert("Preview Mode: Cannot save to database.");
         const payload = getFormData();
         if(!payload.username || !payload.password) return alert("Fill required fields!");
         payload.company_id = localStorage.getItem('jmcy_cid');
+        
         const { error } = await _sb.from('staff_members').insert([payload]);
         if(error) alert(error.message);
         else { resetForm(); loadTable(); }
     }
 
     async function updateUser() {
-        if (previewMode) return alert("Preview Mode: Cannot update database.");
+        const cid = localStorage.getItem('jmcy_cid');
         const payload = getFormData();
-        const { error } = await _sb.from('staff_members').update(payload).eq('username', editingUserId);
+        
+        const { error } = await _sb.from('staff_members')
+            .update(payload)
+            .eq('username', editingUserId)
+            .eq('company_id', cid);
+
         if(error) alert(error.message);
         else { resetForm(); loadTable(); }
     }
@@ -230,16 +219,20 @@
             staff_id: document.getElementById('id-in').value.trim().toUpperCase(),
             full_name: document.getElementById('name-in').value.trim().toUpperCase(),
             username: document.getElementById('user-in').value.trim().toUpperCase(),
-            password: document.getElementById('pass-in').value.trim(),
-            role: document.getElementById('role-in').value,
-            permissions: [] // Default empty as UI was removed
+            password: document.getElementById('pass-in').value.trim().toUpperCase(),
+            role: document.getElementById('role-in').value
         };
     }
 
     async function delUser(username) {
-        if (previewMode) return alert("Preview Mode: Cannot delete.");
+        const cid = localStorage.getItem('jmcy_cid');
         if(!confirm(`Delete user ${username}?`)) return;
-        const { error } = await _sb.from('staff_members').delete().eq('username', username);
+        
+        const { error } = await _sb.from('staff_members')
+            .delete()
+            .eq('username', username)
+            .eq('company_id', cid);
+
         if(error) alert(error.message);
         else loadTable();
     }
