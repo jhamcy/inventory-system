@@ -125,7 +125,8 @@
             return;
         }
 
-        if (role !== 'ADMINISTRATOR' && role !== 'ADMIN') {
+        // Owners and Admins can access this page
+        if (role !== 'OWNER' && role !== 'ADMINISTRATOR' && role !== 'ADMIN') {
             window.location.href = 'inventory.html';
             return;
         }
@@ -149,9 +150,10 @@
         const tbody = document.getElementById('user-table-body');
         tbody.innerHTML = data.map(u => {
             let roleClass = '';
-            if(u.role === 'ADMINISTRATOR' || u.role === 'ADMIN') roleClass = 'role-admin';
-            else if(u.role === 'WAREHOUSE STAFF') roleClass = 'role-warehouse';
-            else if(u.role === 'SALES STAFF') roleClass = 'role-sales';
+            const r = u.role || '';
+            if(r === 'ADMINISTRATOR' || r === 'ADMIN' || r === 'OWNER') roleClass = 'role-admin';
+            else if(r === 'WAREHOUSE STAFF') roleClass = 'role-warehouse';
+            else if(r === 'SALES STAFF') roleClass = 'role-sales';
 
             return `
             <tr onclick='activateEditMode(${JSON.stringify(u)})'>
@@ -159,7 +161,7 @@
                 <td>${u.full_name}</td>
                 <td style="color:var(--accent); font-weight:800;">${u.username}</td>
                 <td class="pass-code">${u.password}</td>
-                <td><span class="role-badge ${roleClass}">${u.role}</span></td>
+                <td><span class="role-badge ${roleClass}">${r}</span></td>
                 <td>
                     <button style="color:var(--danger); background:none; border:none; font-weight:800; cursor:pointer;" onclick="event.stopPropagation(); delUser('${u.username}')">DEL</button>
                 </td>
