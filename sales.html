@@ -12,9 +12,11 @@
         body { margin: 0; background: var(--bg); color: var(--primary); }
 
         .nav { height: 60px; background: white; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; position: sticky; top: 0; z-index: 1000; }
+        .nav-left { display: flex; align-items: center; gap: 10px; }
+        .company-logo-nav { height: 40px; width: 40px; object-fit: contain; border-radius: 4px; }
         .logo-text { font-weight: 800; font-size: 1rem; color: var(--accent); text-decoration: none; }
         
-        .main-wrapper { display: grid; grid-template-columns: 1fr; max-width: 1200px; margin: 0 auto; }
+        .main-wrapper { display: grid; grid-template-columns: 1fr; max-width: 1400px; margin: 0 auto; }
         @media (min-width: 1024px) {
             .main-wrapper { grid-template-columns: 1fr 380px; height: calc(100vh - 60px); }
             .invoice-area { overflow-y: auto; padding: 40px; }
@@ -23,23 +25,23 @@
         .invoice-area { padding: 20px; background: white; }
         .sidebar-area { padding: 20px; background: #f1f5f9; }
 
-        .invoice-header { display: flex; justify-content: space-between; margin-bottom: 30px; }
-        .biz-info { flex: 1; }
-        .inv-meta { text-align: right; }
-        .display-name { font-size: 1.4rem; font-weight: 800; border: none; width: 100%; outline: none; }
-        .display-details { font-size: 0.8rem; color: #334155; line-height: 1.4; white-space: pre-wrap; width: 100%; height: 90px; border: none; resize: none; outline: none; background: transparent; }
+        .invoice-header { display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 2px solid var(--primary); padding-bottom: 20px; }
+        .biz-info { flex: 1.5; }
+        .inv-meta { flex: 1; text-align: right; font-size: 0.8rem; color: #334155; }
+        .doc-type { font-size: 1.5rem; font-weight: 900; color: #000; text-transform: uppercase; margin-bottom: 10px; }
         
-        .doc-type { font-size: 1.2rem; font-weight: 900; color: #000; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
-        .inv-val { font-size: 1rem; font-weight: 700; color: #ef4444; border: 1px dashed transparent; text-align: right; outline: none; background: transparent; width: 140px; }
+        .display-name { font-size: 1.4rem; font-weight: 800; display: block; margin-bottom: 5px; }
+        .inv-val { font-size: 1rem; font-weight: 700; color: #ef4444; border: none; text-align: right; outline: none; background: transparent; width: 140px; }
 
         .section-title { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin: 20px 0 10px 0; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
         .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         label { font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 3px; }
         input, select { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem; outline: none; }
+        input[readonly] { background-color: #f1f5f9; cursor: not-allowed; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { background: #f1f5f9; padding: 10px; font-size: 0.65rem; text-transform: uppercase; text-align: left; border: 1px solid var(--border); }
-        td { padding: 10px; border: 1px solid var(--border); font-size: 0.8rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.75rem; }
+        th { background: #f1f5f9; padding: 8px; text-transform: uppercase; text-align: left; border: 1px solid var(--border); }
+        td { padding: 8px; border: 1px solid var(--border); }
 
         .vat-summary { width: 100%; margin-top: 20px; font-size: 0.75rem; border: none; }
         .vat-summary td { border: none; padding: 2px 0; }
@@ -50,7 +52,6 @@
         @media print {
             .nav, .sidebar-area, #prod-search-container, .add-row, .remove-col { display: none !important; }
             body, .main-wrapper, .invoice-area { display: block; background: white; padding: 0; }
-            input, textarea { border: none !important; padding: 0 !important; background: none !important; }
             .inv-val { color: black !important; }
         }
     </style>
@@ -58,7 +59,10 @@
 <body>
 
 <nav class="nav">
-    <a href="portal.html" class="logo-text">JMCYFLOW POS</a>
+    <div class="nav-left">
+        <img id="nav-logo" src="" alt="" class="company-logo-nav" style="display:none;">
+        <a href="portal.html" class="logo-text">JMCYFLOW POS</a>
+    </div>
     <div id="sync-status" style="font-size: 0.65rem; color: #f59e0b; font-weight: 600;">● LOADING SYSTEM...</div>
 </nav>
 
@@ -66,19 +70,22 @@
     <div class="invoice-area">
         <div class="invoice-header">
             <div class="biz-info">
-                <input type="text" id="comp-name" class="display-name" placeholder="Company Name" readonly>
-                <textarea id="comp-addr" class="display-details" placeholder="Business Address & TIN" readonly></textarea>
-            </div>
-            <div class="inv-meta">
                 <div class="doc-type">Sales Invoice</div>
-                <div style="margin-bottom: 5px;">
-                    <span style="font-size: 0.7rem; font-weight: 800;">No:</span>
+                <div>
+                    <span style="font-size: 0.7rem; font-weight: 800;">Invoice No:</span>
                     <input type="text" id="inv-num" class="inv-val" placeholder="000000">
                 </div>
                 <div>
                     <span style="font-size: 0.7rem; font-weight: 800;">Date:</span>
                     <span id="inv-date" style="font-size: 0.9rem; font-weight: 700;"></span>
                 </div>
+            </div>
+            <div class="inv-meta" id="company-header-right">
+                <strong id="header-comp-name" class="display-name">---</strong>
+                <div id="header-comp-addr">---</div>
+                <div>TIN: <span id="header-comp-tin">---</span></div>
+                <div>Contact: <span id="header-comp-contact">---</span></div>
+                <div>Email: <span id="header-comp-email">---</span></div>
             </div>
         </div>
 
@@ -88,8 +95,7 @@
             <div><label>Customer TIN</label><input type="text" id="cust-tin" placeholder="000-000-000-000"></div>
         </div>
         <div class="input-grid">
-            <div><label>Business Style</label><input type="text" id="cust-style" placeholder="e.g. Retailer"></div>
-            <div><label>Address</label><input type="text" id="cust-addr" placeholder="Registered Address"></div>
+            <div style="grid-column: span 2;"><label>Address</label><input type="text" id="cust-addr" placeholder="Registered Address"></div>
         </div>
 
         <span class="section-title">Product Details</span>
@@ -100,18 +106,22 @@
         
         <div class="add-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; align-items: flex-end; margin-bottom: 15px;">
             <div><label>Qty</label><input type="number" id="qty" value="1"></div>
-            <div><label>Unit Price</label><input type="number" id="price"></div>
-            <div><label>UOM</label><input type="text" id="uom" readonly style="background:#f1f5f9;"></div>
-            <button onclick="addItem()" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer; font-weight:700;">ADD</button>
+            <div><label>Unit Price (Locked)</label><input type="number" id="price" readonly></div>
+            <div><label>UOM</label><input type="text" id="uom" readonly></div>
+            <button onclick="addItem()" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer; font-weight:700;">ADD ITEM</button>
         </div>
 
-        <table>
+        <table id="sales-table">
             <thead>
                 <tr>
+                    <th>Cat.</th>
+                    <th>Code/SKU</th>
                     <th>Description</th>
-                    <th style="width:70px;">Qty</th>
-                    <th style="width:110px;">Price</th>
-                    <th style="width:110px;">Amount</th>
+                    <th>Type/Brand</th>
+                    <th>Qty</th>
+                    <th>UOM</th>
+                    <th>Price</th>
+                    <th>Amount</th>
                     <th class="remove-col"></th>
                 </tr>
             </thead>
@@ -152,7 +162,7 @@
             </select>
             <label>Discount Value</label>
             <input type="number" id="disc-val" value="0" oninput="calculateBIR()" style="margin-bottom:20px;">
-            <button onclick="finalizeTransaction()" style="width:100%; padding:18px; background:var(--success); color:white; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-size: 1rem;">FINALIZE & PRINT</button>
+            <button id="finalize-btn" onclick="finalizeTransaction()" style="width:100%; padding:18px; background:var(--success); color:white; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-size: 1rem;">FINALIZE & PRINT</button>
         </div>
     </div>
 </div>
@@ -168,8 +178,19 @@
         if(companyId) {
             const { data: comp } = await _sb.from('companies').select('*').eq('id', companyId).single();
             if(comp) {
-                document.getElementById('comp-name').value = comp.company_name;
-                document.getElementById('comp-addr').value = `${comp.company_address}\nTIN: ${comp.tin_number}\nPhone: ${comp.contact_number}`;
+                // Navbar Logo
+                if(comp.logo_url) {
+                    const logoImg = document.getElementById('nav-logo');
+                    logoImg.src = comp.logo_url;
+                    logoImg.style.display = 'block';
+                }
+                // Header Details (Top Right)
+                document.getElementById('header-comp-name').innerText = comp.company_name;
+                document.getElementById('header-comp-addr').innerText = comp.company_address;
+                document.getElementById('header-comp-tin').innerText = comp.tin_number;
+                document.getElementById('header-comp-contact').innerText = comp.contact_number;
+                document.getElementById('header-comp-email').innerText = comp.email_address || 'N/A';
+                
                 document.getElementById('sync-status').innerText = "● SYSTEM ONLINE";
                 document.getElementById('sync-status').style.color = "var(--success)";
             }
@@ -179,12 +200,12 @@
     };
 
     async function fetchInventory() {
-        const { data } = await _sb.from('inventory').select('*');
+        const { data } = await _sb.from('inventory').select('*').eq('company_id', companyId);
         if(data) inventory = data;
     }
 
     async function syncInvoiceNumber() {
-        const { data } = await _sb.from('sales').select('invoice_number').order('created_at', { ascending: false }).limit(1);
+        const { data } = await _sb.from('sales').select('invoice_number').order('sale_date', { ascending: false }).limit(1);
         const lastNum = data && data.length > 0 ? parseInt(data[0].invoice_number) : 100000;
         document.getElementById('inv-num').value = lastNum + 1;
     }
@@ -193,15 +214,22 @@
         const q = document.getElementById('prod-search').value.toLowerCase();
         const res = document.getElementById('search-results');
         if(!q) { res.style.display='none'; return; }
-        const matches = inventory.filter(i => i.item_name.toLowerCase().includes(q) || i.sku.toLowerCase().includes(q));
-        res.innerHTML = matches.map(m => `<div style="padding:10px; border-bottom:1px solid #eee; cursor:pointer;" onclick="selectItem('${m.sku}')"><b>${m.item_name}</b><br><small>${m.sku} | Stock: ${m.quantity_on_hand}</small></div>`).join('');
+        const matches = inventory.filter(i => 
+            (i.item_nam || '').toLowerCase().includes(q) || 
+            (i.sku || '').toLowerCase().includes(q)
+        );
+        res.innerHTML = matches.map(m => `
+            <div style="padding:10px; border-bottom:1px solid #eee; cursor:pointer;" onclick="selectItem('${m.sku}')">
+                <b>${m.item_nam}</b><br>
+                <small>${m.sku} | Brand: ${m.brand || 'N/A'} | Price: ₱${m.unit_price}</small>
+            </div>`).join('');
         res.style.display = matches.length ? 'block' : 'none';
     }
 
     function selectItem(sku) {
         activeItem = inventory.find(i => i.sku === sku);
-        document.getElementById('prod-search').value = activeItem.item_name;
-        document.getElementById('price').value = activeItem.unit_price;
+        document.getElementById('prod-search').value = activeItem.item_nam;
+        document.getElementById('price').value = activeItem.unit_price; // Locked Value
         document.getElementById('uom').value = activeItem.uom;
         document.getElementById('search-results').style.display = 'none';
     }
@@ -209,22 +237,32 @@
     function addItem() {
         const qty = parseFloat(document.getElementById('qty').value);
         if(!activeItem || qty <= 0) return;
-        if(qty > activeItem.quantity_on_hand) return alert("Insufficient Stock!");
+        if(qty > activeItem.stock_qty) return alert("Insufficient Stock! Available: " + activeItem.stock_qty);
 
-        cart.push({ ...activeItem, qty, total: qty * activeItem.unit_price });
+        cart.push({ 
+            ...activeItem, 
+            qty, 
+            total: qty * activeItem.unit_price 
+        });
         renderCart();
         activeItem = null;
         document.getElementById('prod-search').value = "";
+        document.getElementById('price').value = "";
+        document.getElementById('uom').value = "";
     }
 
     function renderCart() {
         document.getElementById('cart-body').innerHTML = cart.map((item, i) => `
             <tr>
-                <td><b>${item.item_name}</b><br><small>${item.sku}</small></td>
+                <td>${item.category || '-'}</td>
+                <td>${item.sku}</td>
+                <td><b>${item.item_nam}</b><br><small>${item.description || ''}</small></td>
+                <td>${item.type || ''} / ${item.brand || ''} ${item.material ? '('+item.material+')' : ''}</td>
                 <td>${item.qty}</td>
+                <td>${item.uom}</td>
                 <td>₱${item.unit_price.toFixed(2)}</td>
                 <td>₱${item.total.toFixed(2)}</td>
-                <td class="remove-col" style="color:red; cursor:pointer;" onclick="removeItem(${i})">×</td>
+                <td class="remove-col" style="color:red; cursor:pointer; text-align:center;" onclick="removeItem(${i})">×</td>
             </tr>`).join('');
         calculateBIR();
     }
@@ -249,27 +287,44 @@
     async function finalizeTransaction() {
         if(!cart.length) return alert("Empty Cart");
         
-        const updates = cart.map(item => {
-            return _sb.from('inventory')
-                .update({ quantity_on_hand: item.quantity_on_hand - item.qty })
-                .eq('sku', item.sku);
-        });
+        const btn = document.getElementById('finalize-btn');
+        btn.disabled = true;
+        btn.innerText = "Processing...";
 
-        const { error } = await _sb.from('sales').insert([{
-            company_id: companyId,
-            invoice_number: document.getElementById('inv-num').value,
-            customer_name: document.getElementById('cust-name').value || "Cash Customer",
-            items: cart,
-            total_amount: parseFloat(document.getElementById('v-total').innerText.replace(/[₱,]/g, ''))
-        }]);
+        try {
+            const invoiceNum = document.getElementById('inv-num').value;
+            const customerName = document.getElementById('cust-name').value || "Cash Customer";
 
-        if(!error) {
-            await Promise.all(updates);
+            for (const item of cart) {
+                // 1. Deduct Inventory
+                const { error: invErr } = await _sb.from('inventory')
+                    .update({ stock_qty: item.stock_qty - item.qty })
+                    .eq('id', item.id);
+                
+                if (invErr) throw invErr;
+
+                // 2. Record Sale
+                const { error: saleErr } = await _sb.from('sales').insert([{
+                    product_id: item.id,
+                    quantity_sold: item.qty,
+                    unit_price: item.unit_price,
+                    total_price: item.total,
+                    customer_name: customerName,
+                    invoice_number: invoiceNum,
+                    company_id: companyId
+                }]);
+
+                if (saleErr) throw saleErr;
+            }
+
             alert("Transaction Complete!");
             window.print();
             location.reload();
-        } else {
-            alert("Error: " + error.message);
+
+        } catch (err) {
+            alert("Error: " + err.message);
+            btn.disabled = false;
+            btn.innerText = "FINALIZE & PRINT";
         }
     }
 </script>
