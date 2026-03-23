@@ -51,7 +51,7 @@
         
         .portal-label { font-size: 0.6rem; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; display: block; font-weight: 700; opacity: 0.8; }
 
-        .form-group { text-align: left; margin-bottom: 15px; }
+        .form-group { text-align: left; margin-bottom: 15px; position: relative; }
         label { display: block; font-size: 0.65rem; font-weight: 700; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; }
         
         input {
@@ -63,6 +63,17 @@
 
         input:focus { border-color: var(--primary); background: rgba(15, 23, 42, 0.9); border-width: 2px; }
 
+        /* Password Toggle Styling */
+        .pass-wrapper { position: relative; display: flex; align-items: center; }
+        .toggle-btn {
+            position: absolute; right: 12px; background: none; border: none;
+            color: #94a3b8; cursor: pointer; font-size: 0.6rem; font-weight: 800;
+            padding: 5px; text-transform: uppercase; letter-spacing: 1px;
+            display: flex; align-items: center; justify-content: center;
+            transition: color 0.2s; z-index: 5;
+        }
+        .toggle-btn:hover { color: var(--primary); }
+
         .btn-login {
             width: 100%; padding: 15px; background: var(--primary);
             color: white; border: none; border-radius: 10px;
@@ -73,20 +84,11 @@
         .btn-login:hover { filter: brightness(1.1); transform: translateY(-1px); }
         .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* Return Button Styling */
         .btn-return {
-            display: inline-block;
-            margin-top: 15px;
-            color: #94a3b8;
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: 0.3s;
-            cursor: pointer;
-            background: none;
-            border: none;
+            display: inline-block; margin-top: 15px; color: #94a3b8;
+            font-size: 0.65rem; font-weight: 700; text-decoration: none;
+            text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
+            cursor: pointer; background: none; border: none;
         }
         .btn-return:hover { color: var(--primary); }
 
@@ -108,12 +110,16 @@
 
         <div class="form-group">
             <label>Access Key</label>
-            <input type="password" id="password" placeholder="••••••••" oninput="this.value = this.value.toUpperCase()">
+            <div class="pass-wrapper">
+                <input type="password" id="password" placeholder="••••••••" oninput="this.value = this.value.toUpperCase()">
+                <button type="button" class="toggle-btn" onclick="togglePassword()">
+                    <span id="toggleText">SHOW</span>
+                </button>
+            </div>
         </div>
         
         <button class="btn-login" id="loginBtn" onclick="handleLogin()">Authorize Access</button>
         
-        <!-- Added Return Button -->
         <button class="btn-return" onclick="window.location.href='portal.html'">← Back to Portal Search</button>
 
         <div id="errorBox" class="error-msg">⚠️ ACCESS DENIED: INVALID CREDENTIALS</div>
@@ -127,6 +133,19 @@
         const _sb = supabase.createClient('https://pehffyqlssrqogosfsab.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s');
 
         let activeCompany = null;
+
+        // Toggle Password Function using Words
+        function togglePassword() {
+            const passInput = document.getElementById('password');
+            const toggleText = document.getElementById('toggleText');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                toggleText.innerText = 'HIDE';
+            } else {
+                passInput.type = 'password';
+                toggleText.innerText = 'SHOW';
+            }
+        }
 
         window.onload = async () => {
             const urlParams = new URLSearchParams(window.location.search);
