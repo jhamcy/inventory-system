@@ -29,7 +29,6 @@
             padding: 0 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000;
         }
 
-        /* Logo Styling */
         #nav-brand { display: flex; align-items: center; height: 100%; }
         #nav-logo { max-height: 45px; width: auto; object-fit: contain; }
         
@@ -97,8 +96,7 @@
             <div class="container">
                 <div class="header-flex">
                     <div class="welcome-section">
-                        <!-- Changed from "Hello, User" to Company Name -->
-                        <h1 id="welcome-user">ADMIN ACCESS</h1>
+                        <h1 id="welcome-user">LOADING...</h1>
                         <p id="role-subtitle" style="color: #64748b; font-size: 0.8rem; font-weight: 600; margin:0;">Company Management Suite</p>
                     </div>
                 </div>
@@ -152,12 +150,10 @@
     <script>
         const _sb = supabase.createClient('https://pehffyqlssrqogosfsab.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s');
 
-        function checkAccess() {
+        async function checkAccess() {
             const user = localStorage.getItem('jmcy_username');
             const role = localStorage.getItem('jmcy_role');
             const cid = localStorage.getItem('jmcy_cid');
-            const logoUrl = localStorage.getItem('jmcy_logo');
-            const companyName = localStorage.getItem('jmcy_company_name');
 
             if (!user || !cid) {
                 window.location.href = 'portal.html';
@@ -169,15 +165,33 @@
                 return;
             }
 
-            // Updated this line to use company_name
-            document.getElementById('welcome-user').innerText = companyName || "ADMIN ACCESS";
-            
-            const logoImg = document.getElementById('nav-logo');
-            if (logoUrl) {
-                logoImg.src = `${logoUrl}?t=${new Date().getTime()}`;
-                logoImg.style.display = "block";
-            } else {
-                document.getElementById('nav-brand').innerText = "ADMIN TERMINAL";
+            // MULTI-COMPANY PROTECTION: Explicitly fetch details for THIS company ID only
+            try {
+                const { data: comp, error } = await _sb
+                    .from('companies')
+                    .select('company_name, company_logo')
+                    .eq('id', cid)
+                    .single();
+
+                if (comp) {
+                    // Update Welcome Section
+                    document.getElementById('welcome-user').innerText = comp.company_name || "ADMIN ACCESS";
+                    
+                    // Update Navbar Logo
+                    const logoImg = document.getElementById('nav-logo');
+                    if (comp.company_logo) {
+                        logoImg.src = `${comp.company_logo}?t=${new Date().getTime()}`;
+                        logoImg.style.display = "block";
+                        // Update cache for other pages
+                        localStorage.setItem('jmcy_logo', comp.company_logo);
+                        localStorage.setItem('jmcy_company_name', comp.company_name);
+                    } else {
+                        document.getElementById('nav-brand').innerText = comp.company_name || "ADMIN TERMINAL";
+                    }
+                }
+            } catch (err) {
+                console.error("Access Detail Error:", err);
+                document.getElementById('welcome-user').innerText = "ADMIN ACCESS";
             }
         }
 
