@@ -77,7 +77,6 @@
 <body>
     <div class="navbar">
         <div id="nav-brand">
-            <!-- Logo replaces the text here -->
             <img id="nav-logo" src="" alt="LOGO" style="display: none;">
         </div>
         <button onclick="logout()" style="background:none; border:none; color:#ef4444; font-weight:800; cursor:pointer; font-size:0.7rem;">LOGOUT ⏻</button>
@@ -98,6 +97,7 @@
             <div class="container">
                 <div class="header-flex">
                     <div class="welcome-section">
+                        <!-- Changed from "Hello, User" to Company Name -->
                         <h1 id="welcome-user">ADMIN ACCESS</h1>
                         <p id="role-subtitle" style="color: #64748b; font-size: 0.8rem; font-weight: 600; margin:0;">Company Management Suite</p>
                     </div>
@@ -157,6 +157,7 @@
             const role = localStorage.getItem('jmcy_role');
             const cid = localStorage.getItem('jmcy_cid');
             const logoUrl = localStorage.getItem('jmcy_logo');
+            const companyName = localStorage.getItem('jmcy_company_name');
 
             if (!user || !cid) {
                 window.location.href = 'portal.html';
@@ -168,9 +169,9 @@
                 return;
             }
 
-            document.getElementById('welcome-user').innerText = `Hello, ${user}`;
+            // Updated this line to use company_name
+            document.getElementById('welcome-user').innerText = companyName || "ADMIN ACCESS";
             
-            // Set Logo if available, else show fallback text
             const logoImg = document.getElementById('nav-logo');
             if (logoUrl) {
                 logoImg.src = `${logoUrl}?t=${new Date().getTime()}`;
