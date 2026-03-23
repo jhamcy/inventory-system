@@ -29,7 +29,7 @@
             padding: 0 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000;
         }
 
-        #nav-brand { display: flex; align-items: center; height: 100%; }
+        #nav-brand { display: flex; align-items: center; height: 100%; min-width: 50px; }
         #nav-logo { max-height: 45px; width: auto; object-fit: contain; }
         
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -77,6 +77,7 @@
     <div class="navbar">
         <div id="nav-brand">
             <img id="nav-logo" src="" alt="LOGO" style="display: none;">
+            <span id="nav-text" style="display: none; font-weight: 800; font-size: 0.9rem;">ADMIN TERMINAL</span>
         </div>
         <button onclick="logout()" style="background:none; border:none; color:#ef4444; font-weight:800; cursor:pointer; font-size:0.7rem;">LOGOUT ⏻</button>
     </div>
@@ -96,7 +97,7 @@
             <div class="container">
                 <div class="header-flex">
                     <div class="welcome-section">
-                        <h1 id="welcome-user">LOADING...</h1>
+                        <h1 id="welcome-user">ADMIN ACCESS</h1>
                         <p id="role-subtitle" style="color: #64748b; font-size: 0.8rem; font-weight: 600; margin:0;">Company Management Suite</p>
                     </div>
                 </div>
@@ -154,7 +155,26 @@
             const user = localStorage.getItem('jmcy_username');
             const role = localStorage.getItem('jmcy_role');
             const cid = localStorage.getItem('jmcy_cid');
+            
+            // 1. Initial Local Cache Display (Prevents "Loading..." flash)
+            const cachedName = localStorage.getItem('jmcy_company_name');
+            const cachedLogo = localStorage.getItem('jmcy_logo');
+            
+            if (cachedName) document.getElementById('welcome-user').innerText = cachedName;
+            
+            const logoImg = document.getElementById('nav-logo');
+            const navText = document.getElementById('nav-text');
 
+            if (cachedLogo) {
+                logoImg.src = cachedLogo;
+                logoImg.style.display = 'block';
+                navText.style.display = 'none';
+            } else {
+                navText.innerText = cachedName || "ADMIN TERMINAL";
+                navText.style.display = 'block';
+            }
+
+            // 2. Security Check
             if (!user || !cid) {
                 window.location.href = 'portal.html';
                 return;
@@ -165,33 +185,32 @@
                 return;
             }
 
-            // MULTI-COMPANY PROTECTION: Explicitly fetch details for THIS company ID only
+            // 3. Supabase Sync (Using CORRECT column: logo_url)
             try {
                 const { data: comp, error } = await _sb
                     .from('companies')
-                    .select('company_name, company_logo')
+                    .select('company_name, logo_url')
                     .eq('id', cid)
                     .single();
 
                 if (comp) {
-                    // Update Welcome Section
-                    document.getElementById('welcome-user').innerText = comp.company_name || "ADMIN ACCESS";
+                    document.getElementById('welcome-user').innerText = comp.company_name;
+                    localStorage.setItem('jmcy_company_name', comp.company_name);
                     
-                    // Update Navbar Logo
-                    const logoImg = document.getElementById('nav-logo');
-                    if (comp.company_logo) {
-                        logoImg.src = `${comp.company_logo}?t=${new Date().getTime()}`;
+                    if (comp.logo_url) {
+                        logoImg.src = `${comp.logo_url}?t=${new Date().getTime()}`;
                         logoImg.style.display = "block";
-                        // Update cache for other pages
-                        localStorage.setItem('jmcy_logo', comp.company_logo);
-                        localStorage.setItem('jmcy_company_name', comp.company_name);
+                        navText.style.display = "none";
+                        localStorage.setItem('jmcy_logo', comp.logo_url);
                     } else {
-                        document.getElementById('nav-brand').innerText = comp.company_name || "ADMIN TERMINAL";
+                        logoImg.style.display = "none";
+                        navText.innerText = comp.company_name;
+                        navText.style.display = "block";
+                        localStorage.removeItem('jmcy_logo');
                     }
                 }
             } catch (err) {
-                console.error("Access Detail Error:", err);
-                document.getElementById('welcome-user').innerText = "ADMIN ACCESS";
+                console.error("Fetch Details Error:", err);
             }
         }
 
