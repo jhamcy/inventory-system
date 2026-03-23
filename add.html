@@ -8,277 +8,201 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        :root { --primary: #0f172a; --accent: #3b82f6; --success: #10b981; --danger: #ef4444; --border-main: #cbd5e1; }
+        * { box-sizing: border-box; text-transform: uppercase; }
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        :root {
-            --primary: #0f172a;
-            --accent: #0081ff;
-            --success: #10b981;
-            --danger: #ef4444;
-            --border-main: #cbd5e1;
-        }
+        .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 3px solid var(--accent); }
+        .nav-title { color: white; font-weight: 800; font-size: 0.8rem; letter-spacing: 1px; }
 
-        /* --- GLOBAL LAYOUT --- */
-        html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; position: fixed; width: 100%; }
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; display: flex; flex-direction: column; }
-
-        .navbar { height: 60px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; flex-shrink: 0; z-index: 1000; border-bottom: 3px solid var(--accent); }
+        .main-content { flex: 1; padding: 20px; display: flex; justify-content: center; overflow: hidden; }
+        .bulk-card { background: white; border-radius: 12px; border: 1px solid var(--border-main); width: 100%; max-width: 1400px; display: flex; flex-direction: column; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
         
-        #nav-brand { display: flex; align-items: center; gap: 10px; height: 100%; }
-        #nav-logo { max-height: 40px; width: auto; object-fit: contain; }
-        .nav-title { color: white; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .bulk-header { padding: 15px 20px; border-bottom: 1px solid var(--border-main); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
+        .grid-area { flex: 1; overflow: auto; }
         
-        .user-info { display: flex; flex-direction: column; align-items: flex-end; margin-right: 10px; }
-        .user-label { font-size: 0.5rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; }
-        .user-name { font-size: 0.7rem; color: white; font-weight: 700; display: flex; align-items: center; gap: 4px; }
-        .online-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
+        table { width: 100%; border-collapse: collapse; min-width: 1400px; }
+        th { position: sticky; top: 0; background: #f8fafc; font-size: 0.7rem; font-weight: 700; color: #64748b; border-bottom: 2px solid var(--border-main); padding: 12px; z-index: 10; text-align: left; }
+        td { padding: 8px; border-bottom: 1px solid #f1f5f9; }
 
-        .main-content { flex: 1; display: flex; flex-direction: column; padding: 15px; overflow: hidden; align-items: center; justify-content: center; }
-
-        .right-panel { width: 100%; max-width: 1200px; display: flex; flex-direction: column; overflow: hidden; height: 90%; }
-        .bulk-card { background: white; border-radius: 12px; border: 2px solid var(--primary); display: flex; flex-direction: column; height: 100%; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        /* Sticky Columns */
+        .sticky-del { position: sticky; left: 0; background: #f8fafc; width: 50px; text-align: center; z-index: 11; border-right: 1px solid var(--border-main); }
+        .sticky-num { position: sticky; left: 50px; background: #f8fafc; width: 50px; text-align: center; z-index: 11; border-right: 2px solid var(--border-main); }
         
-        .bulk-header { padding: 12px 20px; border-bottom: 2px solid var(--primary); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; flex-shrink: 0; }
-        .bulk-header h2 { margin: 0; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 1px; }
+        input, select { width: 100%; padding: 8px; border: 1px solid transparent; border-radius: 4px; font-size: 0.75rem; font-weight: 600; outline: none; }
+        input:focus { border-color: var(--accent); background: #fff; }
+        .row-sku { background: #f8fafc; color: var(--accent); font-family: monospace; }
+        .row-prc { text-align: right; color: var(--success); font-weight: 800; }
 
-        .grid-area { flex: 1; overflow: auto; background: #fff; }
-        table { border-collapse: collapse; width: 100%; min-width: 1100px; table-layout: fixed; }
-        
-        thead th { position: sticky; top: 0; background: #f1f5f9; font-size: 0.6rem; font-weight: 800; border-bottom: 2px solid var(--primary); border-right: 1px solid var(--border-main); text-transform: uppercase; z-index: 20; height: 40px; }
-        .sticky-action { position: sticky !important; left: 0; z-index: 30; width: 45px !important; background: #f1f5f9; border-right: 1px solid var(--border-main); text-align: center; }
-        .sticky-num { position: sticky !important; left: 45px; z-index: 29; width: 40px !important; background: #f1f5f9; border-right: 2px solid var(--primary); text-align: center; }
-
-        tbody td { border-bottom: 1px solid var(--border-main); border-right: 1px solid var(--border-main); height: 44px; }
-        input, select { width: 100%; height: 100%; padding: 0 8px; border: none; outline: none; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; background: transparent; }
-        .price-input { color: var(--success); text-align: right; font-family: monospace; }
-
-        .bulk-footer { padding: 12px 20px; border-top: 2px solid var(--primary); display: flex; gap: 10px; background: white; flex-shrink: 0; align-items: center; }
-        
-        .btn { height: 42px; border-radius: 8px; font-weight: 800; text-transform: uppercase; font-size: 0.7rem; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; padding: 0 20px; transition: 0.2s; }
-        .btn-import { background: var(--success); color: white; margin-left: auto; }
-        .btn-add-row { background: #f1f5f9; color: var(--primary); border: 1.5px solid var(--primary); }
-        .btn-save { background: var(--primary); color: white; font-size: 0.8rem; flex: 1; box-shadow: 0 4px 0 #000; }
+        .bulk-footer { padding: 15px 20px; border-top: 1px solid var(--border-main); display: flex; gap: 12px; background: white; }
+        .btn { padding: 10px 20px; border-radius: 8px; font-weight: 800; font-size: 0.7rem; cursor: pointer; border: none; transition: 0.2s; }
+        .btn-save { background: var(--primary); color: white; flex: 1; box-shadow: 0 4px 0 #000; }
         .btn-save:active { transform: translateY(2px); box-shadow: 0 2px 0 #000; }
-        .btn-exit { background: #64748b; color: white; }
-
-        #excel-upload { display: none; }
+        .btn-add { background: #f1f5f9; color: var(--primary); border: 1px solid var(--border-main); }
+        .btn-import { background: var(--success); color: white; }
     </style>
 </head>
 <body>
 
 <header class="navbar">
-    <div id="nav-brand">
-        <img id="nav-logo" src="" alt="" style="display: none;">
-        <div class="nav-title" id="nav-text">JMCYFLOW | ADD ITEMS</div>
-    </div>
-    <div class="user-info">
-        <span class="user-label" id="display-role">STAFF</span>
-        <span class="user-name"><div class="online-dot"></div><span id="display-user">USER</span></span>
-    </div>
+    <div class="nav-title" id="nav-text">JMCYFLOW | ADD ITEMS</div>
+    <button class="btn" style="background:var(--danger); color:white;" onclick="location.href='inventory.html'">BACK</button>
 </header>
 
 <main class="main-content">
-    <div class="right-panel">
-        <div class="bulk-card">
-            <div class="bulk-header">
-                <h2>New Item Registration</h2>
-                <div>
-                    <label for="excel-upload" class="btn btn-import">📁 Import Excel</label>
-                    <input type="file" id="excel-upload" accept=".xlsx, .xls, .csv" onchange="handleExcel(event)">
-                </div>
-            </div>
+    <div class="bulk-card">
+        <div class="bulk-header">
+            <h2 style="font-size: 0.9rem; margin:0;">BULK ITEM REGISTRATION</h2>
+            <label class="btn btn-import">📁 IMPORT EXCEL <input type="file" id="excel-upload" hidden onchange="handleExcel(event)"></label>
+        </div>
 
-            <div class="grid-area">
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="sticky-action">Del</th>
-                            <th class="sticky-num">#</th>
-                            <th style="width: 300px;">Item Description</th>
-                            <th style="width: 130px;">Brand</th>
-                            <th style="width: 160px;">Category</th>
-                            <th style="width: 160px;">SKU</th>
-                            <th style="width: 120px;">Price</th>
-                            <th style="width: 80px;">UOM</th>
-                            <th style="width: 120px;">Initial Loc</th>
-                        </tr>
-                    </thead>
-                    <tbody id="bulk-body"></tbody>
-                </table>
-            </div>
+        <div class="grid-area">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="sticky-del">DEL</th>
+                        <th class="sticky-num">#</th>
+                        <th>Category</th>
+                        <th>Location</th>
+                        <th>Item Code (SKU)</th>
+                        <th style="width: 250px;">Description</th>
+                        <th>Type</th>
+                        <th>Material</th>
+                        <th>Brand</th>
+                        <th>Price</th>
+                        <th>UoM</th>
+                    </tr>
+                </thead>
+                <tbody id="bulk-body"></tbody>
+            </table>
+        </div>
 
-            <div class="bulk-footer">
-                <button class="btn btn-exit" onclick="location.href='inventory.html'">Cancel</button>
-                <button class="btn btn-add-row" onclick="addNewRow()">+ Add Row</button>
-                <button class="btn btn-save" id="save-btn" onclick="saveAllItems()">Register All Items</button>
-            </div>
+        <div class="bulk-footer">
+            <button class="btn btn-add" onclick="addNewRow()">+ ADD ROW</button>
+            <button class="btn btn-save" id="save-btn" onclick="saveAllItems()">REGISTER ALL ITEMS</button>
         </div>
     </div>
 </main>
 
 <script>
-    const SUPABASE_URL = "https://pehffyqlssrqogosfsab.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s";
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    let categories = [], uomList = [], locList = [];
+    const _sb = supabase.createClient('https://pehffyqlssrqogosfsab.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s');
     const companyID = localStorage.getItem('jmcy_cid');
+    const userName = localStorage.getItem('jmcy_user') || 'SYSTEM';
 
     async function init() {
-        if(!companyID) { 
-            alert("Unauthorized access. Please login via your portal.");
-            location.href = 'portal.html'; 
-            return; 
-        }
-        
-        loadBranding();
-
-        const activeUser = localStorage.getItem('jmcy_user') || 'USER';
-        const activeRole = localStorage.getItem('jmcy_role') || 'STAFF';
-        document.getElementById('display-user').innerText = activeUser.toUpperCase();
-        document.getElementById('display-role').innerText = activeRole.toUpperCase();
-
-        try {
-            const { data: catData } = await _supabase.from('inventory_categories').select('*').eq('company_id', companyID).order('name');
-            categories = catData || [];
-            
-            const { data: uomData } = await _supabase.from('inventory_uom').select('name').eq('company_id', companyID).order('name');
-            uomList = uomData || [];
-            
-            const { data: locData } = await _supabase.from('inventory_locations').select('name').eq('company_id', companyID).order('name');
-            locList = locData || [];
-
-            for(let i=0; i<8; i++) addNewRow();
-        } catch (err) {
-            console.error("Init Error:", err.message);
-        }
+        if(!companyID) return location.href = 'portal.html';
+        for(let i=0; i<8; i++) addNewRow();
     }
 
-    async function loadBranding() {
-        const cachedName = localStorage.getItem('jmcy_company_name');
-        const cachedLogo = localStorage.getItem('jmcy_logo');
-        const logoImg = document.getElementById('nav-logo');
-        const navText = document.getElementById('nav-text');
-
-        if (cachedLogo) {
-            logoImg.src = cachedLogo;
-            logoImg.style.display = 'block';
-        }
-        if (cachedName) navText.innerText = `${cachedName.toUpperCase()} | ADD ITEMS`;
-
-        // Sync with DB
-        try {
-            const { data: comp } = await _supabase.from('companies').select('company_name, logo_url').eq('id', companyID).single();
-            if (comp) {
-                if (comp.logo_url) {
-                    logoImg.src = comp.logo_url;
-                    logoImg.style.display = 'block';
-                    localStorage.setItem('jmcy_logo', comp.logo_url);
-                }
-                navText.innerText = `${comp.company_name.toUpperCase()} | ADD ITEMS`;
-                localStorage.setItem('jmcy_company_name', comp.company_name);
-            }
-        } catch (e) { console.warn("Branding sync failed"); }
-    }
-
-    function addNewRow(initialData = {}) {
+    function addNewRow(data = {}) {
         const tbody = document.getElementById('bulk-body');
         const tr = document.createElement('tr');
-        
-        const catOpts = categories.map(c => `<option value="${c.name}" data-code="${c.code}" ${initialData.category === c.name ? 'selected' : ''}>${c.name.toUpperCase()}</option>`).join('');
-        const uomOpts = uomList.map(u => `<option value="${u.name}" ${initialData.uom === u.name ? 'selected' : ''}>${u.name.toUpperCase()}</option>`).join('');
-        const locOpts = locList.map(l => `<option value="${l.name}" ${initialData.location === l.name ? 'selected' : ''}>${l.name.toUpperCase()}</option>`).join('');
-
         tr.innerHTML = `
-            <td class="sticky-action"><button onclick="this.closest('tr').remove(); updateRowNumbers();" style="color:var(--danger); border:none; background:none; font-weight:900; cursor:pointer;">✕</button></td>
-            <td class="sticky-num">0</td>
-            <td><input type="text" class="row-name" value="${initialData.item_name || ''}" placeholder="NAME"></td>
-            <td><input type="text" class="row-brand" value="${initialData.brand || ''}" placeholder="BRAND"></td>
-            <td><select class="row-cat" onchange="generateRowSKU(this)"><option value="">-- SELECT --</option>${catOpts}</select></td>
-            <td><input type="text" class="row-sku" readonly value="${initialData.sku || '---'}"></td>
-            <td><input type="number" class="row-price price-input" value="${initialData.price || ''}" placeholder="0.00" step="0.01"></td>
-            <td><select class="row-uom"><option value="PCS">PCS</option>${uomOpts}</select></td>
-            <td><select class="row-loc"><option value="MAIN">MAIN</option>${locOpts}</select></td>
+            <td class="sticky-del"><button onclick="this.closest('tr').remove(); updateNums()" style="color:var(--danger); border:none; background:none; cursor:pointer; font-weight:bold;">✕</button></td>
+            <td class="sticky-num"></td>
+            <td><input type="text" class="row-cat" placeholder="CATEGORY" value="${data.category || ''}"></td>
+            <td><input type="text" class="row-loc" placeholder="MAIN" value="${data.location || 'MAIN'}"></td>
+            <td><input type="text" class="row-sku" placeholder="AUTO-GEN" value="${data.sku || ''}"></td>
+            <td><input type="text" class="row-nam" placeholder="ITEM DESCRIPTION" value="${data.item_nam || ''}"></td>
+            <td><input type="text" class="row-typ" placeholder="TYPE" value="${data.type || ''}"></td>
+            <td><input type="text" class="row-mat" placeholder="MATERIAL" value="${data.material || ''}"></td>
+            <td><input type="text" class="row-brd" placeholder="BRAND" value="${data.brand || ''}"></td>
+            <td><input type="number" class="row-prc" placeholder="0.00" step="0.01" value="${data.unit_price || ''}"></td>
+            <td><input type="text" class="row-uom" placeholder="PCS" value="${data.uom || 'PCS'}"></td>
         `;
         tbody.appendChild(tr);
-        updateRowNumbers();
+        updateNums();
     }
 
-    function updateRowNumbers() {
-        document.querySelectorAll('#bulk-body tr').forEach((row, i) => {
-            row.querySelector('.sticky-num').innerText = i + 1;
-        });
-    }
-
-    function generateRowSKU(selectEl) {
-        const selectedOpt = selectEl.options[selectEl.selectedIndex];
-        const prefix = selectedOpt.dataset.code || 'ITEM';
-        const year = new Date().getFullYear().toString().slice(-2);
-        const rand = Math.floor(1000 + Math.random() * 9000);
-        const sku = `${prefix}-${year}-${rand}`;
-        selectEl.closest('tr').querySelector('.row-sku').value = sku;
+    function updateNums() {
+        document.querySelectorAll('.sticky-num').forEach((td, i) => td.innerText = i + 1);
     }
 
     async function saveAllItems() {
         const rows = document.querySelectorAll('#bulk-body tr');
-        const items = [], trans = [];
-        const ref = "REG-" + Date.now().toString().slice(-6);
+        const items = [];
+        const logs = [];
 
         rows.forEach(row => {
-            const name = row.querySelector('.row-name').value.trim().toUpperCase();
-            const sku = row.querySelector('.row-sku').value;
-            if (name && sku !== "---") {
-                items.push({ 
+            const nam = row.querySelector('.row-nam').value.trim();
+            // Generate SKU if empty
+            let sku = row.querySelector('.row-sku').value.trim();
+            if(!sku && nam) sku = 'SKU-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+            
+            if (nam) {
+                const fullItemData = {
                     company_id: companyID,
-                    item_name: name, 
-                    brand: row.querySelector('.row-brand').value.toUpperCase(), 
-                    category: row.querySelector('.row-cat').value, 
-                    sku: sku, 
-                    price: parseFloat(row.querySelector('.row-price').value) || 0,
-                    uom: row.querySelector('.row-uom').value, 
-                    location: row.querySelector('.row-loc').value, 
-                    quantity: 0 
+                    sku: sku,
+                    item_nam: nam,
+                    category: row.querySelector('.row-cat').value.trim(),
+                    location: row.querySelector('.row-loc').value.trim(),
+                    type: row.querySelector('.row-typ').value.trim(),
+                    material: row.querySelector('.row-mat').value.trim(),
+                    brand: row.querySelector('.row-brd').value.trim(),
+                    unit_price: parseFloat(row.querySelector('.row-prc').value) || 0,
+                    uom: row.querySelector('.row-uom').value.trim() || 'PCS'
+                };
+
+                // Add to main inventory list
+                items.push({ ...fullItemData, stock_qty: 0 });
+
+                // Add to history list (matches your new full-column SQL history table)
+                logs.push({
+                    ...fullItemData,
+                    item_name: nam, // Mapping to history table column name if different
+                    action_type: 'REGISTRATION',
+                    qty_change: 0,
+                    performed_by: userName
                 });
             }
         });
 
-        if (!items.length) return alert("Please enter at least one item.");
+        if (!items.length) return alert("PLEASE ENTER AT LEAST ONE ITEM DESCRIPTION");
+
         const btn = document.getElementById('save-btn');
         btn.disabled = true; 
-        btn.innerText = "SAVING...";
+        btn.innerText = "PROCESSING...";
 
         try {
-            const { error } = await _supabase.from('inventory').insert(items);
-            if(error) throw error;
-            alert("SUCCESSFULLY REGISTERED " + items.length + " ITEMS");
-            window.location.href = 'inventory.html';
-        } catch (e) { 
-            alert("Error: " + e.message); 
+            // 1. Insert into Inventory
+            const { error: insError } = await _sb.from('inventory').insert(items);
+            if (insError) throw insError;
+            
+            // 2. Insert into History (Full Detail Snapshot)
+            const { error: logError } = await _sb.from('inventory_history').insert(logs);
+            if (logError) throw logError;
+            
+            alert(`SUCCESSFULLY REGISTERED ${items.length} ITEMS`);
+            location.href = 'inventory.html';
+        } catch (e) {
+            alert("DB ERROR: " + e.message);
             btn.disabled = false; 
-            btn.innerText = "Register All Items"; 
+            btn.innerText = "REGISTER ALL ITEMS";
         }
     }
 
     function handleExcel(event) {
-        const file = event.target.files[0];
-        if(!file) return;
         const reader = new FileReader();
         reader.onload = (e) => {
             const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const sheet = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+            const wb = XLSX.read(data, {type: 'array'});
+            const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
             document.getElementById('bulk-body').innerHTML = '';
-            sheet.forEach(item => {
-                addNewRow({ 
-                    item_name: item.Description || item.item_name || '', 
-                    brand: item.Brand || '', 
-                    category: item.Category || '', 
-                    price: item.Price || 0,
-                    uom: item.UOM || 'PCS', 
-                    location: item.Location || 'MAIN' 
+            json.forEach(row => {
+                addNewRow({
+                    category: row.Category || row.CATEGORY,
+                    location: row.Location || row.LOCATION,
+                    sku: row.SKU || row.Code,
+                    item_nam: row.Description || row.Name || row.ITEM_NAM,
+                    type: row.Type || row.TYPE,
+                    material: row.Material || row.MATERIAL,
+                    brand: row.Brand || row.BRAND,
+                    unit_price: row.Price || row.PRICE,
+                    uom: row.UoM || row.UOM || 'PCS'
                 });
             });
         };
-        reader.readAsArrayBuffer(file);
+        reader.readAsArrayBuffer(event.target.files[0]);
     }
 
     window.onload = init;
