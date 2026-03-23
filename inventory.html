@@ -99,10 +99,6 @@
             display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
         }
         .page-info { font-size: 0.75rem; color: #64748b; font-weight: 600; }
-        .page-btn {
-            padding: 8px 16px; border: 1px solid var(--border); background: white; border-radius: 6px;
-            font-size: 0.7rem; font-weight: 700; color: var(--text); cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -111,10 +107,10 @@
     <div class="sidebar-header">
         <h2 style="margin:0; font-size: 1.3rem; color: white;">JMCY<span style="color:var(--accent)">FLOW</span></h2>
     </div>
-    <div class="nav-item active" onclick="setTab('master')">📋 MASTER LIST</div>
-    <div class="nav-item" onclick="setTab('rec')">📥 RECEIVING</div>
-    <div class="nav-item" onclick="setTab('out')">📤 OUTSLIP</div>
-    <div class="nav-item" onclick="setTab('his')">📜 HISTORY</div>
+    <div class="nav-item active">📋 MASTER LIST</div>
+    <div class="nav-item">📥 RECEIVING</div>
+    <div class="nav-item">📤 OUTSLIP</div>
+    <div class="nav-item">📜 HISTORY</div>
 </aside>
 
 <div class="main">
@@ -162,10 +158,6 @@
                     <div class="page-info">
                         SHOWING <span id="startRange">0</span> TO <span id="endRange">0</span> OF <span id="totalItems">0</span> ITEMS
                     </div>
-                    <div class="page-controls">
-                        <button class="page-btn" disabled>PREV</button>
-                        <button class="page-btn" disabled>NEXT</button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -196,7 +188,8 @@
     }
 
     async function fetchInventory() {
-        const { data, error } = await _sb.from('inventory').select('*').eq('company_id', companyID).order('item_name', { ascending: true });
+        // Fetches data from Supabase inventory table
+        const { data, error } = await _sb.from('inventory').select('*').eq('company_id', companyID).order('item_nam', { ascending: true });
         if (error) {
             document.getElementById('inventoryBody').innerHTML = '<tr><td colspan="10" style="text-align:center; color:red;">FETCH ERROR</td></tr>';
             return;
@@ -218,12 +211,12 @@
                 <td>${index + 1}</td>
                 <td style="color: #64748b;">${item.category || '-'}</td>
                 <td>${item.location || 'MAIN'}</td>
-                <td style="font-weight: 700; color: var(--accent);">${item.sku}</td>
-                <td style="font-weight: 600;">${item.item_name}</td>
+                <td style="font-weight: 700; color: var(--accent);">${item.sku || '-'}</td>
+                <td style="font-weight: 600;">${item.item_nam || '-'}</td>
                 <td>${item.type || '-'}</td>
                 <td>${item.material || '-'}</td>
                 <td>${item.brand || '-'}</td>
-                <td style="font-weight: 800; color: ${item.quantity <= 5 ? 'var(--danger)' : 'inherit'}">${item.quantity || 0}</td>
+                <td style="font-weight: 800; color: ${item.stock_qty <= 5 ? 'var(--danger)' : 'inherit'}">${item.stock_qty || 0}</td>
                 <td>${item.uom || 'PCS'}</td>
             </tr>
         `).join('');
@@ -240,7 +233,7 @@
         const val = document.getElementById('inventorySearch').value.toUpperCase();
         const filtered = fullInventory.filter(i => 
             (i.sku && i.sku.toUpperCase().includes(val)) || 
-            (i.item_name && i.item_name.toUpperCase().includes(val)) ||
+            (i.item_nam && i.item_nam.toUpperCase().includes(val)) ||
             (i.category && i.category.toUpperCase().includes(val))
         );
         renderTable(filtered);
