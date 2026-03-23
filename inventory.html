@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>INVENTORY | JMCYFLOW</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -23,9 +23,10 @@
         
         body { margin: 0; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
 
-        /* --- SIDEBAR --- */
-        .sidebar { width: 260px; background: var(--primary); color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+        /* --- SIDEBAR (Desktop) / BOTTOM NAV (Mobile) --- */
+        .sidebar { width: 260px; background: var(--primary); color: white; display: flex; flex-direction: column; flex-shrink: 0; z-index: 1000; }
         .sidebar-header { padding: 25px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .nav-items-container { display: flex; flex-direction: column; flex: 1; }
         .nav-item { 
             padding: 14px 25px; cursor: pointer; display: flex; align-items: center; gap: 12px; 
             font-size: 0.85rem; color: var(--sidebar-text); transition: 0.2s; border-left: 4px solid transparent; 
@@ -42,123 +43,117 @@
             padding: 0 25px; flex-shrink: 0; 
         }
         .nav-brand-area { display: flex; align-items: center; gap: 12px; }
-        #nav-logo { max-height: 35px; width: auto; object-fit: contain; }
-        #nav-text { font-weight: 800; font-size: 0.9rem; color: var(--primary); letter-spacing: 0.5px; }
+        #nav-logo { max-height: 30px; width: auto; object-fit: contain; }
+        #nav-text { font-weight: 800; font-size: 0.85rem; color: var(--primary); letter-spacing: 0.5px; }
 
         .btn-logout { 
-            background: #f1f5f9; border: 1px solid var(--border); padding: 8px 16px; 
-            border-radius: 8px; font-size: 0.7rem; font-weight: 800; cursor: pointer; 
-            transition: 0.2s; color: var(--danger);
+            background: #f1f5f9; border: 1px solid var(--border); padding: 8px 12px; 
+            border-radius: 8px; font-size: 0.65rem; font-weight: 800; cursor: pointer; 
+            color: var(--danger);
         }
-        .btn-logout:hover { background: var(--danger); color: white; border-color: var(--danger); }
 
-        .content-area { flex: 1; overflow-y: auto; padding: 25px; }
+        .content-area { flex: 1; overflow-y: auto; padding: 20px; }
 
         /* --- SEARCH BAR --- */
-        .search-container { margin-bottom: 20px; position: relative; max-width: 500px; }
+        .search-container { margin-bottom: 15px; position: relative; width: 100%; }
         .search-input { 
-            width: 100%; padding: 12px 15px 12px 40px; border-radius: 10px; border: 1px solid var(--border); 
-            font-size: 0.85rem; outline: none; transition: 0.2s; background: white;
+            width: 100%; padding: 14px 15px 14px 40px; border-radius: 12px; border: 1px solid var(--border); 
+            font-size: 0.9rem; outline: none; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
-        .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; }
+        .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
 
-        /* --- TABLE & CARD --- */
-        .card { background: white; border-radius: 12px; border: 1px solid var(--border); padding: 0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column; max-height: 75vh; }
-        .table-responsive { width: 100%; overflow: auto; position: relative; flex: 1; }
+        /* --- TABLE & MOBILE CARDS --- */
+        .card { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .table-responsive { width: 100%; overflow-x: auto; }
         
-        table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; min-width: 1300px; }
-        th, td { font-size: var(--table-font-size); padding: 14px 18px; white-space: nowrap; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: #f8fafc; color: #64748b; font-weight: 700; font-size: 0.75rem; padding: 12px 15px; border-bottom: 2px solid var(--border); position: sticky; top: 0; z-index: 10; }
+        td { padding: 12px 15px; font-size: 0.85rem; border-bottom: 1px solid #f1f5f9; background: white; }
 
-        th { 
-            background: #f8fafc; color: #64748b; font-weight: 700; border-bottom: 2px solid var(--border);
-            position: sticky; top: 0; z-index: 10;
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { 
+                width: 100%; height: 60px; order: 3; flex-direction: row; 
+                position: fixed; bottom: 0; left: 0; border-top: 1px solid rgba(255,255,255,0.1);
+            }
+            .sidebar-header { display: none; }
+            .nav-items-container { flex-direction: row; justify-content: space-around; width: 100%; }
+            .nav-item { 
+                flex: 1; padding: 10px 5px; flex-direction: column; justify-content: center; 
+                font-size: 0.6rem; border-left: none; border-top: 3px solid transparent; text-align: center; gap: 4px;
+            }
+            .nav-item.active { border-left-color: transparent; border-top-color: var(--accent); }
+            
+            .main { height: calc(100vh - 60px); }
+            .content-area { padding: 15px; padding-bottom: 80px; }
+
+            /* Turn Table into Cards */
+            table, thead, tbody, th, td, tr { display: block; }
+            thead { display: none; } /* Hide headers on mobile */
+            tr { margin-bottom: 12px; border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+            td { border: none; padding: 5px 0; display: flex; justify-content: space-between; align-items: center; }
+            td:before { content: attr(data-label); font-weight: 800; color: #64748b; font-size: 0.7rem; }
+            
+            /* Special styling for specific mobile cells */
+            td[data-label="#"] { display: none; }
+            td[data-label="Description"] { display: block; font-size: 1rem; font-weight: 800; color: var(--primary); padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; margin-bottom: 5px; }
+            td[data-label="Description"]:before { display: block; margin-bottom: 2px; }
         }
 
-        /* --- LOCKING THE # COLUMN --- */
-        th:first-child, td:first-child { 
-            position: sticky; 
-            left: 0; 
-            width: 50px; 
-            min-width: 50px;
-            text-align: center; 
-            z-index: 11; 
-            background: #f8fafc;
-            border-right: 2px solid var(--border);
-        }
-        td:first-child { background: white; z-index: 9; }
-        th:first-child { z-index: 20; }
-
-        tr { cursor: pointer; transition: background 0.1s; }
-        td { border-bottom: 1px solid #f1f5f9; color: var(--text); background: white; }
-        
-        tr.selected td { background-color: var(--selected-bg) !important; color: var(--accent); font-weight: 600; }
-        tr:hover:not(.selected) td { background-color: #fcfdfe; }
-
-        .pagination-footer {
-            padding: 15px 25px; background: white; border-top: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
-        }
-        .page-info { font-size: 0.75rem; color: #64748b; font-weight: 600; }
+        .pagination-footer { padding: 12px 20px; background: white; border-top: 1px solid var(--border); font-size: 0.7rem; color: #64748b; font-weight: 600; }
     </style>
 </head>
 <body>
 
 <aside class="sidebar">
     <div class="sidebar-header">
-        <h2 style="margin:0; font-size: 1.3rem; color: white;">JMCY<span style="color:var(--accent)">FLOW</span></h2>
+        <h2 style="margin:0; font-size: 1.2rem; color: white;">JMCY<span style="color:var(--accent)">FLOW</span></h2>
     </div>
-    <div class="nav-item active">📋 MASTER LIST</div>
-    <div class="nav-item">📥 RECEIVING</div>
-    <div class="nav-item">📤 OUTSLIP</div>
-    <div class="nav-item">📜 HISTORY</div>
+    <div class="nav-items-container">
+        <div class="nav-item active">📋 <span class="nav-text">LIST</span></div>
+        <div class="nav-item">📥 <span class="nav-text">RCV</span></div>
+        <div class="nav-item">📤 <span class="nav-text">OUT</span></div>
+        <div class="nav-item">📜 <span class="nav-text">HIST</span></div>
+    </div>
 </aside>
 
 <div class="main">
     <header class="top-header">
         <div class="nav-brand-area">
             <img id="nav-logo" src="" alt="" style="display: none;">
-            <span id="nav-text">JMCYFLOW | INVENTORY</span>
+            <span id="nav-text">JMCYFLOW</span>
         </div>
-        <div class="header-actions">
-            <button class="btn-logout" onclick="location.href='portal.html'">LOGOUT</button>
-        </div>
+        <button class="btn-logout" onclick="location.href='portal.html'">LOGOUT</button>
     </header>
 
     <div class="content-area">
-        <div id="view-master" class="view-section active">
-            <div class="search-container">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="inventorySearch" class="search-input" placeholder="SEARCH INVENTORY..." onkeyup="filterTable()">
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="inventorySearch" class="search-input" placeholder="SEARCH SKU OR NAME..." onkeyup="filterTable()">
+        </div>
+
+        <div class="card">
+            <div class="table-responsive">
+                <table id="masterTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Category</th>
+                            <th>Item Code</th>
+                            <th>Description</th>
+                            <th>Brand</th>
+                            <th>Stock</th>
+                            <th>UoM</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryBody">
+                        <tr><td colspan="7" style="text-align:center; padding:40px;">INITIALIZING...</td></tr>
+                    </tbody>
+                </table>
             </div>
-
-            <div class="card">
-                <div class="table-responsive">
-                    <table id="masterTable">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Category</th>
-                                <th>Location</th>
-                                <th>Item Code</th>
-                                <th>Description</th>
-                                <th>Type</th>
-                                <th>Material</th>
-                                <th>Brand</th>
-                                <th>Quantity</th>
-                                <th>UoM</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inventoryBody">
-                            <tr><td colspan="10" style="text-align:center; padding:40px;">INITIALIZING...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="pagination-footer">
-                    <div class="page-info">
-                        SHOWING <span id="startRange">0</span> TO <span id="endRange">0</span> OF <span id="totalItems">0</span> ITEMS
-                    </div>
-                </div>
+            <div class="pagination-footer">
+                TOTAL: <span id="totalItems">0</span> ITEMS
             </div>
         </div>
     </div>
@@ -177,64 +172,45 @@
     }
 
     async function loadBranding() {
-        try {
-            const { data: comp } = await _sb.from('companies').select('company_name, logo_url').eq('id', companyID).single();
-            if (comp) {
-                const logoImg = document.getElementById('nav-logo');
-                if (comp.logo_url) { logoImg.src = comp.logo_url; logoImg.style.display = 'block'; }
-                document.getElementById('nav-text').innerText = `${comp.company_name.toUpperCase()} | INVENTORY`;
+        const { data: comp } = await _sb.from('companies').select('company_name, logo_url').eq('id', companyID).single();
+        if (comp) {
+            if (comp.logo_url) { 
+                const logo = document.getElementById('nav-logo');
+                logo.src = comp.logo_url; 
+                logo.style.display = 'block'; 
             }
-        } catch (e) { console.warn("Branding failed"); }
+            document.getElementById('nav-text').innerText = comp.company_name;
+        }
     }
 
     async function fetchInventory() {
-        // Fetches data from Supabase inventory table
         const { data, error } = await _sb.from('inventory').select('*').eq('company_id', companyID).order('item_nam', { ascending: true });
-        if (error) {
-            document.getElementById('inventoryBody').innerHTML = '<tr><td colspan="10" style="text-align:center; color:red;">FETCH ERROR</td></tr>';
-            return;
-        }
+        if (error) return;
         fullInventory = data;
         renderTable(fullInventory);
     }
 
     function renderTable(items) {
         const tbody = document.getElementById('inventoryBody');
-        if (!items.length) {
-            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:40px;">NO DATA FOUND</td></tr>';
-            updateUI(0);
-            return;
-        }
-
         tbody.innerHTML = items.map((item, index) => `
             <tr onclick="selectRow(this)" ondblclick="location.href='details.html?sku=${item.sku}'">
-                <td>${index + 1}</td>
-                <td style="color: #64748b;">${item.category || '-'}</td>
-                <td>${item.location || 'MAIN'}</td>
-                <td style="font-weight: 700; color: var(--accent);">${item.sku || '-'}</td>
-                <td style="font-weight: 600;">${item.item_nam || '-'}</td>
-                <td>${item.type || '-'}</td>
-                <td>${item.material || '-'}</td>
-                <td>${item.brand || '-'}</td>
-                <td style="font-weight: 800; color: ${item.stock_qty <= 5 ? 'var(--danger)' : 'inherit'}">${item.stock_qty || 0}</td>
-                <td>${item.uom || 'PCS'}</td>
+                <td data-label="#">${index + 1}</td>
+                <td data-label="Category">${item.category || '-'}</td>
+                <td data-label="Item Code" style="font-weight:700; color:var(--accent);">${item.sku || '-'}</td>
+                <td data-label="Description"><b>${item.item_nam || '-'}</b></td>
+                <td data-label="Brand">${item.brand || '-'}</td>
+                <td data-label="Stock" style="font-weight:800; color: ${item.stock_qty <= 5 ? 'var(--danger)' : 'inherit'}">${item.stock_qty || 0}</td>
+                <td data-label="UoM">${item.uom || 'PCS'}</td>
             </tr>
         `).join('');
-        updateUI(items.length);
-    }
-
-    function updateUI(count) {
-        document.getElementById('totalItems').innerText = count;
-        document.getElementById('endRange').innerText = count;
-        document.getElementById('startRange').innerText = count > 0 ? 1 : 0;
+        document.getElementById('totalItems').innerText = items.length;
     }
 
     function filterTable() {
         const val = document.getElementById('inventorySearch').value.toUpperCase();
         const filtered = fullInventory.filter(i => 
             (i.sku && i.sku.toUpperCase().includes(val)) || 
-            (i.item_nam && i.item_nam.toUpperCase().includes(val)) ||
-            (i.category && i.category.toUpperCase().includes(val))
+            (i.item_nam && i.item_nam.toUpperCase().includes(val))
         );
         renderTable(filtered);
     }
