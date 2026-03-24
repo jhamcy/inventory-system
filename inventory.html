@@ -15,7 +15,7 @@
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; text-transform: uppercase; }
         body { margin: 0; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
 
-        /* --- SIDEBAR --- */
+        /* --- SIDEBAR (DESKTOP) --- */
         .sidebar { width: 260px; background: var(--primary); color: white; display: flex; flex-direction: column; flex-shrink: 0; z-index: 1000; }
         .sidebar-header { padding: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .nav-item { padding: 16px 25px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 0.8rem; color: var(--sidebar-text); transition: 0.2s; border-left: 4px solid transparent; text-decoration: none; }
@@ -24,7 +24,7 @@
 
         /* --- MAIN --- */
         .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .top-header { height: 65px; background: white; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 25px; }
+        .top-header { height: 65px; background: white; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 25px; flex-shrink: 0; }
         #nav-logo { max-height: 28px; width: auto; margin-right: 10px; }
 
         .content-area { flex: 1; overflow-y: auto; padding: 20px; }
@@ -34,23 +34,38 @@
         .search-input { width: 100%; padding: 14px 15px 14px 45px; border-radius: 10px; border: 1px solid var(--border); outline: none; font-size: 0.85rem; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; }
 
-        /* --- TABLE LAYOUT (DESKTOP) --- */
+        /* --- TABLE --- */
         .card { background: var(--white); border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; }
         .table-responsive { width: 100%; overflow-x: auto; }
-        
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th { background: #f1f5f9; color: #475569; font-weight: 700; font-size: 0.7rem; padding: 14px 15px; border: 1px solid var(--border); text-align: left; position: sticky; top: 0; }
         td { padding: 12px 15px; font-size: 0.8rem; border: 1px solid var(--border); }
-        tr:hover { background-color: #f8fafc; }
 
-        /* --- MOBILE LAYOUT --- */
+        /* --- MOBILE LAYOUT UPDATES --- */
         @media (max-width: 768px) {
-            .sidebar { width: 100%; height: 70px; position: fixed; bottom: 0; flex-direction: row; border-top: 1px solid rgba(255,255,255,0.1); }
+            body { flex-direction: column; }
+            .sidebar { 
+                width: 100%; 
+                height: 60px; 
+                flex-direction: row; 
+                order: 2; /* Moves sidebar below top-header */
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
             .sidebar-header { display: none; }
-            .nav-item { flex: 1; flex-direction: column; padding: 10px; font-size: 0.6rem; border-left: none; border-top: 3px solid transparent; justify-content: center; }
-            .nav-item.active { border-top-color: var(--accent); background: transparent; }
-            .main { height: calc(100vh - 70px); }
-            .content-area { padding: 15px 15px 90px 15px; }
+            .nav-item { 
+                flex: 1; 
+                padding: 0; 
+                font-size: 0.65rem; 
+                border-left: none; 
+                border-bottom: 3px solid transparent; 
+                justify-content: center; 
+                flex-direction: column;
+                gap: 4px;
+            }
+            .nav-item.active { border-bottom-color: var(--accent); border-top-color: transparent; background: transparent; }
+            
+            .main { height: 100vh; }
+            .content-area { padding: 15px; }
 
             table, thead, tbody, th, td, tr { display: block; border: none; }
             thead { display: none; }
@@ -58,23 +73,13 @@
             td { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f8fafc; }
             td:last-child { border-bottom: none; }
             td:before { content: attr(data-label); font-weight: 800; color: #64748b; font-size: 0.65rem; }
-            
-            td[data-label="Description"] { display: block; font-size: 1rem; font-weight: 800; color: var(--primary); padding-bottom: 10px; margin-bottom: 5px; border-bottom: 2px solid var(--bg); }
-            td[data-label="Description"]:before { margin-bottom: 4px; display: block; }
+            td[data-label="Description"] { display: block; font-size: 1rem; font-weight: 800; color: var(--primary); border-bottom: 2px solid var(--bg); }
         }
 
         .footer-stats { padding: 15px 20px; background: #f8fafc; border-top: 1px solid var(--border); font-size: 0.75rem; font-weight: 700; color: #64748b; }
     </style>
 </head>
 <body>
-
-<aside class="sidebar">
-    <div class="sidebar-header"><h2 style="margin:0; font-size: 1.1rem; color: white;">WHSE <span style="color:var(--accent)">PRO</span></h2></div>
-    <div class="nav-item active" onclick="location.href='inventory.html'">📋 <span>LIST</span></div>
-    <div class="nav-item" onclick="location.href='rcv.html'">📥 <span>RCV</span></div>
-    <div class="nav-item" onclick="location.href='out.html'">📤 <span>OUT</span></div>
-    <div class="nav-item" onclick="location.href='hist.html'">📜 <span>HIST</span></div>
-</aside>
 
 <div class="main">
     <header class="top-header">
@@ -85,6 +90,14 @@
         <button style="border:none; background:#fef2f2; color:var(--danger); padding:8px 15px; border-radius:6px; font-weight:800; font-size:0.65rem; cursor:pointer;" onclick="localStorage.clear(); location.href='portal.html'">LOGOUT</button>
     </header>
 
+    <aside class="sidebar">
+        <div class="sidebar-header"><h2 style="margin:0; font-size: 1.1rem; color: white;">WHSE <span style="color:var(--accent)">PRO</span></h2></div>
+        <div class="nav-item active" onclick="location.href='inventory.html'">📋 <span>LIST</span></div>
+        <div class="nav-item" onclick="location.href='rcv.html'">📥 <span>RCV</span></div>
+        <div class="nav-item" onclick="location.href='out.html'">📤 <span>OUT</span></div>
+        <div class="nav-item" onclick="location.href='hist.html'">📜 <span>HIST</span></div>
+    </aside>
+
     <div class="content-area">
         <div class="search-box">
             <span class="search-icon">🔍</span>
@@ -93,7 +106,7 @@
 
         <div class="card">
             <div class="table-responsive">
-                <table>
+                <table id="mainTable">
                     <thead>
                         <tr>
                             <th>#</th>
