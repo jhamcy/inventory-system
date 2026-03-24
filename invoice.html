@@ -3,328 +3,289 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Professional Invoice System | JmcyFlow</title>
+    <title>OFFICIAL INVOICE | JMCYFLOW</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #1e293b; --accent: #2563eb; --border: #cbd5e1; --bg: #f8fafc; --success: #059669; }
-        * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { margin: 0; background: var(--bg); color: var(--primary); }
+        :root { --primary: #0f172a; --accent: #2563eb; --border: #e2e8f0; --bg: #f8fafc; --text: #1e293b; --success: #10b981; }
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; text-transform: uppercase; }
+        body { margin: 0; background: var(--bg); color: var(--text); }
 
-        .nav { height: 60px; background: white; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; position: sticky; top: 0; z-index: 1000; }
-        .nav-left { display: flex; align-items: center; gap: 10px; }
-        .company-logo-nav { height: 40px; width: 40px; object-fit: contain; border-radius: 4px; }
-        .logo-text { font-weight: 800; font-size: 1rem; color: var(--accent); text-decoration: none; }
+        /* --- NAVIGATION --- */
+        .nav { height: 65px; background: white; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 25px; position: sticky; top: 0; z-index: 1000; }
+        .nav-logo { height: 32px; margin-right: 12px; }
+        .nav-link { color: var(--text); text-decoration: none; font-weight: 800; font-size: 0.7rem; margin-left: 20px; cursor: pointer; }
         
-        .main-wrapper { display: grid; grid-template-columns: 1fr; max-width: 1400px; margin: 0 auto; }
+        /* --- LAYOUT ENGINE --- */
+        .main-container { display: flex; flex-direction: column; max-width: 1600px; margin: 0 auto; height: calc(100vh - 65px); }
+        
         @media (min-width: 1024px) {
-            .main-wrapper { grid-template-columns: 1fr 380px; height: calc(100vh - 60px); }
-            .invoice-area { overflow-y: auto; padding: 40px; }
-            .sidebar-area { border-left: 1px solid var(--border); overflow-y: auto; padding: 25px; }
+            .main-container { flex-direction: row; }
+            .invoice-preview { flex: 1; overflow-y: auto; padding: 50px; background: #cbd5e1; display: flex; justify-content: center; }
+            .controls-panel { width: 400px; border-left: 1px solid var(--border); background: white; padding: 30px; overflow-y: auto; }
         }
-        .invoice-area { padding: 20px; background: white; }
-        .sidebar-area { padding: 20px; background: #f1f5f9; }
 
-        .invoice-header { display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 2px solid var(--primary); padding-bottom: 20px; }
-        .biz-info { flex: 1.5; }
-        .inv-meta { flex: 1; text-align: right; font-size: 0.8rem; color: #334155; }
-        .doc-type { font-size: 1.5rem; font-weight: 900; color: #000; text-transform: uppercase; margin-bottom: 10px; }
+        /* --- THE PAPER (INVOICE) --- */
+        .paper { background: white; width: 100%; max-width: 800px; min-height: 1056px; padding: 60px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; }
         
-        .display-name { font-size: 1.4rem; font-weight: 800; display: block; margin-bottom: 5px; }
-        .inv-val { font-size: 1rem; font-weight: 700; color: #ef4444; border: none; text-align: right; outline: none; background: transparent; width: 140px; }
-
-        .section-title { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin: 20px 0 10px 0; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        label { font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 3px; }
-        input, select { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem; outline: none; }
-        input[readonly] { background-color: #f1f5f9; cursor: not-allowed; }
+        .header-grid { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 40px; }
+        .company-brand h1 { margin: 0; font-size: 1.8rem; font-weight: 900; color: var(--primary); }
+        .company-details { font-size: 0.7rem; color: #64748b; line-height: 1.5; margin-top: 10px; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.75rem; }
-        th { background: #f1f5f9; padding: 8px; text-transform: uppercase; text-align: left; border: 1px solid var(--border); }
-        td { padding: 8px; border: 1px solid var(--border); }
+        .invoice-meta { text-align: right; }
+        .doc-title { font-size: 2rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 10px; }
+        .meta-row { font-size: 0.8rem; font-weight: 700; margin-bottom: 5px; }
+        .meta-row span { color: var(--accent); }
 
-        .vat-summary { width: 100%; margin-top: 20px; font-size: 0.75rem; border: none; }
-        .vat-summary td { border: none; padding: 2px 0; }
-        .total-box { font-size: 1.2rem; font-weight: 800; color: var(--accent); border-top: 2px solid #000 !important; margin-top: 10px; padding-top: 10px !important; }
+        /* --- CLIENT SECTION --- */
+        .bill-to { margin-bottom: 30px; border-top: 2px solid var(--primary); padding-top: 20px; }
+        .section-label { font-size: 0.6rem; font-weight: 900; color: #94a3b8; margin-bottom: 10px; display: block; }
+        
+        /* --- TABLES --- */
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th { background: var(--primary); color: white; padding: 12px; font-size: 0.7rem; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.75rem; }
+        
+        .totals-table { width: 250px; margin-left: auto; }
+        .totals-table td { border: none; padding: 5px 0; text-align: right; }
+        .grand-total { font-size: 1.2rem; font-weight: 900; color: var(--accent); border-top: 2px solid var(--primary) !important; }
 
-        .bir-footer { margin-top: 40px; font-size: 0.6rem; color: #94a3b8; text-align: center; border-top: 1px dashed var(--border); padding-top: 10px; }
+        /* --- FORMS & AUTOCOMPLETE --- */
+        .form-group { margin-bottom: 15px; position: relative; }
+        label { font-size: 0.65rem; font-weight: 800; color: #64748b; display: block; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.8rem; outline: none; }
+        input:focus { border-color: var(--accent); }
+
+        .search-results { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 0 0 8px 8px; z-index: 100; max-height: 150px; overflow-y: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: none; }
+        .search-item { padding: 10px; cursor: pointer; font-size: 0.75rem; border-bottom: 1px solid #f1f5f9; }
+        .search-item:hover { background: #f8fafc; color: var(--accent); }
+
+        .btn-primary { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; margin-top: 10px; }
+        .btn-success { width: 100%; padding: 18px; background: var(--success); color: white; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 1rem; }
 
         @media print {
-            .nav, .sidebar-area, #prod-search-container, .add-row, .remove-col { display: none !important; }
-            body, .main-wrapper, .invoice-area { display: block; background: white; padding: 0; }
-            .inv-val { color: black !important; }
+            .nav, .controls-panel, .no-print { display: none !important; }
+            body { background: white; }
+            .invoice-preview { padding: 0; background: white; }
+            .paper { box-shadow: none; max-width: 100%; padding: 0; }
         }
     </style>
 </head>
 <body>
 
 <nav class="nav">
-    <div class="nav-left">
-        <img id="nav-logo" src="" alt="" class="company-logo-nav" style="display:none;">
-        <a href="portal.html" class="logo-text">JMCYFLOW INVOICE</a>
+    <div style="display:flex; align-items:center;">
+        <img id="nav-logo" class="nav-logo" src="" style="display:none;">
+        <span id="nav-comp-name" style="font-weight:900;">JMCYFLOW</span>
+        <a class="nav-link" onclick="location.href='sales.html'">INVENTORY</a>
+        <a class="nav-link" onclick="location.href='clients.html'">CUSTOMERS</a>
     </div>
-    <div id="sync-status" style="font-size: 0.65rem; color: #f59e0b; font-weight: 600;">● LOADING SYSTEM...</div>
+    <div id="status" style="font-size:0.6rem; color:var(--success); font-weight:800;">● SYSTEM ACTIVE</div>
 </nav>
 
-<div class="main-wrapper">
-    <div class="invoice-area">
-        <div class="invoice-header">
-            <div class="biz-info">
-                <div class="doc-type">Sales Invoice</div>
-                <div>
-                    <span style="font-size: 0.7rem; font-weight: 800;">Invoice No:</span>
-                    <input type="text" id="inv-num" class="inv-val" placeholder="000000">
+<div class="main-container">
+    <div class="invoice-preview">
+        <div class="paper" id="invoice-paper">
+            <div class="header-grid">
+                <div class="company-brand">
+                    <h1 id="bill-comp-name">---</h1>
+                    <div class="company-details">
+                        <div id="bill-comp-addr">---</div>
+                        <div>TIN: <span id="bill-comp-tin">---</span></div>
+                        <div>TEL: <span id="bill-comp-contact">---</span></div>
+                        <div>EMAIL: <span id="bill-comp-email">---</span></div>
+                    </div>
                 </div>
-                <div>
-                    <span style="font-size: 0.7rem; font-weight: 800;">Date:</span>
-                    <span id="inv-date" style="font-size: 0.9rem; font-weight: 700;"></span>
-                </div>
-            </div>
-            <div class="inv-meta" id="company-header-right">
-                <strong id="header-comp-name" class="display-name">---</strong>
-                <div id="header-comp-addr">---</div>
-                <div>TIN: <span id="header-comp-tin">---</span></div>
-                <div>Contact: <span id="header-comp-contact">---</span></div>
-                <div>Email: <span id="header-comp-email">---</span></div>
-            </div>
-        </div>
-
-        <span class="section-title">Client Details</span>
-        <div class="input-grid">
-            <div><label>Customer Name / Company</label><input type="text" id="cust-name" placeholder="Registered Name"></div>
-            <div><label>Customer TIN</label><input type="text" id="cust-tin" placeholder="000-000-000-000"></div>
-        </div>
-        <div class="input-grid">
-            <div style="grid-column: span 2;"><label>Address</label><input type="text" id="cust-addr" placeholder="Registered Address"></div>
-        </div>
-
-        <span class="section-title">Line Items</span>
-        <div id="prod-search-container" style="position:relative; margin-bottom:10px;">
-            <input type="text" id="prod-search" placeholder="🔍 Search Product SKU or Name..." oninput="searchProducts()">
-            <div id="search-results" style="position:absolute; width:100%; background:white; z-index:10; border:1px solid var(--border); display:none; max-height:150px; overflow-y:auto; border-radius:0 0 8px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></div>
-        </div>
-        
-        <div class="add-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; align-items: flex-end; margin-bottom: 15px;">
-            <div><label>Qty</label><input type="number" id="qty" value="1"></div>
-            <div><label>Unit Price</label><input type="number" id="price" readonly></div>
-            <div><label>UOM</label><input type="text" id="uom" readonly></div>
-            <button onclick="addItem()" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer; font-weight:700;">ADD LINE</button>
-        </div>
-
-        <table id="invoice-table">
-            <thead>
-                <tr>
-                    <th>Cat.</th>
-                    <th>Code/SKU</th>
-                    <th>Description</th>
-                    <th>Type/Brand</th>
-                    <th>Qty</th>
-                    <th>UOM</th>
-                    <th>Price</th>
-                    <th>Amount</th>
-                    <th class="remove-col"></th>
-                </tr>
-            </thead>
-            <tbody id="cart-body"></tbody>
-        </table>
-
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 20px;">
-            <div style="width: 45%;">
-                <div style="margin-top: 50px; text-align: center; width: 100%;">
-                    <input type="text" id="signatory" placeholder="Cashier / Authorized Signature" style="width:100%; border:none; border-bottom:1px solid #000; text-align:center; font-weight:700; padding-bottom:5px;">
-                    <p style="font-size: 0.65rem; text-transform: uppercase; margin-top: 5px; color: #64748b;">Authorized Signature</p>
+                <div class="invoice-meta">
+                    <div class="doc-title">INVOICE</div>
+                    <div class="meta-row">NO: <span id="display-inv-num">---</span></div>
+                    <div class="meta-row">DATE: <span id="display-date">---</span></div>
                 </div>
             </div>
-            <div style="width: 45%;">
-                <table class="vat-summary">
-                    <tr><td>VATable Sales</td><td style="text-align:right;" id="v-sales">₱0.00</td></tr>
-                    <tr><td>VAT-Exempt Sales</td><td style="text-align:right;" id="v-exempt">₱0.00</td></tr>
-                    <tr><td>VAT Amount (12%)</td><td style="text-align:right; border-bottom:1px solid #ddd !important; padding-bottom:5px;" id="v-amount">₱0.00</td></tr>
-                    <tr class="total-box"><td><strong>INVOICE TOTAL</strong></td><td style="text-align:right;" id="v-total"><strong>₱0.00</strong></td></tr>
+
+            <div class="bill-to">
+                <span class="section-label">BILL TO:</span>
+                <div style="font-weight:800; font-size:1.1rem;" id="display-cust-name">CASH CUSTOMER</div>
+                <div id="display-cust-style" style="font-size:0.7rem; font-weight:700; color:var(--accent); margin-bottom:4px;">---</div>
+                <div id="display-cust-addr" style="font-size:0.8rem; color:#64748b;">---</div>
+                <div style="font-size:0.75rem; margin-top:5px; font-weight:600;">TIN: <span id="display-cust-tin">---</span></div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ITEM DESCRIPTION</th>
+                        <th style="text-align:center">QTY</th>
+                        <th style="text-align:right">PRICE</th>
+                        <th style="text-align:right">TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody id="invoice-items"></tbody>
+            </table>
+
+            <div style="display:flex; justify-content:space-between; margin-top:40px;">
+                <div style="width:200px; text-align:center; border-top:1px solid black; padding-top:10px;">
+                    <div style="font-size:0.7rem; font-weight:800;" id="staff-name">AUTHORIZED SIGNATURE</div>
+                </div>
+                <table class="totals-table">
+                    <tr><td>VATABLE SALES</td><td id="tot-vatable">₱0.00</td></tr>
+                    <tr><td>VAT AMOUNT (12%)</td><td id="tot-tax">₱0.00</td></tr>
+                    <tr class="grand-total"><td>TOTAL DUE</td><td id="tot-grand">₱0.00</td></tr>
                 </table>
             </div>
         </div>
-
-        <div class="bir-footer">
-            <p>"THIS DOCUMENT IS NOT VALID FOR CLAIM OF INPUT TAX"</p>
-            <p>Powered by JmcyFlow Invoice Engine</p>
-        </div>
     </div>
 
-    <div class="sidebar-area">
-        <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
-            <span class="section-title" style="margin-top: 0;">Discounts</span>
-            <label>Discount Type</label>
-            <select id="disc-type" onchange="calculateBIR()" style="margin-bottom:15px;">
-                <option value="none">None</option>
-                <option value="percent">Percentage (%)</option>
-                <option value="fixed">Fixed Amount (₱)</option>
-            </select>
-            <label>Value</label>
-            <input type="number" id="disc-val" value="0" oninput="calculateBIR()" style="margin-bottom:20px;">
-            <button id="finalize-btn" onclick="finalizeTransaction()" style="width:100%; padding:18px; background:var(--success); color:white; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-size: 1rem;">GENERATE INVOICE</button>
+    <aside class="controls-panel">
+        <span class="section-label">1. TRANSACTION INFO</span>
+        <div class="form-group">
+            <label>Invoice Number</label>
+            <input type="text" id="input-inv-num" oninput="syncText()">
         </div>
-    </div>
+        
+        <span class="section-label">2. CUSTOMER LOOKUP</span>
+        <div class="form-group">
+            <input type="text" id="input-cust-name" placeholder="SEARCH REGISTERED CUSTOMER..." oninput="searchCustomer()" autocomplete="off">
+            <div id="cust-results" class="search-results"></div>
+        </div>
+        <div class="form-group"><input type="text" id="input-cust-addr" placeholder="MANUAL ADDRESS" oninput="syncText()"></div>
+        <div class="form-group"><input type="text" id="input-cust-tin" placeholder="MANUAL TIN #" oninput="syncText()"></div>
+
+        <span class="section-label">3. ITEM SELECTION</span>
+        <div class="form-group">
+            <input type="text" id="item-search" placeholder="🔍 SEARCH INVENTORY..." oninput="searchStock()" autocomplete="off">
+            <div id="item-results" class="search-results"></div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <div class="form-group"><label>QTY</label><input type="number" id="input-qty" value="1"></div>
+            <div class="form-group"><label>PRICE</label><input type="number" id="input-price"></div>
+        </div>
+        <button class="btn-primary" onclick="addToInvoice()">ADD TO LIST</button>
+
+        <div style="margin-top:30px; border-top:1px dashed #ddd; padding-top:20px;">
+            <button class="btn-success" onclick="finalizeAndPrint()">PROCESS & PRINT</button>
+            <button class="btn-primary" style="background:#64748b;" onclick="location.reload()">NEW TRANSACTION</button>
+        </div>
+    </aside>
 </div>
 
 <script>
     const _sb = supabase.createClient('https://pehffyqlssrqogosfsab.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s');
     
-    let inventory = [], cart = [], activeItem = null;
-    const companyId = localStorage.getItem('jmcy_company_uuid');
+    let stock = [], customers = [], cart = [], selectedItem = null;
+    const cid = localStorage.getItem('jmcy_cid');
 
-    window.onload = async () => {
-        document.getElementById('inv-date').innerText = new Date().toLocaleDateString('en-PH');
-        if(companyId) {
-            const { data: comp } = await _sb.from('companies').select('*').eq('id', companyId).single();
-            if(comp) {
-                if(comp.logo_url) {
-                    const logoImg = document.getElementById('nav-logo');
-                    logoImg.src = comp.logo_url;
-                    logoImg.style.display = 'block';
-                }
-                document.getElementById('header-comp-name').innerText = comp.company_name;
-                document.getElementById('header-comp-addr').innerText = comp.company_address;
-                document.getElementById('header-comp-tin').innerText = comp.tin_number;
-                document.getElementById('header-comp-contact').innerText = comp.contact_number;
-                document.getElementById('header-comp-email').innerText = comp.email_address || 'N/A';
-                
-                document.getElementById('sync-status').innerText = "● SYSTEM ONLINE";
-                document.getElementById('sync-status').style.color = "var(--success)";
-            }
-            fetchInventory();
-            syncInvoiceNumber();
+    async function init() {
+        if(!cid) { location.href='portal.html'; return; }
+        document.getElementById('display-date').innerText = new Date().toLocaleDateString();
+        
+        const { data: comp } = await _sb.from('companies').select('*').eq('id', cid).single();
+        if(comp) {
+            document.getElementById('nav-comp-name').innerText = comp.company_name;
+            document.getElementById('bill-comp-name').innerText = comp.company_name;
+            document.getElementById('bill-comp-addr').innerText = comp.company_address;
+            document.getElementById('bill-comp-tin').innerText = comp.tin_number;
+            document.getElementById('bill-comp-contact').innerText = comp.contact_number;
+            document.getElementById('bill-comp-email').innerText = comp.email_address;
+            if(comp.logo_url) { document.getElementById('nav-logo').src = comp.logo_url; document.getElementById('nav-logo').style.display = 'block'; }
         }
-    };
 
-    async function fetchInventory() {
-        const { data } = await _sb.from('inventory').select('*').eq('company_id', companyId);
-        if(data) inventory = data;
+        const { data: inv } = await _sb.from('inventory').select('*').eq('company_id', cid);
+        stock = inv || [];
+
+        const { data: custReg } = await _sb.from('customer_registry').select('*').eq('company_id', cid);
+        customers = custReg || [];
+
+        const { data: sales } = await _sb.from('sales_report').select('invoice_number').order('created_at', {ascending:false}).limit(1);
+        const last = (sales && sales[0]) ? parseInt(sales[0].invoice_number) : 1000;
+        document.getElementById('input-inv-num').value = last + 1;
+        syncText();
     }
 
-    async function syncInvoiceNumber() {
-        const { data } = await _sb.from('sales').select('invoice_number').order('sale_date', { ascending: false }).limit(1);
-        const lastNum = data && data.length > 0 ? parseInt(data[0].invoice_number) : 100000;
-        document.getElementById('inv-num').value = lastNum + 1;
+    // --- CUSTOMER SEARCH ---
+    function searchCustomer() {
+        const q = document.getElementById('input-cust-name').value.toLowerCase();
+        const res = document.getElementById('cust-results');
+        if(!q) { res.style.display='none'; syncText(); return; }
+        const matches = customers.filter(c => c.customer_name.toLowerCase().includes(q) || (c.tin && c.tin.includes(q)));
+        res.innerHTML = matches.map(m => `<div class="search-item" onclick="pickCustomer('${m.id}')">${m.customer_name}<br><small>TIN: ${m.tin || 'N/A'}</small></div>`).join('');
+        res.style.display = 'block';
+        syncText();
     }
 
-    function searchProducts() {
-        const q = document.getElementById('prod-search').value.toLowerCase();
-        const res = document.getElementById('search-results');
+    function pickCustomer(id) {
+        const c = customers.find(x => x.id === id);
+        document.getElementById('input-cust-name').value = c.customer_name;
+        document.getElementById('input-cust-addr').value = c.address || "";
+        document.getElementById('input-cust-tin').value = c.tin || "";
+        document.getElementById('display-cust-style').innerText = c.business_style || "";
+        document.getElementById('cust-results').style.display = 'none';
+        syncText();
+    }
+
+    // --- INVENTORY SEARCH ---
+    function searchStock() {
+        const q = document.getElementById('item-search').value.toLowerCase();
+        const res = document.getElementById('item-results');
         if(!q) { res.style.display='none'; return; }
-        const matches = inventory.filter(i => 
-            (i.item_nam || '').toLowerCase().includes(q) || 
-            (i.sku || '').toLowerCase().includes(q)
-        );
-        res.innerHTML = matches.map(m => `
-            <div style="padding:10px; border-bottom:1px solid #eee; cursor:pointer;" onclick="selectItem('${m.sku}')">
-                <b>${m.item_nam}</b><br>
-                <small>${m.sku} | Price: ₱${m.unit_price}</small>
-            </div>`).join('');
-        res.style.display = matches.length ? 'block' : 'none';
+        const matches = stock.filter(s => s.item_nam.toLowerCase().includes(q) || s.sku.toLowerCase().includes(q));
+        res.innerHTML = matches.map(m => `<div class="search-item" onclick="pickItem('${m.sku}')">${m.item_nam}<br><small>STOCK: ${m.stock_qty} | ₱${m.unit_price}</small></div>`).join('');
+        res.style.display = 'block';
     }
 
-    function selectItem(sku) {
-        activeItem = inventory.find(i => i.sku === sku);
-        document.getElementById('prod-search').value = activeItem.item_nam;
-        document.getElementById('price').value = activeItem.unit_price;
-        document.getElementById('uom').value = activeItem.uom;
-        document.getElementById('search-results').style.display = 'none';
+    function pickItem(sku) {
+        selectedItem = stock.find(s => s.sku === sku);
+        document.getElementById('item-search').value = selectedItem.item_nam;
+        document.getElementById('input-price').value = selectedItem.unit_price;
+        document.getElementById('item-results').style.display = 'none';
     }
 
-    function addItem() {
-        const qty = parseFloat(document.getElementById('qty').value);
-        if(!activeItem || qty <= 0) return;
-        if(qty > activeItem.stock_qty) return alert("Insufficient Stock! Available: " + activeItem.stock_qty);
-
-        cart.push({ 
-            ...activeItem, 
-            qty, 
-            total: qty * activeItem.unit_price 
-        });
-        renderCart();
-        activeItem = null;
-        document.getElementById('prod-search').value = "";
-        document.getElementById('price').value = "";
-        document.getElementById('uom').value = "";
+    function addToInvoice() {
+        const qty = parseFloat(document.getElementById('input-qty').value);
+        if(!selectedItem || qty <= 0) return;
+        cart.push({ ...selectedItem, sale_qty: qty, total: qty * selectedItem.unit_price });
+        renderTable();
+        document.getElementById('item-search').value = "";
+        selectedItem = null;
     }
 
-    function renderCart() {
-        document.getElementById('cart-body').innerHTML = cart.map((item, i) => `
-            <tr>
-                <td>${item.category || '-'}</td>
-                <td>${item.sku}</td>
-                <td><b>${item.item_nam}</b><br><small>${item.description || ''}</small></td>
-                <td>${item.type || ''} / ${item.brand || ''}</td>
-                <td>${item.qty}</td>
-                <td>${item.uom}</td>
-                <td>₱${item.unit_price.toFixed(2)}</td>
-                <td>₱${item.total.toFixed(2)}</td>
-                <td class="remove-col" style="color:red; cursor:pointer; text-align:center;" onclick="removeItem(${i})">×</td>
-            </tr>`).join('');
-        calculateBIR();
+    function renderTable() {
+        const body = document.getElementById('invoice-items');
+        body.innerHTML = cart.map((i, idx) => `<tr><td>${i.item_nam}</td><td style="text-align:center">${i.sale_qty}</td><td style="text-align:right">₱${i.unit_price.toFixed(2)}</td><td style="text-align:right">₱${i.total.toFixed(2)}</td></tr>`).join('');
+        const gross = cart.reduce((a,b) => a + b.total, 0);
+        const vatable = gross / 1.12;
+        const tax = gross - vatable;
+        document.getElementById('tot-vatable').innerText = `₱${vatable.toLocaleString(undefined, {minimumFractionDigits:2})}`;
+        document.getElementById('tot-tax').innerText = `₱${tax.toLocaleString(undefined, {minimumFractionDigits:2})}`;
+        document.getElementById('tot-grand').innerText = `₱${gross.toLocaleString(undefined, {minimumFractionDigits:2})}`;
     }
 
-    function removeItem(i) { cart.splice(i, 1); renderCart(); }
-
-    function calculateBIR() {
-        const gross = cart.reduce((acc, c) => acc + c.total, 0);
-        const dType = document.getElementById('disc-type').value;
-        const dVal = parseFloat(document.getElementById('disc-val').value) || 0;
-        const dAmt = dType === 'percent' ? gross * (dVal/100) : (dType === 'fixed' ? dVal : 0);
-        
-        const netSales = gross - dAmt;
-        const vatableSales = netSales / 1.12;
-        const vatAmount = netSales - vatableSales;
-
-        document.getElementById('v-sales').innerText = `₱${vatableSales.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-        document.getElementById('v-amount').innerText = `₱${vatAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-        document.getElementById('v-total').innerText = `₱${netSales.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+    function syncText() {
+        document.getElementById('display-cust-name').innerText = document.getElementById('input-cust-name').value || 'CASH CUSTOMER';
+        document.getElementById('display-cust-addr').innerText = document.getElementById('input-cust-addr').value || '---';
+        document.getElementById('display-cust-tin').innerText = document.getElementById('input-cust-tin').value || '---';
+        document.getElementById('display-inv-num').innerText = document.getElementById('input-inv-num').value;
     }
 
-    async function finalizeTransaction() {
-        if(!cart.length) return alert("Line Items Required");
-        
-        const btn = document.getElementById('finalize-btn');
-        btn.disabled = true;
-        btn.innerText = "Processing...";
+    async function finalizeAndPrint() {
+        if(cart.length === 0) return;
+        const invNo = document.getElementById('input-inv-num').value;
+        const cust = document.getElementById('display-cust-name').innerText;
 
-        try {
-            const invoiceNum = document.getElementById('inv-num').value;
-            const customerName = document.getElementById('cust-name').value || "Cash Customer";
-
-            for (const item of cart) {
-                // 1. Deduct Inventory
-                const { error: invErr } = await _sb.from('inventory')
-                    .update({ stock_qty: item.stock_qty - item.qty })
-                    .eq('id', item.id);
-                
-                if (invErr) throw invErr;
-
-                // 2. Record Transaction
-                const { error: saleErr } = await _sb.from('sales').insert([{
-                    product_id: item.id,
-                    quantity_sold: item.qty,
-                    unit_price: item.unit_price,
-                    total_price: item.total,
-                    customer_name: customerName,
-                    invoice_number: invoiceNum,
-                    company_id: companyId
-                }]);
-
-                if (saleErr) throw saleErr;
-            }
-
-            alert("Invoice Recorded Successfully!");
-            window.print();
-            location.reload();
-
-        } catch (err) {
-            alert("Error: " + err.message);
-            btn.disabled = false;
-            btn.innerText = "GENERATE INVOICE";
+        for (const item of cart) {
+            await _sb.from('inventory').update({ stock_qty: item.stock_qty - item.sale_qty }).eq('id', item.id);
+            const vatable = item.total / 1.12;
+            await _sb.from('sales_report').insert([{
+                company_id: cid, invoice_number: invNo, customer_name: cust,
+                sku: item.sku, item_nam: item.item_nam, qty_sold: item.sale_qty,
+                unit_price: item.unit_price, total_amount: item.total,
+                vat_amount: item.total - vatable, net_sales: vatable
+            }]);
         }
+        window.print();
+        location.reload();
     }
+    window.onload = init;
 </script>
 </body>
 </html>

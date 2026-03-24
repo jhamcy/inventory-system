@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CUSTOMER REGISTRATION</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #0f172a; --accent: #2563eb; --bg: #f8fafc; --border: #e2e8f0; }
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; text-transform: uppercase; }
+        body { margin: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        .form-box { background: white; width: 100%; max-width: 550px; padding: 40px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .title { font-weight: 900; font-size: 1.4rem; margin-bottom: 25px; letter-spacing: -1px; }
+        .field { margin-bottom: 15px; }
+        label { display: block; font-size: 0.65rem; font-weight: 900; color: #64748b; margin-bottom: 6px; }
+        input, textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; outline: none; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn-save { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="form-box">
+    <div style="color:var(--accent); font-weight:800; cursor:pointer; font-size:0.7rem; margin-bottom:10px;" onclick="location.href='clients.html'">← BACK TO REGISTRY</div>
+    <div class="title">NEW CUSTOMER ENTRY</div>
+
+    <div class="field">
+        <label>Customer Registered Name</label>
+        <input type="text" id="customer_name" placeholder="E.G. DELA CRUZ TRADING INC.">
+    </div>
+
+    <div class="grid">
+        <div class="field"><label>TIN Number</label><input type="text" id="tin" placeholder="000-000-000-000"></div>
+        <div class="field"><label>Business Style</label><input type="text" id="business_style" placeholder="RETAILER / SERVICE"></div>
+    </div>
+
+    <div class="field">
+        <label>Registered Address</label>
+        <textarea id="address" rows="2" placeholder="STREET, CITY, PROVINCE"></textarea>
+    </div>
+
+    <div class="grid">
+        <div class="field"><label>Contact No.</label><input type="text" id="contact_no" placeholder="09XX-XXX-XXXX"></div>
+        <div class="field"><label>Email Address</label><input type="email" id="email" style="text-transform:none;" placeholder="customer@email.com"></div>
+    </div>
+
+    <button class="btn-save" id="saveBtn" onclick="saveCustomer()">SAVE TO REGISTRY</button>
+</div>
+
+<script>
+    const _sb = supabase.createClient('https://pehffyqlssrqogosfsab.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s');
+    const cid = localStorage.getItem('jmcy_cid');
+
+    async function saveCustomer() {
+        const name = document.getElementById('customer_name').value;
+        if(!name) return alert("Customer Name is required.");
+
+        const btn = document.getElementById('saveBtn');
+        btn.innerText = "PROCESSING...";
+        btn.disabled = true;
+
+        const { error } = await _sb.from('customer_registry').insert([{
+            company_id: cid,
+            customer_name: name,
+            tin: document.getElementById('tin').value,
+            business_style: document.getElementById('business_style').value,
+            address: document.getElementById('address').value,
+            contact_no: document.getElementById('contact_no').value,
+            email: document.getElementById('email').value
+        }]);
+
+        if(error) {
+            alert("Error: " + error.message);
+            btn.innerText = "SAVE TO REGISTRY";
+            btn.disabled = false;
+        } else {
+            alert("Customer added successfully!");
+            location.href = 'clients.html';
+        }
+    }
+</script>
+</body>
+</html>
