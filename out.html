@@ -7,63 +7,109 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #0f172a; --accent: #f59e0b; --bg: #f8fafc; --border: #e2e8f0; --text: #1e293b; --danger: #ef4444; }
+        :root { 
+            --primary: #0f172a; --accent: #f59e0b; --bg: #f8fafc; --border: #e2e8f0; 
+            --text: #1e293b; --sidebar-text: #94a3b8; --danger: #ef4444; --white: #ffffff;
+        }
+        
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; text-transform: uppercase; }
         body { margin: 0; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
 
-        .sidebar { width: 260px; background: var(--primary); color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-        .nav-item { padding: 16px 25px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 0.8rem; color: #94a3b8; border-left: 4px solid transparent; }
+        /* --- SIDEBAR (DESKTOP) --- */
+        .sidebar { width: 260px; background: var(--primary); color: white; display: flex; flex-direction: column; flex-shrink: 0; z-index: 1000; }
+        .sidebar-header { padding: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .nav-item { padding: 16px 25px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 0.8rem; color: var(--sidebar-text); transition: 0.2s; border-left: 4px solid transparent; text-decoration: none; }
+        .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
         .nav-item.active { background: rgba(245, 158, 11, 0.1); color: white; border-left-color: var(--accent); font-weight: 700; }
 
+        /* --- MAIN --- */
         .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .content-area { flex: 1; overflow-y: auto; padding: 25px; }
+        .top-header { height: 65px; background: white; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 25px; flex-shrink: 0; }
+        #nav-logo { max-height: 28px; width: auto; margin-right: 10px; }
 
-        .header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .ref-badge { background: var(--primary); color: white; padding: 12px 20px; border-radius: 8px; border-left: 4px solid var(--accent); }
-        .ref-no { font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; }
+        .content-area { flex: 1; overflow-y: auto; padding: 20px; }
 
+        /* --- TRANSACTION HEADER --- */
+        .header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .ref-badge { background: var(--primary); color: white; padding: 12px 20px; border-radius: 8px; border-left: 4px solid var(--accent); min-width: 200px; }
+        .ref-no { font-size: 1.1rem; font-weight: 800; letter-spacing: 1px; }
+
+        /* --- FORM CARDS --- */
         .form-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
         .field { display: flex; flex-direction: column; gap: 6px; }
         label { font-size: 0.65rem; font-weight: 800; color: #64748b; }
-        input, select { padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem; outline: none; background: #fff; }
-
-        .selector-box { background: #fff7ed; padding: 20px; border-radius: 12px; border: 1px solid #ffedd5; margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end; }
+        input, select { padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.8rem; outline: none; }
+        
+        /* --- SELECTOR --- */
+        .selector-box { background: #fff7ed; padding: 20px; border-radius: 12px; border: 1px solid #ffedd5; margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
         .btn-add { background: var(--accent); color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: 800; cursor: pointer; }
 
+        /* --- TABLE --- */
         .table-card { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
         table { width: 100%; border-collapse: collapse; }
-        th { background: #f8fafc; padding: 12px; font-size: 0.7rem; border: 1px solid var(--border); text-align: left; }
-        td { padding: 12px; font-size: 0.8rem; border: 1px solid var(--border); }
+        th { background: #f8fafc; padding: 12px; font-size: 0.7rem; border-bottom: 1px solid var(--border); text-align: left; color: #64748b; }
+        td { padding: 12px; font-size: 0.8rem; border-bottom: 1px solid #f1f5f9; }
 
-        .btn-post { width: 100%; margin-top: 20px; background: var(--primary); color: white; border: none; padding: 18px; border-radius: 10px; font-size: 1rem; font-weight: 800; cursor: pointer; }
+        .btn-post { width: 100%; margin-top: 25px; background: var(--primary); color: white; border: none; padding: 18px; border-radius: 12px; font-size: 1rem; font-weight: 900; cursor: pointer; transition: 0.3s; }
 
+        /* --- MOBILE LAYOUT --- */
         @media (max-width: 768px) {
-            .sidebar { width: 100%; height: 65px; position: fixed; bottom: 0; flex-direction: row; }
-            .nav-item { flex: 1; flex-direction: column; padding: 10px; font-size: 0.5rem; border: none; }
-            .main { height: calc(100vh - 65px); }
-            .form-card, .selector-box { grid-template-columns: 1fr; flex-direction: column; }
+            body { flex-direction: column; }
+            .sidebar { 
+                width: 100%; height: 60px; flex-direction: row; flex-shrink: 0;
+                border-bottom: 1px solid rgba(255,255,255,0.1); 
+            }
+            .sidebar-header { display: none; }
+            .nav-item { 
+                flex: 1; padding: 0; font-size: 0.65rem; border-left: none; 
+                border-bottom: 3px solid transparent; justify-content: center; 
+                flex-direction: column; gap: 4px;
+            }
+            .nav-item.active { border-bottom-color: var(--accent); background: transparent; }
+            
+            .main { height: 100vh; display: flex; flex-direction: column; }
+            .content-area { padding: 15px; flex: 1; overflow-y: auto; }
+            .header-section { flex-direction: column; align-items: stretch; }
+            .ref-badge { width: 100%; }
+            .selector-box { flex-direction: column; align-items: stretch; }
+            
+            table, thead, tbody, th, td, tr { display: block; border: none; }
+            thead { display: none; }
+            tr { background: white; margin-bottom: 12px; padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
+            td { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f8fafc; }
+            td:before { content: attr(data-label); font-weight: 800; color: #64748b; font-size: 0.6rem; }
+            td:last-child { border-bottom: none; }
         }
     </style>
 </head>
 <body>
 
 <aside class="sidebar">
+    <div class="sidebar-header"><h2 style="margin:0; font-size: 1.1rem; color: white;">WHSE <span style="color:var(--accent)">PRO</span></h2></div>
     <div class="nav-item" onclick="location.href='inventory.html'">📋 <span>LIST</span></div>
     <div class="nav-item" onclick="location.href='rcv.html'">📥 <span>RCV</span></div>
-    <div class="nav-item active">📤 <span>OUT</span></div>
-    <div class="nav-item">📜 <span>HIST</span></div>
+    <div class="nav-item active" onclick="location.href='out.html'">📤 <span>OUT</span></div>
+    <div class="nav-item" onclick="location.href='hist.html'">📜 <span>HIST</span></div>
 </aside>
 
-<main class="main">
-    <div class="content-area">
+<div class="main">
+    <header class="top-header">
+        <div style="display:flex; align-items:center;">
+            <img id="nav-logo" src="" style="display:none;">
+            <span id="nav-text" style="font-weight:800; letter-spacing:1px;">---</span>
+        </div>
+        <button style="border:none; background:#fef2f2; color:var(--danger); padding:8px 15px; border-radius:6px; font-weight:800; font-size:0.65rem; cursor:pointer;" onclick="localStorage.clear(); location.href='portal.html'">LOGOUT</button>
+    </header>
+
+    <main class="content-area">
         <div class="header-section">
             <div class="ref-badge">
-                <span style="font-size: 0.6rem; opacity: 0.8; display: block;">OUTSLIP REF</span>
+                <span style="font-size: 0.5rem; opacity: 0.8; display: block; margin-bottom: 2px;">OUTSLIP REFERENCE</span>
                 <span id="displayRef" class="ref-no">LOADING...</span>
             </div>
-            <div class="field" style="width: 200px;">
-                <label>Released By</label>
-                <input type="text" id="staffName" placeholder="YOUR NAME">
+            <div class="field" style="flex:1; min-width: 200px;">
+                <label>Released By (Staff)</label>
+                <input type="text" id="staffName" placeholder="YOUR NAME" style="background: #fffbeb; border-color: #fde68a;">
             </div>
         </div>
 
@@ -89,12 +135,12 @@
         </div>
 
         <div class="selector-box">
-            <div class="field" style="flex:3">
+            <div class="field" style="flex:3; min-width: 200px;">
                 <label>Search Item</label>
                 <input type="text" id="itemSearch" list="itemDataset" placeholder="SKU OR DESCRIPTION" oninput="handleSearch(this.value)">
                 <datalist id="itemDataset"></datalist>
             </div>
-            <div class="field" style="flex:1">
+            <div class="field" style="flex:1; min-width: 100px;">
                 <label>Qty Out</label>
                 <input type="number" id="qtyInput" value="1" min="1">
             </div>
@@ -105,23 +151,22 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width:50px">#</th>
-                        <th>SKU</th>
+                        <th>SKU Code</th>
                         <th>Item Description</th>
-                        <th>Current Stock</th>
+                        <th>Stock</th>
                         <th>Qty Out</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="stagingBody">
-                    <tr><td colspan="6" style="text-align:center; padding:40px; color:#94a3b8;">NO ITEMS ADDED</td></tr>
+                    <tr><td colspan="5" style="text-align:center; padding:40px; color:#94a3b8;">NO ITEMS ADDED</td></tr>
                 </tbody>
             </table>
         </div>
 
         <button class="btn-post" onclick="submitTransaction()">POST OUTSLIP & UPDATE HISTORY</button>
-    </div>
-</main>
+    </main>
+</div>
 
 <script>
     const _sb = supabase.createClient('https://pehffyqlssrqogosfsab.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s');
@@ -135,6 +180,15 @@
         if(!companyID) { location.href='portal.html'; return; }
         document.getElementById('dateOut').valueAsDate = new Date();
         
+        const { data: comp } = await _sb.from('companies').select('*').eq('id', companyID).single();
+        if(comp) {
+            document.getElementById('nav-text').innerText = comp.company_name;
+            if(comp.logo_url) {
+                const logo = document.getElementById('nav-logo');
+                logo.src = comp.logo_url; logo.style.display = 'block';
+            }
+        }
+
         const { data: refNum } = await _sb.rpc('generate_inventory_ref', { prefix_input: 'OUT' });
         document.getElementById('displayRef').innerText = refNum || 'OUT-TEMP';
 
@@ -161,17 +215,16 @@
     function renderTable() {
         const tbody = document.getElementById('stagingBody');
         if(cart.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:40px;">NO ITEMS ADDED</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px;">NO ITEMS ADDED</td></tr>';
             return;
         }
         tbody.innerHTML = cart.map((item, idx) => `
             <tr>
-                <td>${idx + 1}</td>
-                <td style="font-weight:700;">${item.sku}</td>
-                <td><b>${item.item_nam}</b></td>
-                <td>${item.stock_qty}</td>
-                <td style="font-weight:800; color:var(--danger)">-${item.move_qty}</td>
-                <td><button onclick="cart.splice(${idx},1); renderTable();" style="color:red; border:none; background:none; cursor:pointer; font-weight:800;">REMOVE</button></td>
+                <td data-label="SKU" style="font-weight:700;">${item.sku}</td>
+                <td data-label="Item"><b>${item.item_nam}</b></td>
+                <td data-label="Current">${item.stock_qty}</td>
+                <td data-label="Out" style="font-weight:800; color:var(--danger)">-${item.move_qty}</td>
+                <td data-label="Action"><button onclick="cart.splice(${idx},1); renderTable();" style="color:var(--danger); border:none; background:none; cursor:pointer; font-weight:800; font-size:0.7rem;">REMOVE</button></td>
             </tr>
         `).join('');
     }

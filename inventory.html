@@ -41,14 +41,15 @@
         th { background: #f1f5f9; color: #475569; font-weight: 700; font-size: 0.7rem; padding: 14px 15px; border: 1px solid var(--border); text-align: left; position: sticky; top: 0; }
         td { padding: 12px 15px; font-size: 0.8rem; border: 1px solid var(--border); }
 
-        /* --- MOBILE LAYOUT UPDATES --- */
+        /* --- MOBILE LAYOUT FIX --- */
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .sidebar { 
                 width: 100%; 
                 height: 60px; 
                 flex-direction: row; 
-                order: 2; /* Moves sidebar below top-header */
+                flex-shrink: 0;
+                position: relative; /* Removed absolute/fixed positioning */
                 border-bottom: 1px solid rgba(255,255,255,0.1);
             }
             .sidebar-header { display: none; }
@@ -62,10 +63,10 @@
                 flex-direction: column;
                 gap: 4px;
             }
-            .nav-item.active { border-bottom-color: var(--accent); border-top-color: transparent; background: transparent; }
+            .nav-item.active { border-bottom-color: var(--accent); background: transparent; }
             
-            .main { height: 100vh; }
-            .content-area { padding: 15px; }
+            .main { height: 100vh; display: flex; flex-direction: column; }
+            .content-area { padding: 15px; flex: 1; overflow-y: auto; }
 
             table, thead, tbody, th, td, tr { display: block; border: none; }
             thead { display: none; }
@@ -81,6 +82,14 @@
 </head>
 <body>
 
+<aside class="sidebar">
+    <div class="sidebar-header"><h2 style="margin:0; font-size: 1.1rem; color: white;">WHSE <span style="color:var(--accent)">PRO</span></h2></div>
+    <div class="nav-item active" onclick="location.href='inventory.html'">📋 <span>LIST</span></div>
+    <div class="nav-item" onclick="location.href='rcv.html'">📥 <span>RCV</span></div>
+    <div class="nav-item" onclick="location.href='out.html'">📤 <span>OUT</span></div>
+    <div class="nav-item" onclick="location.href='hist.html'">📜 <span>HIST</span></div>
+</aside>
+
 <div class="main">
     <header class="top-header">
         <div style="display:flex; align-items:center;">
@@ -89,14 +98,6 @@
         </div>
         <button style="border:none; background:#fef2f2; color:var(--danger); padding:8px 15px; border-radius:6px; font-weight:800; font-size:0.65rem; cursor:pointer;" onclick="localStorage.clear(); location.href='portal.html'">LOGOUT</button>
     </header>
-
-    <aside class="sidebar">
-        <div class="sidebar-header"><h2 style="margin:0; font-size: 1.1rem; color: white;">WHSE <span style="color:var(--accent)">PRO</span></h2></div>
-        <div class="nav-item active" onclick="location.href='inventory.html'">📋 <span>LIST</span></div>
-        <div class="nav-item" onclick="location.href='rcv.html'">📥 <span>RCV</span></div>
-        <div class="nav-item" onclick="location.href='out.html'">📤 <span>OUT</span></div>
-        <div class="nav-item" onclick="location.href='hist.html'">📜 <span>HIST</span></div>
-    </aside>
 
     <div class="content-area">
         <div class="search-box">
