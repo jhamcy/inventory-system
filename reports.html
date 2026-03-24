@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SALES REPORTS | JMCYFLOW</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #0f172a; --accent: #2563eb; --bg: #f1f5f9; --border: #e2e8f0; --success: #10b981; }
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; text-transform: uppercase; }
+        body { margin: 0; background: var(--bg); display: flex; height: 100vh; }
+
+        .sidebar { width: 260px; background: var(--primary); color: white; display: flex; flex-direction: column; }
+        .nav-item { padding: 16px 25px; cursor: pointer; color: #94a3b8; font-size: 0.75rem; text-decoration: none; border-left: 4px solid transparent; }
+        .nav-item.active { background: rgba(37, 99, 235, 0.15); color: white; border-left-color: var(--accent); font-weight: 800; }
+
+        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .header { height: 65px; background: white; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 25px; }
+        .content { flex: 1; padding: 25px; overflow-y: auto; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
+        .stat-label { font-size: 0.65rem; font-weight: 800; color: #64748b; }
+        .stat-value { font-size: 1.5rem; font-weight: 900; color: var(--primary); margin-top: 5px; }
+
+        .card { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.7rem; }
+        th { background: #f8fafc; padding: 15px; text-align: left; border-bottom: 1px solid var(--border); color: #64748b; }
+        td { padding: 15px; border-bottom: 1px solid var(--border); }
+
+        .toolbar { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
+        .filter-group { display: flex; flex-direction: column; gap: 5px; }
+        .filter-group label { font-size: 0.6rem; font-weight: 800; color: #64748b; }
+        input { padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.75rem; outline: none; }
+        
+        .btn-filter { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 800; cursor: pointer; height: 38px; }
+        .btn-pdf { background: #dc2626; color: white; border: none; padding: 0 20px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.7rem; height: 38px; }
+        .btn-reset { background: #e2e8f0; color: #475569; border: none; padding: 10px 15px; border-radius: 6px; font-weight: 800; cursor: pointer; height: 38px; }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div style="padding:25px; font-weight:900;">JMCY <span style="color:var(--accent)">ADMIN</span></div>
+    <div class="nav-item" onclick="location.href='sales.html'">📦 <span>INVENTORY</span></div>
+    <div class="nav-item" onclick="location.href='invoice.html'">📑 <span>INVOICE</span></div>
+    <div class="nav-item" onclick="location.href='clients.html'">👥 <span>CUSTOMERS</span></div>
+    <div class="nav-item active">📊 <span>SALES REPORTS</span></div>
+</aside>
+
+<div class="main">
+    <header class="header">
+        <span style="font-weight:900;">DATE-RANGE REPORTING</span>
+        <button class="btn-pdf" onclick="generatePDF()">📥 EXPORT AS PDF</button>
+    </header>
+
+    <div class="content">
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-label">GROSS</div><div class="stat-value" id="stat-gross">₱0.00</div></div>
+            <div class="stat-card"><div class="stat-label">NET SALES</div><div class="stat-value" id="stat-net" style="color:var(--success);">₱0.00</div></div>
+            <div class="stat-card"><div class="stat-label">VAT</div><div class="stat-value" id="stat-vat" style="color:var(--accent);">₱0.00</div></div>
+        </div>
+
+        <div class="toolbar">
+            <div class="filter-group">
+                <label>FROM DATE</label>
+                <input type="date" id="date-from">
+            </div>
+            <div class="filter-group">
+                <label>TO DATE</label>
+                <input type="date" id="date-to">
+            </div>
+            <div class="filter-group" style="flex:1">
+                <label>SEARCH NAME/INV#</label>
+                <input type="text" id="reportSearch" placeholder="SEARCH..." onkeyup="renderTable()">
+            </div>
+            <button class="btn-filter" onclick="loadData()">APPLY FILTER</button>
+            <button class="btn-reset" onclick="resetFilters()">RESET</button>
+        </div>
+
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>DATE</th>
+                        <th>INV #</th>
+                        <th>CUSTOMER</th>
+                        <th>ITEM</th>
+                        <th>QTY</th>
+                        <th style="text-align:right">TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody id="report-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const _sb = supabase.createClient('https://pehffyqlssrqogosfsab.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlaGZmeXFsc3NycW9nb3Nmc2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTg3OTUsImV4cCI6MjA4OTU5NDc5NX0.xvnbRP1kG2x55HNPI7NbZoz3NhSRWWHBeIVS9jKib9s');
+    let reportData = [];
+    let companyInfo = null;
+    const cid = localStorage.getItem('jmcy_cid');
+
+    async function loadData() {
+        if(!cid) return location.href='portal.html';
+        
+        // Load Company Metadata
+        const { data: comp } = await _sb.from('companies').select('*').eq('id', cid).single();
+        companyInfo = comp;
+
+        // Build Query
+        let query = _sb.from('sales_report').select('*').eq('company_id', cid);
+        
+        const from = document.getElementById('date-from').value;
+        const to = document.getElementById('date-to').value;
+        
+        if(from) query = query.gte('created_at', from + 'T00:00:00');
+        if(to) query = query.lte('created_at', to + 'T23:59:59');
+
+        const { data, error } = await query.order('created_at', { ascending: false });
+        reportData = data || [];
+        renderTable();
+    }
+
+    function renderTable() {
+        const q = document.getElementById('reportSearch').value.toLowerCase();
+        const filtered = reportData.filter(r => 
+            r.invoice_number.toString().includes(q) || 
+            r.customer_name.toLowerCase().includes(q)
+        );
+
+        const gross = filtered.reduce((s, i) => s + (i.total_amount || 0), 0);
+        const net = filtered.reduce((s, i) => s + (i.net_sales || 0), 0);
+        const vat = filtered.reduce((s, i) => s + (i.vat_amount || 0), 0);
+
+        document.getElementById('stat-gross').innerText = `₱${gross.toLocaleString(undefined,{minimumFractionDigits:2})}`;
+        document.getElementById('stat-net').innerText = `₱${net.toLocaleString(undefined,{minimumFractionDigits:2})}`;
+        document.getElementById('stat-vat').innerText = `₱${vat.toLocaleString(undefined,{minimumFractionDigits:2})}`;
+
+        document.getElementById('report-body').innerHTML = filtered.map(r => `
+            <tr>
+                <td>${new Date(r.created_at).toLocaleDateString()}</td>
+                <td style="font-weight:800;">${r.invoice_number}</td>
+                <td>${r.customer_name}</td>
+                <td>${r.item_nam}</td>
+                <td>${r.qty_sold}</td>
+                <td style="text-align:right; font-weight:800;">₱${r.total_amount.toFixed(2)}</td>
+            </tr>
+        `).join('');
+    }
+
+    function resetFilters() {
+        document.getElementById('date-from').value = "";
+        document.getElementById('date-to').value = "";
+        document.getElementById('reportSearch').value = "";
+        loadData();
+    }
+
+    function generatePDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const from = document.getElementById('date-from').value || 'Start';
+        const to = document.getElementById('date-to').value || 'Present';
+
+        doc.setFontSize(16);
+        doc.text(companyInfo ? companyInfo.company_name : "JMCY SALES REPORT", 14, 20);
+        doc.setFontSize(9);
+        doc.text(`Report Period: ${from} to ${to}`, 14, 28);
+        
+        // Summary box in PDF
+        doc.autoTable({
+            startY: 35,
+            head: [['Total Gross', 'Net Sales', 'Total VAT']],
+            body: [[
+                document.getElementById('stat-gross').innerText,
+                document.getElementById('stat-net').innerText,
+                document.getElementById('stat-vat').innerText
+            ]],
+            theme: 'plain',
+            styles: { fontSize: 12, fontStyle: 'bold', halign: 'center' }
+        });
+
+        doc.autoTable({
+            startY: 55,
+            head: [['Date', 'Inv #', 'Customer', 'Item', 'Qty', 'Total']],
+            body: reportData.map(r => [
+                new Date(r.created_at).toLocaleDateString(),
+                r.invoice_number,
+                r.customer_name,
+                r.item_nam,
+                r.qty_sold,
+                `P${r.total_amount.toFixed(2)}`
+            ]),
+            headStyles: { fillColor: [15, 23, 42] },
+            styles: { fontSize: 8 }
+        });
+
+        doc.save(`Sales_Report_${from}_to_${to}.pdf`);
+    }
+
+    window.onload = loadData;
+</script>
+</body>
+</html>
