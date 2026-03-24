@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Aligned with index.html */
             --primary: #3b82f6;
             --dark-bg: #0f172a;
             --card-bg: #1e293b;
@@ -105,7 +104,6 @@
         
         strong { color: var(--text-main); }
 
-        /* PAYMENT BOX */
         .payment-box {
             background: rgba(15, 23, 42, 0.5);
             padding: 30px;
@@ -115,7 +113,7 @@
         }
 
         .gcash-badge {
-            background: #007dfe; /* Official GCash Blue */
+            background: #007dfe; 
             color: white;
             padding: 4px 14px;
             border-radius: 6px;
@@ -137,7 +135,6 @@
         .account-info p { margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--text-main); }
         .account-info span { font-size: 0.75rem; color: var(--text-dim); font-weight: 400; text-transform: uppercase; }
 
-        /* SIGNATURES */
         .signature-section {
             margin-top: 80px;
             display: grid;
@@ -155,7 +152,6 @@
             letter-spacing: 1px;
         }
 
-        /* BUTTONS */
         .btn {
             background: var(--primary);
             color: white;
@@ -181,7 +177,6 @@
             color: var(--text-dim);
         }
 
-        /* PRINT MEDIA - Switches to light mode for paper efficiency */
         @media print {
             body { background: white; padding: 0; color: black; }
             .container { 
@@ -227,23 +222,22 @@
 
         <p>This Agreement governs the use of the <strong>JmcyFlow Managed Inventory Engine</strong>, provided by Jmcy Web Solutions.</p>
 
-        <h2>1. Scope of Service</h2>
-        <p>The Provider grants the Client a private, managed instance of JmcyFlow including:</p>
+        <h2>1. Licensing & Portal ID</h2>
+        <p>The Provider grants the Client a secure, managed instance tied to a specific <strong>Portal ID / Company Name</strong>.</p>
         <ul>
-            <li><strong>Inventory Logic:</strong> Stock In/Out, Returns, and Transfers.</li>
-            <li><strong>Financials:</strong> Sales records and automated transaction logs.</li>
-            <li><strong>Branding:</strong> Custom logo integration and UI color profiles.</li>
-            <li><strong>Cloud Infrastructure:</strong> Real-time database hosting via Supabase.</li>
+            <li><strong>Single Entity License:</strong> One (1) subscription covers one (1) unique business entity.</li>
+            <li><strong>Multi-Company Use:</strong> Owners with multiple businesses must secure a separate license per Company Name to maintain data integrity and legal isolation.</li>
+            <li><strong>Unlimited Staffing:</strong> Within one Portal ID, the Client may create unlimited staff user accounts.</li>
         </ul>
 
-        <h2>2. 30-Day Evaluation Policy</h2>
+        <h2>2. 30-Day Evaluation & Fees</h2>
         <ul>
-            <li><strong>No-Cost Trial:</strong> The first 30 days are provided free of charge for system evaluation.</li>
-            <li><strong>Post-Trial Transition:</strong> On Day 31, the service requires a monthly subscription of <strong>₱3,500</strong>. Failure to settle the fee will result in temporary portal suspension.</li>
+            <li><strong>No-Cost Trial:</strong> The first 30 days are free for system evaluation.</li>
+            <li><strong>Subscription:</strong> On Day 31, a recurring monthly fee of <strong>₱3,500</strong> per Portal ID is required to maintain system access.</li>
         </ul>
 
-        <h2>3. Data Sovereignty & Security</h2>
-        <p>The Client retains <strong>100% ownership</strong> of all business data. The Provider implements Row Level Security (RLS) to ensure that no other entities can view or access the Client's records. Daily backups are performed automatically.</p>
+        <h2>3. Zero-Jump Data Security</h2>
+        <p>The Provider utilizes advanced Row Level Security (RLS) and <strong>Zero-Jump Logic</strong>. This ensures that the Client's data is strictly locked to their Portal ID, making it impossible for other users or company environments to access, view, or modify the records.</p>
 
         <div class="payment-box">
             <div class="gcash-badge">Settlement Details</div>
@@ -259,15 +253,15 @@
                 </div>
             </div>
             <p style="margin-top: 20px; font-size: 0.8rem; font-style: italic; color: var(--accent);">
-                *Please send proof of payment via whatsapp No.09091297422 for instant account activation.
+                *Please send proof of payment via Whatsapp No. 09091297422 for instant portal activation.
             </p>
         </div>
 
-        <h2>4. Technical Support</h2>
-        <p>Subscription includes maintenance, security patches, and bug fixes. Response time for critical system issues is typically within 24–48 hours during business days.</p>
+        <h2>4. Audit & Ownership</h2>
+        <p>The Client retains <strong>100% ownership</strong> of all data. All system transactions are recorded in an <strong>Audit History Report</strong>, allowing the Client to monitor staff activity and prevent internal fraud or data tampering.</p>
 
-        <h2>5. Terms of Use</h2>
-        <p>The Client agrees not to reverse-engineer the portal logic. The system is provided as a tool for business efficiency; the Provider is not responsible for physical stock losses or incorrect data entry performed by Client staff.</p>
+        <h2>5. Terms of Service</h2>
+        <p>Service includes cloud hosting, security patches, and automated backups. The Provider is not liable for data inaccuracies resulting from incorrect manual entry by the Client's personnel.</p>
 
         <div class="signature-section">
             <div class="sig-box">

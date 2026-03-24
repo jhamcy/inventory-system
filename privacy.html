@@ -71,6 +71,14 @@
             font-size: 1.15rem; 
             margin: 35px 0 15px; 
             color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2::before {
+            content: "🛡️";
+            font-size: 1rem;
         }
 
         p, li { font-size: 0.95rem; color: var(--text-dim); margin-bottom: 15px; }
@@ -133,43 +141,45 @@
             <div class="doc-title">Data Privacy & Protection Policy</div>
         </div>
 
-        <p>At <strong>Jmcy Web Solutions</strong>, we value the integrity of your business data. This policy explains how JmcyFlow handles information for your company and your clients.</p>
+        <p>At <strong>Jmcy Web Solutions</strong>, we prioritize the confidentiality and integrity of your business operations. This policy details how the JmcyFlow engine handles sensitive information for your organization.</p>
 
-        <h2>1. Data We Collect</h2>
-        <p>To provide a functional inventory engine, we store the following data on your behalf:</p>
+        <h2>1. Portal ID Isolation</h2>
+        <p>JmcyFlow operates on a strict <strong>Zero-Jump Logic</strong> architecture. Your data is not just stored; it is "Portal Locked."</p>
         <ul>
-            <li><strong>Company Profiles:</strong> Business name, logo, and preferred color schemes.</li>
-            <li><strong>Inventory Data:</strong> Product names, quantities, SKUs, and transaction history.</li>
-            <li><strong>Staff Accounts:</strong> Login emails and encrypted credentials for your team members.</li>
-            <li><strong>Sales Records:</strong> Transaction amounts, timestamps, and itemized lists.</li>
+            <li><strong>Company Segregation:</strong> Information is filtered by your unique Company Portal ID.</li>
+            <li><strong>Access Control:</strong> Staff members registered under your company cannot view or access data from any other organization using the JmcyFlow engine.</li>
         </ul>
 
-        <h2>2. Data Isolation (Your Vault)</h2>
-        <p>JmcyFlow is built on a "Multi-Tenant" architecture. This means while all users use the same application, your data is kept in a <strong>separate digital vault</strong>. We use Row Level Security (RLS) to ensure that staff from "Company A" can never view or access data from "Company B."</p>
+        <h2>2. Information We Manage</h2>
+        <p>To provide a high-performance inventory and sales experience, we store the following:</p>
+        <ul>
+            <li><strong>Organizational Identity:</strong> Business name, logo, and physical address for invoice generation.</li>
+            <li><strong>Business Assets:</strong> Inventory lists, stock quantities, and SKU details.</li>
+            <li><strong>Audit Logs:</strong> Real-time records of every transaction (In/Out/Return) to prevent internal fraud.</li>
+            <li><strong>Credentials:</strong> Encrypted staff login details and permission levels.</li>
+        </ul>
 
         <div class="security-note">
-            <strong>Pro-Tech Security:</strong> All data is stored in a real-time cloud database (Supabase) with enterprise-grade encryption. We do not sell, rent, or share your business data with third-party advertisers.
+            <strong>Enterprise-Grade Security:</strong> All records are hosted on encrypted cloud servers (Supabase) utilizing Row Level Security (RLS). Jmcy Web Solutions does not sell, trade, or share your proprietary data with any third parties.
         </div>
 
-        <h2>3. Use of Information</h2>
-        <p>We use your data strictly to:</p>
+        <h2>3. Use of Data</h2>
+        <p>We utilize your stored information exclusively to:</p>
         <ul>
-            <li>Generate your inventory and sales reports.</li>
-            <li>Enable staff to process transfers and returns.</li>
-            <li>Maintain system security and prevent unauthorized logins.</li>
+            <li>Generate real-time Sales and Inventory reports.</li>
+            <li>Maintain an accurate Audit History for your business security.</li>
+            <li>Verify authorized staff logins per Portal ID.</li>
         </ul>
 
-        <h2>4. Cookies & Local Storage</h2>
-        <p>JmcyFlow uses local storage to keep your session active and remember your portal preferences (like your custom logo). We do not use tracking cookies for advertising purposes.</p>
+        <h2>4. Data Sovereignty</h2>
+        <p>You retain <strong>100% ownership</strong> of all data entered into the system. Should you choose to terminate your managed service, you may request a full export of your records. To ensure security, all data associated with a suspended Portal ID is permanently purged 14 days after the license expires.</p>
 
-        <h2>5. Data Deletion</h2>
-        <p>You have full control over your data. Upon termination of your managed service, you may request a full export of your records. 14 days after a service expires, all associated data is purged from our production servers to maintain security.</p>
-
-        <h2>6. Contact Us</h2>
-        <p>For questions regarding your data privacy, please reach out to the development team at <strong>Whatsapp No.09091297422 </strong>.</p>
+        <h2>5. Compliance & Contact</h2>
+        <p>JmcyFlow complies with modern data protection standards to keep your warehouse and sales data safe. For privacy concerns or data requests, contact us via <strong>Whatsapp No. 09091297422</strong>.</p>
 
         <footer>
             <p>&copy; 2026 Jmcy Web Solutions | Last Updated: March 2026</p>
+            <p style="font-size: 0.65rem; margin-top: 5px; opacity: 0.7;">This policy is subject to updates to reflect new security features and architecture improvements.</p>
         </footer>
     </div>
 
