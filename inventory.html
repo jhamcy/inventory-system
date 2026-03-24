@@ -18,7 +18,8 @@
         /* --- SIDEBAR --- */
         .sidebar { width: 260px; background: var(--primary); color: white; display: flex; flex-direction: column; flex-shrink: 0; z-index: 1000; }
         .sidebar-header { padding: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .nav-item { padding: 16px 25px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 0.8rem; color: var(--sidebar-text); transition: 0.2s; border-left: 4px solid transparent; }
+        .nav-item { padding: 16px 25px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 0.8rem; color: var(--sidebar-text); transition: 0.2s; border-left: 4px solid transparent; text-decoration: none; }
+        .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
         .nav-item.active { background: rgba(59, 130, 246, 0.1); color: white; border-left-color: var(--accent); font-weight: 700; }
 
         /* --- MAIN --- */
@@ -51,7 +52,6 @@
             .main { height: calc(100vh - 70px); }
             .content-area { padding: 15px 15px 90px 15px; }
 
-            /* Card transformation */
             table, thead, tbody, th, td, tr { display: block; border: none; }
             thead { display: none; }
             tr { background: white; margin-bottom: 12px; padding: 15px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
@@ -59,7 +59,6 @@
             td:last-child { border-bottom: none; }
             td:before { content: attr(data-label); font-weight: 800; color: #64748b; font-size: 0.65rem; }
             
-            /* Highlighting Description on Mobile */
             td[data-label="Description"] { display: block; font-size: 1rem; font-weight: 800; color: var(--primary); padding-bottom: 10px; margin-bottom: 5px; border-bottom: 2px solid var(--bg); }
             td[data-label="Description"]:before { margin-bottom: 4px; display: block; }
         }
@@ -71,10 +70,10 @@
 
 <aside class="sidebar">
     <div class="sidebar-header"><h2 style="margin:0; font-size: 1.1rem; color: white;">WHSE <span style="color:var(--accent)">PRO</span></h2></div>
-    <div class="nav-item active">📋 <span>LIST</span></div>
-    <div class="nav-item">📥 <span>RCV</span></div>
-    <div class="nav-item">📤 <span>OUT</span></div>
-    <div class="nav-item">📜 <span>HIST</span></div>
+    <div class="nav-item active" onclick="location.href='inventory.html'">📋 <span>LIST</span></div>
+    <div class="nav-item" onclick="location.href='rcv.html'">📥 <span>RCV</span></div>
+    <div class="nav-item" onclick="location.href='out.html'">📤 <span>OUT</span></div>
+    <div class="nav-item" onclick="location.href='hist.html'">📜 <span>HIST</span></div>
 </aside>
 
 <div class="main">
@@ -83,7 +82,7 @@
             <img id="nav-logo" src="" style="display:none;">
             <span id="nav-text" style="font-weight:800; letter-spacing:1px;">JMCYFLOW</span>
         </div>
-        <button style="border:none; background:#fef2f2; color:var(--danger); padding:8px 15px; border-radius:6px; font-weight:800; font-size:0.65rem; cursor:pointer;" onclick="location.href='portal.html'">LOGOUT</button>
+        <button style="border:none; background:#fef2f2; color:var(--danger); padding:8px 15px; border-radius:6px; font-weight:800; font-size:0.65rem; cursor:pointer;" onclick="localStorage.clear(); location.href='portal.html'">LOGOUT</button>
     </header>
 
     <div class="content-area">
